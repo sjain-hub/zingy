@@ -1,0 +1,23 @@
+    {% if error_message %}
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger large">{{ error_message }}</span>
+    </div>
+    {% endif %}
+    {% for item in menuform.forms %}
+    {{ menuform.management_form }}
+    {% csrf_token %}
+    <tr>
+        {% for field in item %}
+        <div class="col-sm-offset-2 col-sm-12">
+            <span class="text-danger small">{{ field.errors }}</span>
+        </div>
+        <td>{{ field}}</td>
+        {% endfor %}
+        <!-- <td><input type="number" value="" name="offer{{ item.id }}" /></td>
+        <td><input type="number" value="" name="minOrder{{ item.id }}" /></td>
+        <td><input type="checkbox" checked data-toggle="toggle" data-on="Available"
+                data-off="Unavailable" data-onstyle="success" data-offstyle="danger"
+                name="radio{{ item.id }}" /></td>
+        <td><input type="checkbox" class="form-check-input" name="tick{{ item.id }}" /></td> -->
+    </tr>
+    {% endfor %}

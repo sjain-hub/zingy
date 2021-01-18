@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'kitchenHomePage' %}">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active"><a href="{% url 'orderList' %}" class="nav-link">Orders <span
+                            class="badge badge-danger badge-counter" id="newNotificationCount">
+                            {{waitingorderscount}}
+                        </span></a></li>
+                <li class="nav-item"><a href="{% url 'addFoodItems' %}" class="nav-link">Add Items</a></li>
+                <li class="nav-item"><a href="{% url 'updateKitchen' %}" class="nav-link">Profile</a></li>
+                <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                <!--	        	<li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>-->
+                <!--	        	<li class="nav-item active"><a href="blog.html" class="nav-link">Stories</a></li>-->
+                <!--	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>-->
+            </ul>
+        </div>
+        <h4>Hello, {{ user }}</h4>
+    </div>
+</nav>
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Manage Your Orders</h1>
+                <p class="breadcrumbs">
+                    <span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span class="mr-2"><a href="/kitchens">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span>Menu<i class="ion-ios-arrow-forward"></i></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+<br>
+
+<section>
+    <div class="container-fluid">
+        <a class="btn btn-outline-info" href="{% url 'orderHistory' %}">Order History</a>
+        <br>
+        <br>
+        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+            <thead>
+                <tr>
+                    <th class="text-center">
+                        Order ID
+                    </th>
+                    <th class="text-center">
+                        Placed On
+                    </th>
+                    <th class="text-center">
+                        Scheduled On
+                    </th>
+                    <th class="text-center">
+                        Customer
+                    </th>
+                    <th class="text-center">
+                        Items
+                    </th>
+                    <th class="text-center">
+                        Customer's Message
+                    </th>
+                    <th class="text-center">
+                        Mode
+                    </th>
+                    <th class="text-center">
+                        Address
+                    </th>
+                    <th class="text-center">
+                        Total Amount
+                    </th>
+                    <th class="text-center">
+                        Status
+                    </th>
+                    <th class="text-center">
+                        Message to Customer
+                    </th>
+                    <th class="text-center">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% csrf_token %}
+                {% if orders|length == 0 %}
+                <tr>
+                    <td colspan="11" class="text-center">
+                        <h3>No Orders</h3>
+                    </td>
+                </tr>
+                {% else %}
+                {% for day in days %}
+                    <tr>
+                        <td colspan="12" class="text-center">
+                            {% if day == days.0 %}<h3>Today's Orders</h3>{% else %}<h3>{{ day }}</h3>{% endif %}
+                        </td>
+                    </tr>
+                    {% for order in orders %}
+                        {% if order.scheduled_order.date == day %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.created_at }}</td>
+                            <td><b>{{ order.scheduled_order }}</b></td>
+                            <td><h5><b>{{ order.customer }}</b></h5></td>
+                            <td>
+                                {% for item in order.itemswithquantity %}
+                                {{ item }}<br>
+                                {% endfor %}
+                            </td>
+                            <td>{{ order.message }}</td>
+                            <td>{{ order.mode }}</td>
+                            <td>{{ order.delivery_addr }}</td>
+                            <td>&#8377; {{ order.total_amount }}</td>
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <td>
+                                    <select name="status{{order.id}}" id="status{{order.id}}">
+                                        {% if order.mode == "Delivery" %}
+                                        <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
+                                        </option>
+                                        <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
+                                        </option>
+                                        <option value="Packed" {% if order.status == "Packed" %} selected {% endif %}>Packed
+                                        </option>
+                                        <option value="Dispatched" {% if order.status == "Dispatched" %} selected {% endif %}>
+                                            Dispatched</option>
+                                        <option value="Delivered" {% if order.status == "Delivered" %} selected {% endif %}>
+                                            Delivered</option>
+                                        <option value="Rejected" {% if order.status == "Rejected" %} selected {% endif %}>
+                                            Rejected</option>
+                                        {% else %}
+                                        <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
+                                        </option>
+                                        <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
+                                        </option>
+                                        <option value="Packed" {% if order.status == "Packed" %} selected {% endif %}>Packed
+                                        </option>
+                                        <option value="Picked" {% if order.status == "Picked" %} selected {% endif %}>Picked
+                                        </option>
+                                        <option value="Rejected" {% if order.status == "Rejected" %} selected {% endif %}>
+                                            Rejected</option>
+                                        {% endif %}
+                                    </select><br><br>
+                                    {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
+                                    {{ order.completed_at }}
+                                    {% endif %}
+                                </td>
+                                <td><textarea id="msgtocust{{order.id}}" name="msgtocust{{order.id}}" rows="2" cols="20">{{ order.msgtocust }}</textarea></td>
+                                <td>
+                                    <input type="hidden" name="custid{{order.id}}" id="custid{{order.id}}" value="{{ order.customer.id }}" />
+                                    <!-- <input type="hidden" name="orderid" id="orderid" value="{{order.id}}"> -->
+                                    <!-- <input type="submit" value="Set Status" name="submit" /> -->
+                                    <button data-id="{{order.id}}" type="button" class="setstatus btn btn-success">Set Status</button>
+                                </td>
+                            </form>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                
+                {% endif %}
+
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+
+
+{% include "notificationModal.html" %}
+{% endblock %}

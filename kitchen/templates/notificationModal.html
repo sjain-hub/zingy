@@ -1,0 +1,110 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
+<!-- Kitchen Notification Modal -->
+<form id="orderresponse" method="post" role="form" enctype="multipart/form-data">
+    <div class="modal fade" data-backdrop="static" data-keyboard="false" id="kitnotification" tabindex="-1"
+        role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Order Details</h5>
+                </div>
+                <div class="modal-body">
+
+                    <span id="items">
+                    </span>
+                    <input type="hidden" name="custid" id="custid" value="" />
+                    <input type="hidden" name="orderid" id="orderid" value="" />
+                    <input type="text" name="distance" id="distance" value="" />
+                    <input type="text" name="scheduledDate" id="scheduledDate" value="" />
+                    <input type="text" name="msgtocust" id="msgtocust" />
+                    <span id="deliveryadd">
+                    </span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="reject btn btn-primary" data-dismiss="modal">Reject Order</button>
+                    <button type="button" class="confirm btn btn-success" data-dismiss="modal">Confirm Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    var loc = window.location
+    var wsStart = "ws://"
+    if (loc.protocol == 'https:') {
+        wsStart = "wss://"
+    }
+    var endpoint = wsStart + loc.host + '/notify/{{user.username}}/'
+
+    var socket = new ReconnectingWebSocket(endpoint)
+
+    socket.onmessage = function (e) {
+        console.log("message", e)
+        $(".modal-body #deliveryadd").html('')
+        $(".modal-body #items").html('')
+        var data = JSON.parse(e.data);
+        var items = data.items
+        var otherdetails = data.otherdetails
+        items.forEach(element => {
+            $(".modal-body #items").append(element.itemName);
+        });
+        $(".modal-body #deliveryadd").append(data.deliveryadd);
+        $(".modal-body #custid").val(data.custid);
+        $(".modal-body #distance").val(data.distance);
+        $(".modal-body #orderid").val(data.orderid);
+        $(".modal-body #scheduledDate").val(data.scheduledDate);
+        $("#kitnotification").modal("show");
+    }
+
+    socket.onopen = function (e) {
+        console.log("open", e)
+        $(document).on("click", ".confirm", function (event) {
+            console.log(event)
+            var data = {
+                "msgtocust": $("#msgtocust").val(),
+                "custid": $("#custid").val(),
+                "status": "Placed",
+                "orderid": $("#orderid").val(),
+            }
+            console.log(data)
+            socket.send(JSON.stringify(data))
+            window.location.reload();
+        })
+        $(document).on("click", ".reject", function (event) {
+            console.log(event)
+            var data = {
+                "msgtocust": $("#msgtocust").val(),
+                "custid": $("#custid").val(),
+                "status": "Rejected",
+                "orderid": $("#orderid").val(),
+            }
+            console.log(data)
+            socket.send(JSON.stringify(data))
+            window.location.reload();
+        })
+        $(document).on("click", ".setstatus", function (event) {
+            console.log(event)
+            var orderId = $(this).data('id');
+            var status = document.getElementById('status'+orderId).value;
+            var data = {
+                "msgtocust": $("#msgtocust"+orderId).val(),
+                "custid": $("#custid"+orderId).val(),
+                "status": status,
+                "orderid": orderId,
+            }
+            console.log(data)
+            // $("#ftco-navbar").load(" #ftco-navbar > *");
+            socket.send(JSON.stringify(data))
+            window.location.reload();
+        })
+    }
+
+    socket.onerror = function (e) {
+        console.log("error", e)
+        // console.log(JSON.parse(e.data))
+    }
+
+    socket.onclose = function (e) {
+        console.log("close", e)
+    }
+</script>

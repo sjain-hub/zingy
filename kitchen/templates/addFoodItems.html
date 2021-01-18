@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- for table -->
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'kitchenHomePage' %}">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a href="{% url 'orderList' %}" class="nav-link">Orders <span
+                    class="badge badge-danger badge-counter" id="newNotificationCount">
+                    {{waitingorderscount}}
+                </span></a></li>
+                <li class="nav-item active"><a href="{% url 'addFoodItems' %}" class="nav-link">Add Items</a></li>
+                <li class="nav-item"><a href="{% url 'updateKitchen' %}" class="nav-link">Profile</a></li>
+                <li class="nav-item"><a href="/logout" class="nav-link">Logout</a></li>
+                <!-- <li class="nav-item active"><a href="/test" class="nav-link">Add Items</a></li> -->
+                <!--	        	<li class="nav-item"><a href="menu.html" class="nav-link">Specialties</a></li>-->
+                <!--	        	<li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>-->
+                <!--	        	<li class="nav-item active"><a href="blog.html" class="nav-link">Stories</a></li>-->
+                <!--	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>-->
+            </ul>
+        </div>
+        <h4>Hello, {{ user }}</h4>
+    </div>
+</nav>
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Add Food Items to your Kitchen</h1>
+                <p class="breadcrumbs">
+                    <span class="mr-2"><a href="/kitHome">Home <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span>Add Items<i class="ion-ios-arrow-forward"></i></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .table-sortable tbody tr {
+        cursor: move;
+    }
+
+    .scrollspy-example {
+        position: relative;
+        height: 500px;
+        overflow: auto;
+    }
+</style>
+
+<br />
+<br />
+<section>
+    <div class="container-fluid">
+        <form action="" method="POST" enctype="multipart/form-data" id="item-form">
+            <br>
+            <h2>Add or Modify the Items</h2>
+            <br />
+            <input type="submit" value="Add/Update Items" name="submit" class="btn btn-success" />
+            <br />
+            <br />
+            <div class="row">
+                <!-- <div class="col-sm-1" id="spy">
+                <ul class="nav nav-pills flex-column">
+                    {% for form in cat.forms %}
+                    {% if form.category.value != None %}
+                    <li class="nav-item"><a class="nav-link" href="#scroll{{ form.id.value }}">{{ form.category.value }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </div> -->
+                <div class="col-sm-11 scrollspy-example" data-spy="scroll" data-target="#spy">
+
+                    <div id="scroll{{ form.category.value }}">
+                        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Category
+                                    </th>
+                                    <th class="text-center">
+                                        Name
+                                    </th>
+                                    <th class="text-center">
+                                        Type
+                                    </th>
+                                    <th class="text-center">
+                                        Price
+                                    </th>
+                                    <th class="text-center">
+                                        Image
+                                    </th>
+                                    <th class="text-center">
+                                        Condition
+                                    </th>
+                                    <th class="text-center">
+                                        Description
+                                    </th>
+                                    <th class="text-center">
+
+                                    </th>
+                                    <th class="text-center">
+
+                                    </th>
+                                    <th class="text-center">
+                                        Delete
+                                    </th>
+                                    <th class="text-center">
+
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in cat.forms %}
+                                <div id="scroll{{ form.category.value }}">
+                                    <tr>
+                                        <td colspan="10" class="text-center">
+                                            {% if category.category.value != None %}
+                                            <h3>{{ category.category.value }}</h3>
+                                            {% else %}
+                                            <h3>Add New Item</h3>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% for item in existing.forms %}
+                                    {% if item.category.value == category.id.value %}
+                                    {{ existing.management_form }}
+                                    {% csrf_token %}
+                                    <tr>
+                                        {% for field in item %}
+                                        <td>{{ field }}</td>
+                                        {% endfor %}
+                                        {% if category.category.value != None %}
+                                        <td>
+                                            <button type="button" data-id="{{item.id.value}}" class="open-subItemsModal btn btn-info"
+                                                    data-toggle="modal">
+                                                Add/Update SubItems
+                                            </button>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+                <input type="submit" value="Add/Update Items" name="submit" class="btn btn-success" />
+        </form>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">
+            Add/Update Category
+        </button>
+    </div>
+</section>
+<script>
+    $(document).on("click", ".open-subItemsModal", function () {
+        var itemId = $(this).data('id');
+        $(".modal-body #itemId").val(itemId);
+        $.ajax({
+            url: '{% url 'addFoodItems' %}',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            data: {
+                'itemId' : itemId
+            },
+            
+            success: function(data) {
+                $("#subItemsModal .modal-body #subItemsForm tbody").html(data)
+                $("#subItemsModal").modal("show");
+            },
+            
+        });
+    });
+</script>
+<br />
+
+<br>
+<br>
+<!-- Category Modal -->
+<section>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add or modify Categories</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Category
+                                    </th>
+                                    <th class="text-center">
+
+                                    </th>
+                                    <th class="text-center">
+
+                                    </th>
+                                    <th class="text-center">
+                                        Delete
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if error_message %}
+                                <div class="col-sm-offset-2 col-sm-12">
+                                    <span class="text-danger large">{{ error_message }}</span>
+                                </div>
+                                {% endif %}
+                                {% for form in cat.forms %}
+                                {{ cat.management_form }}
+                                {% csrf_token %}
+                                <tr>
+                                    {% for field in form %}
+                                    <td>{{ field }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <input type="submit" value="Save" name="submit" class="btn btn-success btn-lg" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SubItems Modal -->
+<section id="subItemsSection">
+    <div class="modal fade" id="subItemsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add or modify SubItems</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="POST" enctype="multipart/form-data" id="subItemsForm">
+                        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        SubItem
+                                    </th>
+                                    <th class="text-center">
+                                        Price
+                                    </th>
+                                    <th class="text-center">
+
+                                    </th>
+                                    <th class="text-center">
+
+                                    </th>
+                                    <th class="text-center">
+                                        Delete
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="itemId" id="itemId" value="" />
+                        <input type="submit" value="Add/Update SubItems" name="submit" class="btn btn-success btn-lg" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include "notificationModal.html" %}
+
+
+{% endblock %}

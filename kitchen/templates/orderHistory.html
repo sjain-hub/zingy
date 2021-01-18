@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'kitchenHomePage' %}">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active"><a href="{% url 'orderList' %}" class="nav-link">Orders <span
+                            class="badge badge-danger badge-counter" id="newNotificationCount">
+                            {{waitingorderscount}}
+                        </span></a></li>
+                <li class="nav-item"><a href="{% url 'addFoodItems' %}" class="nav-link">Add Items</a></li>
+                <li class="nav-item"><a href="{% url 'updateKitchen' %}" class="nav-link">Profile</a></li>
+                <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                <!--	        	<li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>-->
+                <!--	        	<li class="nav-item active"><a href="blog.html" class="nav-link">Stories</a></li>-->
+                <!--	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>-->
+            </ul>
+        </div>
+        <h4>Hello, {{ user }}</h4>
+    </div>
+</nav>
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Order History</h1>
+                <p class="breadcrumbs">
+                    <span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span class="mr-2"><a href="/kitchens">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span>Menu<i class="ion-ios-arrow-forward"></i></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+<br>
+<br>
+
+<section>
+    <div class="container-fluid" id="history">
+        <div class="center" style="margin: 10px">
+            <label for="year">Select year :</label>
+            <select name="year" id="year">
+                {% for year in years %}
+                <option value="{{ year }}" {% if selectedyear == year %} selected {% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+            <label for="month">Select month :</label>
+            <select name="month" id="month">
+                {% for month in months %}
+                <option value="{{ month }}" {% if selectedmonth == month %} selected {% endif %}>{{ month }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <hr>
+        <h2>Total Income of this Month : <b>&#8377; {{ monthHistory.1 }}</b></h2>
+        <div class="accordion" id="accordionExample">
+            {% for dayHistory in monthHistory.0 %}
+            <div class="card">
+                <div class="card-header" id="heading{{ dayHistory.0.day }}">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                            data-target="#collapse{{ dayHistory.0.day }}" aria-expanded="true"
+                            aria-controls="collapse{{ dayHistory.0.day }}">
+                            {{ dayHistory.0 }}
+                        </button>
+                    </h2>
+                </div>
+
+                <div id="collapse{{ dayHistory.0.day }}" class="collapse"
+                    aria-labelledby="heading{{ dayHistory.0.day }}" data-parent="#accordionExample">
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Order ID
+                                    </th>
+                                    <th class="text-center">
+                                        Placed On
+                                    </th>
+                                    <th class="text-center">
+                                        Scheduled On
+                                    </th>
+                                    <th class="text-center">
+                                        Customer
+                                    </th>
+                                    <th class="text-center">
+                                        Items
+                                    </th>
+                                    <th class="text-center">
+                                        Mode
+                                    </th>
+                                    <th class="text-center">
+                                        Address
+                                    </th>
+                                    <th class="text-center">
+                                        Total Amount
+                                    </th>
+                                    <th class="text-center">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% csrf_token %}
+                                {% if dayHistory.1|length == 0 %}
+                                <tr>
+                                    <td colspan="11" class="text-center">
+                                        <h3>No Orders</h3>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                {% for order in dayHistory.1 %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.created_at }}</td>
+                                    <td><b>{{ order.scheduled_order }}</b></td>
+                                    <td>
+                                        <h5><b>{{ order.customer }}</b></h5>
+                                    </td>
+                                    <td>
+                                        {% for item in order.itemswithquantity %}
+                                        {{ item }}<br>
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ order.mode }}</td>
+                                    <td>{{ order.delivery_addr }}</td>
+                                    <td>&#8377; {{ order.total_amount }}</td>
+                                    <td>{{ order.status }}<br>
+                                        {% if order.status == "Rejected" %}
+                                        Reason: {{ order.msgtocust }}<br>
+                                        {% endif %}
+                                        {{ order.completed_at }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        Total Income of the day : &#8377; {{ dayHistory.2 }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<br>
+<br>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#year').on('change', function () {
+            deleteAllCookies()
+            document.cookie = "year=" + this.value + ";Path=/";
+            window.location.reload();
+        });
+        $('#month').on('change', function () {
+            document.cookie = "month=" + this.value + ";Path=/";
+            window.location.reload();
+        });
+    });
+
+    function deleteAllCookies() {
+        document.cookie.split(";").forEach(function (c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+    }
+</script>
+
+
+{% include "notificationModal.html" %}
+{% endblock %}

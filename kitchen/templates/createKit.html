@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'kitchenHomePage' %}">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                {% if user.kit_Created %}
+                <li class="nav-item"><a href="{% url 'orderList' %}" class="nav-link">Orders <span
+                    class="badge badge-danger badge-counter" id="newNotificationCount">
+                    {{waitingorderscount}}
+                </span></a></li>
+                <li class="nav-item"><a href="{% url 'addFoodItems' %}" class="nav-link">Add Items</a></li>
+                <li class="nav-item active"><a href="{% url 'updateKitchen' %}" class="nav-link">Profile</a></li>
+                {% endif %}
+                <li class="nav-item"><a href="/logout" class="nav-link">Logout</a></li>
+                <!--				<li class="nav-item"><a href="/about" class="nav-link">About</a></li>-->
+                <!--				<li class="nav-item active"><a href="/menu" class="nav-link">Specialties</a></li>-->
+                <!--				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>-->
+                <!--				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>-->
+                <!--				<li class="nav-item"><a href="/contact" class="nav-link">Contact</a></li>-->
+            </ul>
+        </div>
+        <h4>Hello, {{ user }}</h4>
+    </div>
+</nav>
+
+<link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+<noscript>
+    <link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
+
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css" rel="stylesheet" />
+<style>
+    #map {
+        position: absolute;
+        top: 24px;
+        bottom: 0;
+        width: 97%;
+    }
+
+    .mapboxgl-ctrl-logo {
+        display: none !important;
+    }
+</style>
+
+<!-- Wrapper-->
+<div id="wrapper">
+    <!-- Nav -->
+    <nav id="nav">
+        <!--        <a href="#" class="icon solid fa-smile"><span>Me</span></a>-->
+        <a href="#kitchen" class="icon solid fa-home"><span>My Kitchen</span></a>
+        <a href="#gallery" class="icon solid fa-image"><span>Gallery</span></a>
+        <a href="#certificates" class="icon solid fa-file-alt"><span>Documents</span></a>
+        <a href="#submit" class="icon solid fa-paper-plane"><span>Submit</span></a>
+    </nav>
+
+    {% if error_message %}
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger large">{{ error_message }}</span>
+    </div>
+    {% endif %}
+
+    <form role="form" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <!-- Main -->
+        <div id="main">
+
+            <!-- My Kitchen -->
+            <article id="kitchen" class="panel"
+                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
+                <header>
+                    <h1>Enter Details of your Kitchen</h1>
+                </header>
+                <section>
+                    <div class="row">
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.kitName.errors }}</span>
+                            </div>
+                            <label class="col">Name of Kitchen :</label>
+                            {{ form.kitName }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.mode.errors }}</span>
+                            </div>
+                            <label class="col">What would you prefer:</label>
+                            {{ form.mode }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.acceptAdvcOrders.errors }}</span>
+                            </div>
+                            <label class="col">Accept advance orders (upto 2 days) ? :</label>
+                            {{ form.acceptAdvcOrders }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.deliveryTime.errors }}</span>
+                            </div>
+                            <label class="col">How much time will you take to prepare and deliver the order in your range ? :</label>
+                            {{ form.deliveryTime }}
+                        </div>
+                        <div class="col-12 ">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.address.errors }}</span>
+                            </div>
+                            <label class="col">Full Address :</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.city.errors }}</span>
+                            </div>
+                            <label class="col">City :</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.landmark.errors }}</span>
+                            </div>
+                            <label class="col">Landmark :</label>
+                            {{ form.landmark }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.floorNo.errors }}</span>
+                            </div>
+                            <label class="col">Floor No. :</label>
+                            {{ form.floorNo }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.postalCode.errors }}</span>
+                            </div>
+                            <label class="col">Postal Code :</label>
+                            {{ form.postalCode }}
+                        </div>
+                        <div class="col-12">
+                            <div id="map"></div>
+                            <script>
+                                mapboxgl.accessToken = 'pk.eyJ1IjoiamFpbnNodWJoYW0iLCJhIjoiY2tkcG5lYzgyMjNteTMwbXIzYjkxaWtjayJ9.mV7uussgvFw4MXHVyMkIBg';
+
+                                {% if user.kitchens.approved %}
+
+                                    var map = new mapboxgl.Map({
+                                        container: 'map', // container id
+                                        style: 'mapbox://styles/mapbox/streets-v11',
+                                        center: [{{ form.longitude.value }}, {{ form.latitude.value }}], // starting position
+                                        zoom: 14, // starting zoom
+                                        attributionControl: false
+                                    });
+
+                                    // Full Screen
+                                    map.addControl(new mapboxgl.FullscreenControl());
+
+                                    new mapboxgl.Marker()
+                                    .setLngLat([{{ form.longitude.value }}, {{ form.latitude.value }}])
+                                    .addTo(map);
+
+                                    document.getElementById('lon').value = {{ form.longitude.value }};
+                                    document.getElementById('lat').value = {{ form.latitude.value }};
+
+                                {% else %}
+
+                                    var map = new mapboxgl.Map({
+                                        container: 'map', // container id
+                                        style: 'mapbox://styles/mapbox/streets-v11',
+                                        center: [77.2230, 28.5086], // starting position
+                                        zoom: 6, // starting zoom
+                                        attributionControl: false
+                                    });
+
+                                    // Full Screen
+                                    map.addControl(new mapboxgl.FullscreenControl());
+
+                                    // Add geolocate control to the map.
+                                    map.addControl(
+                                        new mapboxgl.GeolocateControl({
+                                            positionOptions: {
+                                                enableHighAccuracy: true
+                                            },
+                                            trackUserLocation: true,
+                                            showUserLocation: false
+                                        })
+                                    );
+
+                                    if (navigator.geolocation) {
+                                        navigator.geolocation.getCurrentPosition(position => {
+                                            document.getElementById('lon').value = position.coords.longitude;
+                                            document.getElementById('lat').value = position.coords.latitude;
+                                            var marker = new mapboxgl.Marker({draggable: true})
+                                            .setLngLat([position.coords.longitude, position.coords.latitude])
+                                            .addTo(map);
+                                    
+                                    function onDragEnd() {
+                                        var lngLat = marker.getLngLat();
+                                        document.getElementById('lon').value = lngLat.lng;
+                                        document.getElementById('lat').value = lngLat.lat;
+                                    }
+
+                                    marker.on('dragend', onDragEnd);
+
+                                    });
+                                    }
+
+                                {% endif %}
+
+
+
+
+                               
+
+                            </script>
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.longitude.errors }}</span>
+                            </div>
+                            <label class="col">Longitude :</label>
+                            {{ form.longitude }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.latitude.errors }}</span>
+                            </div>
+                            <label class="col">Latitude :</label>
+                            {{ form.latitude }}
+                        </div>
+                        <div class="col-12">
+                            <a href="#gallery" class="jumplink pic">
+                                <button type="button">Next</button>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </article>
+
+            <!-- Kitchen Gallery -->
+            <article id="gallery" class="panel"
+                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
+                <header>
+                    <h2>Design your Kitchen</h2>
+                </header>
+                <section>
+                    <div class="row">
+                        <div class="col-12 row">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.dp.errors }}</span>
+                            </div>
+                            <label class="col">Upload DP(Display Picture) of your kitchen :</label>
+                            {{ form.dp }}
+                            <small id="dpHelp" class="form-text text-muted">(This Image will represent your Kitchen to
+                                the Customers)</small>
+                        </div>
+                        <div class="col-12 row">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.video.errors }}</span>
+                            </div>
+                            <label class="col">Upload a Video of your kitchen:</label>
+                            {{ form.video }}
+                            <small id="videoHelp" class="form-text text-muted ">(This video will be attached to your
+                                Kitchen's page to make your kitchen Transparent to the customers. You can also add a
+                                video message that you want to convey to your customers through this video. This will
+                                create a Trust factor within customers.)</small>
+                        </div>
+                        <div class="col-12">
+                            <a href="#certificates" class="jumplink pic">
+                                <button type="button">Next</button>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </article>
+
+            <!-- Certificates -->
+            <article id="certificates" class="panel"
+                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
+                <header>
+                    <h2>Upload Documents</h2>
+                </header>
+                <div>
+                    <div class="row">
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.fssaiLicNo.errors }}</span>
+                            </div>
+                            <label class="col">FSSAI License No. :</label>
+                            {{ form.fssaiLicNo }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.fssaiName.errors }}</span>
+                            </div>
+                            <label class="col">FSSAI Registered name :</label>
+                            {{ form.fssaiName }}
+                        </div>
+                        <div class="col-12">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.fssaiAdd.errors }}</span>
+                            </div>
+                            <label class="col">Address on FSSAI Certificate :</label>
+                            {{ form.fssaiAdd }}
+                        </div>
+                        <div class="col-12 row">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.fssaiExpiry.errors }}</span>
+                            </div>
+                            <label class="col">FSSAI Expiry date:</label>
+                            <div class="col">
+                                {{ form.fssaiExpiry }}
+                            </div>
+                        </div>
+                        <div class="col-12 row">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.fssaiCerti.errors }}</span>
+                            </div>
+                            <label class="col">FSSAI certificate Upload:</label>
+                            <div class="col">
+                                {{ form.fssaiCerti }}
+                            </div>
+                        </div>
+                        <div class="col-12 row">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.kyc.errors }}</span>
+                            </div>
+                            <label class="col">Upload KYC (Aadhar card/ Passport/ Driving License/ Voter ID):</label>
+                            <div class="col">
+                                {{ form.kyc }}
+                            </div>
+                            <small id="kycHelp" class="form-text text-muted">(Please upload ["png", "jpg", "jpeg"]
+                                Images)</small>
+                        </div>
+                        <div class="col-12 row">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.degree.errors }}</span>
+                            </div>
+                            <label class="col">If you have any degree or specialisation in Food, then upload your
+                                Certificate:</label>
+                            <div class="col">
+                                {{ form.degree }}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <a href="#submit" class="jumplink pic">
+                                <button type="button">Next</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Submit details -->
+            <article id="submit" class="panel"
+                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
+                <header>
+                    <h2>Submit your details</h2>
+                </header>
+                <div>
+                    <div class="row">
+                        <div class="col-12">
+                            <input type="submit" value="Submit" />
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+    </form>
+
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'assets/js/jquery.min.js' %}"></script>
+<script src="{% static 'assets/js/browser.min.js' %}"></script>
+<script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
+<script src="{% static 'assets/js/util.js' %}"></script>
+<script src="{% static 'assets/js/main.js' %}"></script>
+
+
+{% include "notificationModal.html" %}
+{% endblock %}

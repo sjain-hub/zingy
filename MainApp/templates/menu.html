@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+
+
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">Zingy</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="oi oi-menu"></span> Menu
+    </button>
+
+    {% if user.is_authenticated %}
+		<div class="collapse navbar-collapse" id="ftco-nav">
+			<ul class="navbar-nav ml-auto">
+        <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+        <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Orders</a></li>
+				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
+				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
+				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
+				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
+      </ul>
+      <h4>Hello, {{ user }}</h4>
+      <a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
+        <i class="fa fa-shopping-cart"></i> Cart
+        <span class="badge badge-light" id="cartitemcount">{{cartitemcount}}</span>
+      </a>
+		</div>
+		{% else %}
+		<div class="collapse navbar-collapse" id="ftco-nav">
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
+				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
+				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
+				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
+				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
+      </ul>
+      <a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
+        <i class="fa fa-shopping-cart"></i> Cart
+        <span class="badge badge-light" id="cartitemcount">{{cartitemcount}}</span>
+      </a>
+		</div>
+		{% endif %}
+  </div>
+</nav>
+<!-- END nav -->
+
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+  data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center">
+        <h1 class="mb-2 bread">{{ kitchen.kitName }}</h1>
+        <p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+          <span class="mr-2"><a href="{% url 'kitchens' %}">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
+          <span>Menu<i class="ion-ios-arrow-forward"></i></span></p>
+        <p class="breadcrumbs"><span class="mr-2"><a href="#reviews"><span
+                class="icon-star text-warning"></span>{{ avgrating.ratings__avg }} ({{ reviews|length }}
+              Reviews)</a></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Main Menu -->
+<section>
+  <div class="container">
+    <div class="row py-3">
+      <!-- <div class="col-2 w3-card w3-medium" id="sticky-sidebar">
+      <div class="sticky-top sidebar ftco-animate">
+        <div class="sidebar-box ftco-animate">
+          <br>
+          <br>
+          <h3>Category</h3>
+          <br>
+          <ul class="categories">
+            <li><a href="/cart">South Indian<span>(6)</span></a></li>
+            <li><a href="#">Lunch <span>(8)</span></a></li>
+            <li><a href="#">Dinner <span>(2)</span></a></li>
+            <li><a href="#">Desserts <span>(2)</span></a></li>
+            <li><a href="#">Drinks <span>(2)</span></a></li>
+            <li><a href="#">Wine <span>(2)</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </div> -->
+
+      <div class="col-11 ftco-animate">
+        <div class="container py-3">
+          <div class="row justify-content-center mb-5 pb-2">
+            <div class="col-md-7 text-center heading-section ftco-animate">
+              <span class="subheading">Specialties</span>
+              <h2 class="mb-4">Our Menu</h2>
+            </div>
+          </div>
+          <div class="row">
+            {% for cat in categories %}
+            <div class="col-md-6 col-lg-12 menu-wrap">
+              <div class="heading-menu text-center ftco-animate">
+                <h3>{{ cat }}</h3>
+              </div>
+              {% for item in menuitems %}
+              {% if item.1 == cat %}
+              <div class="menus d-flex ftco-animate">
+                <div class="menu-img img" style="background-image: url({{ item.4.url }});">
+                </div>
+                <div class="text">
+                  <div class="d-flex">
+                    <div class="one-half">
+                      <h3>{{ item.0 }}</h3>
+                      {% if item.2 == 'veg' %}
+                      <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" />
+                      {% else %}
+                      <img src="https://img.icons8.com/color/20/000000/non-vegetarian-food-symbol.png" />
+                      {% endif %}
+                      <p style="color:tomato;"><span>{{ item.12 }}</span></p>
+                      <p><span>{{ item.5 }}</span></p>
+                      {% if item.9 != 0 %}
+                      <p><span>Minimum Order: {{ item.9 }}</span></p>
+                      {% endif %}
+                    </div>
+                    <div class="one-forth">
+                      <span class="price">&#8377; {{ item.3 }}</span>
+                      <br>
+                      <br>
+                      <br>
+                      <div class="btn-group" role="group" aria-label="Basic example">
+                        {% if item.10|length == 0 %}
+                        <button id="down" type="button" class="btn btn-outline-success" onclick="
+                        if(document.querySelector('#quantity{{item.7}}').innerHTML>0){
+                          if(document.querySelector('#quantity{{item.7}}').innerHTML=={{item.9}}){
+                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-{{item.9}});
+                          }
+                          else {
+                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-1);
+                          }
+                      }"><span class="icon-minus"></span></button>
+                       {% else %}
+                       <button id="down" type="button" class="btn btn-outline-success" data-toggle="modal"
+                         data-target="#id{{ item.7 }}"><span class="icon-minus"></span></button>
+                       {% endif %}
+                        <button type="button" class="btn btn-default" disabled><span id='quantity{{item.7}}'
+                            name='quantity{{item.7}}'> {{item.11}}
+                          </span></button>
+                        {% if item.10|length == 0 %}
+                        <button id="up" type="button" class="btn btn-outline-success" onclick="
+                        if(document.querySelector('#quantity{{item.7}}').innerHTML==0 && {{item.9}}>0){
+                          handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+{{item.9}});
+                        }
+                        else {
+                          handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+1);
+                        }
+                        "><span class="icon-plus"></span></button>
+                        {% else %}
+                        <button id="up" type="button" class="btn btn-outline-success" data-toggle="modal"
+                          data-target="#id{{ item.7 }}"><span class="icon-plus"></span></button>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+            <hr>
+            {% endfor %}
+          </div>
+        </div>
+      </div> <!-- .col-md-8 -->
+    </div>
+  </div>
+</section>
+
+<!-- SubItems Modal -->
+{% for item in menuitems %}
+<div class="modal fade" id="id{{ item.7 }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Choose the Option</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% for sub in item.10 %}
+        <div class="menus d-flex ftco-animate">
+          <div class="text">
+            <div class="d-flex">
+              <div class="one-half">
+                <h3>{{ sub.1 }}</h3>
+                <span class="price">&#8377; {{ sub.2 }}</span>
+              </div>
+              <div class="one-forth">
+                <div class="btn-group" role="group" aria-label="Basic example">
+                  <button id="down" type="button" class="btn btn-outline-success" onclick="
+                  if(document.querySelector('#quantity{{sub.0}}').innerHTML>0){
+                    if(document.querySelector('#quantity{{sub.0}}').innerHTML=={{item.9}}){
+                      handlesubcounter({{item.7}}, {{sub.0}}, parseInt(document.querySelector('#quantity{{sub.0}}').innerHTML)-{{item.9}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-{{item.9}});
+                    }
+                    else {
+                      handlesubcounter({{item.7}}, {{sub.0}}, parseInt(document.querySelector('#quantity{{sub.0}}').innerHTML)-1, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-1);
+                    }
+                }"><span class="icon-minus"></span></button>
+                  <button type="button" class="btn btn-default" disabled><span id='quantity{{sub.0}}'
+                      name='quantity{{sub.0}}'> {{sub.3}}
+                    </span></button>
+                  <button id="up" type="button" class="btn btn-outline-success" onclick="
+                  if(document.querySelector('#quantity{{sub.0}}').innerHTML==0 && {{item.9}}>0){
+                    handlesubcounter({{item.7}}, {{sub.0}}, parseInt(document.querySelector('#quantity{{sub.0}}').innerHTML)+{{item.9}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+{{item.9}});
+                  }
+                  else {
+                    handlesubcounter({{item.7}}, {{sub.0}}, parseInt(document.querySelector('#quantity{{sub.0}}').innerHTML)+1, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+1);
+                  }
+                  "><span class="icon-plus"></span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<script type="text/javascript">
+  var cart = [];
+
+  function handlecounter(id, quant) {
+    var x = getCookie('kit');
+    if (x === 'NA' || parseInt(x) === {{ kitchen.id }}) {
+    document.getElementById('quantity' + id).innerHTML = quant;
+    document.cookie = id + "=" + quant + ";Path=/";
+    document.cookie = "kit={{kitchen.id}};Path=/";
+    $("#ftco-navbar").load(" #ftco-navbar > *");
+  }
+    else {
+    if (confirm("All Items currently present in the Cart will be removed.")) {
+      deleteAllCookies()
+      document.getElementById('quantity' + id).innerHTML = quant;
+      document.cookie = id + "=" + quant + ";Path=/";
+      document.cookie = "kit={{kitchen.id}};Path=/";
+      $("#ftco-navbar").load(" #ftco-navbar > *");
+    }
+    else {
+      txt = "You pressed Cancel!";
+    }
+  }
+  };
+
+  function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "NA";
+  }
+
+  function deleteAllCookies() {
+    document.cookie.split(";").forEach(function (c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+  }
+
+  function handlesubcounter(id, subid, quant, totalquant) {
+    var x = getCookie('kit');
+    if (x === 'NA' || parseInt(x) === {{ kitchen.id }}) {
+    document.getElementById('quantity' + subid).innerHTML = quant;
+    document.getElementById('quantity' + id).innerHTML = totalquant;
+    document.cookie = id + "-" + subid + "=" + quant + ";Path=/";
+    document.cookie = "kit={{kitchen.id}};Path=/";
+    $("#ftco-navbar").load(" #ftco-navbar > *");
+  }
+    else {
+      if (confirm("All Items currently present in the Cart will be removed.")) {
+        deleteAllCookies()
+        document.getElementById('quantity' + subid).innerHTML = quant;
+        document.getElementById('quantity' + id).innerHTML = totalquant;
+        document.cookie = id + "-" + subid + "=" + quant + ";Path=/";
+        document.cookie = "kit={{kitchen.id}};Path=/";
+        $("#ftco-navbar").load(" #ftco-navbar > *");
+    }
+    else {
+      txt = "You pressed Cancel!";
+    }
+  }
+  }
+</script>
+
+
+<!-- Video Section -->
+<section class="ftco-section ftco-wrap-about ftco-no-pb ftco-no-pt">
+  <div class="container">
+    <div class="row no-gutters">
+      <div class="col-sm-5 img img-2 d-flex align-items-center justify-content-center justify-content-md-end"
+        style="background-image: url({% static 'images/about.jpg' %}); position: relative">
+        <a href="https://vimeo.com/45830194"
+          class="icon-video popup-vimeo d-flex justify-content-center align-items-center">
+          <span class="ion-ios-play"></span>
+        </a>
+      </div>
+      <div class="col-sm-7 wrap-about py-5 ftco-animate">
+        <div class="heading-section mt-5 mb-4">
+          <div class="pl-lg-5 ml-md-5">
+            <span class="subheading">About</span>
+            <h2 class="mb-4">Welcome to Kusina Restaurant</h2>
+          </div>
+        </div>
+        <div class="pl-lg-5 ml-md-5">
+          <p>On her way she met a copy. The copy warned the Little Blind Text, that where it came from it would have
+            been rewritten a thousand times and everything that was left from its origin would be the word "and" and the
+            Little Blind Text should turn around and return to its own, safe country. A small river named Duden flows by
+            their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted
+            parts of sentences fly into your mouth.</p>
+          <h3 class="mt-5">Special Recipe</h3>
+          <div class="thumb my-4 d-flex">
+            <a href="#" class="thumb-menu pr-md-4 text-center">
+              <div class="img" style="background-image: url({% static 'images/lunch-4.jpg' %});"></div>
+              <h4>Australian Organic Beef</h4>
+            </a>
+            <a href="#" class="thumb-menu pr-md-4 text-center">
+              <div class="img" style="background-image: url({% static 'images/lunch-7.jpg' %});"></div>
+              <h4>Australian Organic Beef</h4>
+            </a>
+            <a href="#" class="thumb-menu pr-md-4 text-center">
+              <div class="img" style="background-image: url({% static 'images/lunch-6.jpg' %});"></div>
+              <h4>Australian Organic Beef</h4>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<br>
+<br>
+
+<!-- Reviews Section -->
+<section id="reviews" class="ftco-section testimony-section"
+  style="background-image: url({% static 'images/bg_5.jpg' %});" data-stellar-background-ratio="0.5">
+  <div class="container">
+    <div class="row justify-content-center mb-5 pb-2">
+      <div class="col-md-7 text-center heading-section heading-section-white ftco-animate">
+        <span class="subheading">Testimony</span>
+        <h2 class="mb-4">Happy Customer</h2>
+      </div>
+    </div>
+    <div class="row ftco-animate justify-content-center">
+      <div class="col-md-4">
+        <div class="carousel-testimony owl-carousel ftco-owl">
+          {% for review in reviews %}
+          <div class="item">
+            <div class="testimony-wrap text-center py-4 pb-5">
+              <div class="user-img mb-4">
+                {% for i in "x"|rjust:review.ratings %}
+                <span class="icon-star text-warning"></span>
+                {% endfor %}
+              </div>
+              <div class="text p-3">
+                <p class="mb-4">{{ review.reviews }}</p>
+                <p class="name">{{ review.user.username }}</p>
+                <span class="position">Customer</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+{% endblock %}

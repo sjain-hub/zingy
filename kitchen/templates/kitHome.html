@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% if user.kitchens.approved %}
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'kitchenHomePage' %}">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a href="{% url 'orderList' %}" class="nav-link">Orders <span
+                    class="badge badge-danger badge-counter" id="newNotificationCount">
+                    {{waitingorderscount}}
+                </span></a></li>
+                <li class="nav-item"><a href="{% url 'addFoodItems' %}" class="nav-link">Add Items</a></li>
+                <li class="nav-item"><a href="{% url 'updateKitchen' %}" class="nav-link">Profile</a></li>
+                <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                <!--	        	<li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>-->
+                <!--	        	<li class="nav-item active"><a href="blog.html" class="nav-link">Stories</a></li>-->
+                <!--	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>-->
+            </ul>
+        </div>
+        <h4>Hello, {{ user }}</h4>
+    </div>
+</nav>
+<!-- END nav -->
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Welcome to your Kitchen</h1>
+                <p class="breadcrumbs">
+                    <span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span class="mr-2"><a href="/kitchens">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span>Menu<i class="ion-ios-arrow-forward"></i></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+<br>
+<br>
+
+
+
+<button type="button" class="btn btn-info" data-toggle="modal" data-target="#createmenu">
+    Menu
+</button>
+
+
+<input {% if user.kitchens.status == "Open" %} checked {% endif %} onchange="request_access()" type="checkbox"
+    data-toggle="toggle" data-on="OPEN" data-off="CLOSED" data-onstyle="success" data-offstyle="danger">
+<script>
+    function request_access() {
+        $.ajax({
+            url: "{% url 'handleStatus' %}",
+        })
+    }
+</script>
+
+<!-- Add items to Menu Modal -->
+<div class="modal fade bd-example-modal-lg" id="createmenu" tabindex="-1" role="dialog"
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Manupulate your Menu</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST" enctype="multipart/form-data" id="menu-form">
+                    {% csrf_token %}
+                    <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                        <thead>
+                            <tr>
+                                <th class="text-center">
+                                    Item
+                                </th>
+                                <th class="text-center">
+                                    Offer(%)
+                                </th>
+                                <th class="text-center">
+                                    Mark If Not Available
+                                </th>
+                                <th class="text-center">
+                                    Minimum Order
+                                </th>
+                                <th class="text-center">
+                                </th>
+                                <th class="text-center">
+                                </th>
+                                <th class="text-center">
+                                    Tick to Delete
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if error_message %}
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger large">{{ error_message }}</span>
+                            </div>
+                            {% endif %}
+                            {% for item in menuform.forms %}
+                            {{ menuform.management_form }}
+                            {% csrf_token %}
+                            <tr>
+                                {% for field in item %}
+                                <td>{{ field}}</td>
+                                {% endfor %}
+                                <!-- <td><input type="number" value="" name="offer{{ item.id }}" /></td>
+                                <td><input type="number" value="" name="minOrder{{ item.id }}" /></td>
+                                <td><input type="checkbox" checked data-toggle="toggle" data-on="Available"
+                                        data-off="Unavailable" data-onstyle="success" data-offstyle="danger"
+                                        name="radio{{ item.id }}" /></td>
+                                <td><input type="checkbox" class="form-check-input" name="tick{{ item.id }}" /></td> -->
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <input type="submit" value="Save" name="submit" class="open-menumodal btn btn-success btn-lg" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).on("click", ".open-menumodal", function (event) {
+        event.preventDefault();
+        $.ajax({
+            url: '{% url 'kitchenHomePage' %}',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            data: $('#menu-form').serialize(),
+            
+            success: function(data) {
+                $("#createmenu .modal-body #menu-form tbody").html(data)
+                // $("#subItemsModal").modal("show");
+            },
+            
+        });
+    });
+</script>
+
+
+<!-- Menu -->
+<div class="container">
+    <div class="row py-3">
+        <div class="col-12 ftco-animate">
+            <div class="container py-3">
+                <div class="row justify-content-center mb-5 pb-2">
+                    <div class="col-md-7 text-center heading-section ftco-animate">
+                        <span class="subheading">Specialties</span>
+                        <h2 class="mb-4">Your Menu</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    {% for cat in categories %}
+                    <div class="col-md-6 col-lg-12 menu-wrap">
+                        <div class="heading-menu text-center ftco-animate">
+                            <h3>{{ cat }}</h3>
+                        </div>
+                        {% for item in menuitems %}
+                        {% if item.category == cat %}
+                        <div class="menus d-flex ftco-animate">
+                            <div class="menu-img img" style="background-image: url({{ item.image.url }});"></div>
+                            <div class="text">
+                                <div class="d-flex">
+                                    <div class="one-half">
+                                        <h3>{{ item.itemName }}</h3>
+                                    </div>
+                                    <div class="one-forth">
+                                        <span class="price">&#8377; {{ item.price }}</span>
+                                    </div>
+                                </div>
+                                {% if item.itemType == 'veg' %}
+                                <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" />
+                                {% else %}
+                                <img src="https://img.icons8.com/color/20/000000/non-vegetarian-food-symbol.png" />
+                                {% endif %}
+                                <p><span>{{ item.itemDesc }}</span></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% else %}
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="/">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a href="/logout" class="nav-link">Logout</a></li>
+                <!--	        	<li class="nav-item"><a href="about.html" class="nav-link">About</a></li>-->
+                <!--	        	<li class="nav-item"><a href="menu.html" class="nav-link">Specialties</a></li>-->
+                <!--	        	<li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>-->
+                <!--	        	<li class="nav-item active"><a href="blog.html" class="nav-link">Stories</a></li>-->
+                <!--	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>-->
+            </ul>
+        </div>
+    </div>
+</nav>
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Welcome to your Kitchen</h1>
+                <p class="breadcrumbs">
+                    <span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span class="mr-2"><a href="/kitchens">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span>Menu<i class="ion-ios-arrow-forward"></i></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="meta">
+    <div><a style="font-size:30px;">Your Kitchen is waiting for Approval. Just some moments to go LIVE.</a></div>
+</div>
+{% endif %}
+
+{% include "notificationModal.html" %}
+{% endblock %}

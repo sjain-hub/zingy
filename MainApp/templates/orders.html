@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!------ For Ratings ---------->
+<style>
+    .rating {
+        float: left;
+        margin-left: 20px;
+    }
+
+    /* :not(:checked) is a filter, so that browsers that don’t support :checked don’t 
+        follow these rules. Every browser that supports :checked also supports :not(), so
+        it doesn’t make the test unnecessarily selective */
+    .rating:not(:checked)>input {
+        position: absolute;
+        top: -9999px;
+        clip: rect(0, 0, 0, 0);
+    }
+
+    .rating:not(:checked)>label {
+        float: right;
+        width: 1em;
+        /* padding:0 .1em; */
+        overflow: hidden;
+        white-space: nowrap;
+        cursor: pointer;
+        font-size: 300%;
+        /* line-height:1.2; */
+        color: #ddd;
+    }
+
+    .rating:not(:checked)>label:before {
+        content: '★ ';
+    }
+
+    .rating>input:checked~label {
+        color: dodgerblue;
+
+    }
+
+    .rating:not(:checked)>label:hover,
+    .rating:not(:checked)>label:hover~label {
+        color: dodgerblue;
+
+    }
+
+    .rating>input:checked+label:hover,
+    .rating>input:checked+label:hover~label,
+    .rating>input:checked~label:hover,
+    .rating>input:checked~label:hover~label,
+    .rating>label:hover~input:checked~label {
+        color: dodgerblue;
+
+    }
+
+    .rating>label:active {
+        position: relative;
+        top: 2px;
+        left: 2px;
+    }
+</style>
+
+
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="/">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        {% if user.is_authenticated %}
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                <li class="nav-item active"><a href="{% url 'orders' %}" class="nav-link">Orders</a></li>
+                <li class="nav-item"><a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-bell fa-fw"></i>
+                    <!-- Counter - Alerts -->
+                    <span class="badge badge-danger badge-counter" id="newNotificationCount">
+                      0
+                    </span>
+                  </a>
+                </li>
+                <!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
+				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
+				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
+				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
+            </ul>
+        </div>
+        <h4>{{ user.username }}</h4>
+        {% else %}
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
+                <li class="nav-item"><a href="{% url 'test' %}" class="nav-link">Test</a></li>
+                <!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
+				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
+				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
+				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</nav>
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Manage Your Orders</h1>
+                <p class="breadcrumbs">
+                    <span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span class="mr-2"><a href="/kitchens">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
+                    <span>Menu<i class="ion-ios-arrow-forward"></i></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+<br>
+<br>
+<section>
+    <div class="container-fluid">
+        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+            <thead>
+                <tr>
+                    <th class="text-center">
+                        Order ID
+                    </th>
+                    <th class="text-center">
+                        Placed On
+                    </th>
+                    <th class="text-center">
+                        Scheduled On
+                    </th>
+                    <th class="text-center">
+                        Kitchen
+                    </th>
+                    <th class="text-center">
+                        Items
+                    </th>
+                    <th class="text-center">
+                        Your Message
+                    </th>
+                    <th class="text-center">
+                        Mode
+                    </th>
+                    <th class="text-center">
+                        Address
+                    </th>
+                    <th class="text-center">
+                        Total Amount
+                    </th>
+                    <th class="text-center">
+                        Status
+                    </th>
+                    <th class="text-center">
+                        Message from Kitchen
+                    </th>
+                    <th class="text-center">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    {% if orders|length == 0 %}
+                    <tr>
+                        <td colspan="11" class="text-center">
+                            <h3>No Orders</h3>
+                        </td>
+                    </tr>
+                    {% else %}
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.created_at }}</td>
+                        <td>{{ order.scheduled_order }}</td>
+                        <td><h5><b>{{ order.kitchen.kitName }}</b></h5></td>
+                        <td>
+                            {% for item in order.itemswithquantity %}
+                            {{ item }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>{{ order.message }}</td>
+                        <td>{{ order.mode }}</td>
+                        <td>{{ order.delivery_addr }}</td>
+                        <td>{{ order.total_amount }}</td>
+                        <td>{{ order.status }}<br><br>
+                            {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
+                            {{ order.completed_at }}
+                            {% endif %}
+                        </td>
+                        <td>{{ order.msgtocust }}</td>
+                        <td>
+                            {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
+                            <!-- <button type="button" class="btn btn-success">Repeat Order</button><br><br> -->
+                            <button type="button" data-id="{{ order.kitchen.id }}" class="ratingsmodal btn btn-success"
+                                data-toggle="modal">Rate Order</button>
+                            {% else %}
+                            <a href="{% url 'orderStatus' order.id %}">
+                                <button type="button" class="btn btn-info">Track Order</button>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </form>
+            </tbody>
+        </table>
+    </div>
+</section>
+<script>
+    $(document).on("click", ".ratingsmodal", function () {
+        var kitid = $(this).data('id');
+        $(".modal-body #kitid").val(kitid);
+        // $("#ratingsmodal").modal("show");
+        $.ajax({
+            url: '{% url 'addReview' %}',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            data: {
+                'kitid': kitid
+            },
+
+            success: function (data) {
+                $(".modal-body #comment").val(data.reviews);
+                $(".modal-body #starrating").html('');
+                var i;
+                for (i = 5; i > 0; i--) {
+                    if (data.ratings >= i) {
+                        $(".modal-body #starrating").append("<input checked type='radio' id='star" + i + "' name='rating' value='" + i + "'/>" + "<label for='star" + i + "' title='" + i + " stars'>" + i + " stars</label>");
+                    }
+                    else {
+                        $(".modal-body #starrating").append("<input type='radio' id='star" + i + "' name='rating' value='" + i + "'/>" + "<label for='star" + i + "' title='" + i + " stars'>" + i + " stars</label>");
+                    }
+                }
+                $("#ratingsmodal").modal("show");
+            },
+
+        });
+    });
+</script>
+
+
+<!-- Add Ratings Modal-->
+<div class="modal fade" id="ratingsmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Ratings and Reviews</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <section class="ftco-section ftco-wrap-about ftco-no-pb ftco-no-pt">
+                    <div class="container">
+                        <form role="form" method="post" enctype="multipart/form-data" id="ratingform">
+                            {% csrf_token %}
+                            <input type="hidden" name="kitid" id="kitid" value="" />
+                            <div class="card" style="width: 100%;">
+                                <div class="card-body">
+                                    <h5 class="card-title">Add Your Reviews About This Kitchen</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">Rate this Kitchen</h6>
+                                    <div class="row">
+                                        <div class="rating" id="starrating">
+                                            <!-- <input type="radio" id="star5" name="rating" value="5" />
+                                            <label for="star5" title="5 stars">5 stars</label>
+                                            <input type="radio" id="star4" name="rating" value="4" />
+                                            <label for="star4" title="4 stars">4 stars</label>
+                                            <input type="radio" id="star3" name="rating" value="3" />
+                                            <label for="star3" title="3 stars">3 stars</label>
+                                            <input type="radio" id="star2" name="rating" value="2" />
+                                            <label for="star2" title="2 stars">2 stars</label>
+                                            <input type="radio" id="star1" name="rating" value="1" />
+                                            <label for="star1" title="1 stars">1 star</label> -->
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Your Review</span>
+                                        </div>
+                                        <textarea class="form-control" name="comment" id="comment"
+                                            aria-label="With textarea"></textarea>
+                                    </div>
+                                    <br>
+                                    <input type="submit" value="Add" name="Add" class="btn btn-success btn-lg" />
+                                </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#ratingform').on('submit', function (event) {
+            $.ajax({
+                url: '{% url 'addReview' %}',
+                type: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                data: $('#ratingform').serialize(),
+
+                success: function (data) {
+                    if (data.success_message) {
+                        alert(data.success_message)
+                    }
+                },
+            });
+            $("#ratingsmodal").modal("hide");
+        });
+    });
+</script>
+
+{% include "websocket.html" %}
+
+
+{% endblock %}

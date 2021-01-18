@@ -1,0 +1,97 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
+<!------- websocket for chat purpose ------->
+<script>
+    var loc = window.location
+    var wsStart = "ws://"
+    if(loc.protocol == 'https:'){
+        wsStart = "wss://"
+    }
+    // var endpoint = wsStart + loc.host + '/notify/{{kitchen.user_id}}/'
+    var endpoint = wsStart + loc.host + '/notify/{{user.username}}/'
+
+    var socket = new ReconnectingWebSocket(endpoint)
+
+    socket.onmessage = function(e){
+        console.log("message", e)
+        var data = JSON.parse(e.data);
+        $('#loading').hide();
+        var status = data.status
+        var msg = data.msgtocust
+        alert(status)
+
+        if(status == "Placed"){
+            deleteAllCookies()
+        }
+        window.location.reload();
+        // if(window.location.pathname == "/orders/" || window.location.pathname.split("/")[1] == "orderStatus"){
+        //     window.location.reload();
+        // }
+        // console.log(window.location.pathname.split("/")[1])
+    }
+    socket.onopen = function(e){
+        console.log("open", e)
+        $("#checkoutform").submit(function(event){
+            event.preventDefault()
+            // console.log("submitted", $("#scheduledorder").val())
+            
+            var items = [
+                {% for item in items %}
+                {
+                    "itemName": "{{item.1}}",
+                    "quantity": "{{item.4}}",
+                },
+                {% endfor %}
+                ]
+            {% if kitchen.mode == "Delivery" %}
+                var selectedmode = $('#mode :selected').text();
+                if(selectedmode == "Delivery"){
+                    var otherdetails = 
+                        {
+                        "kituserid" : "{{kitchen.user_id}}",
+                        "kitid" : "{{kitchen.id}}",
+                        "message" : $("#message").val(),
+                        "scheduledDate" : $("#scheduledorder").val(),
+                        "total": "{{total}}",
+                        "address": $('input[name=address]:checked', '#checkoutform').val(),
+                        "mode": selectedmode
+                        }
+                }
+                else {
+                    var otherdetails = 
+                        {
+                        "kituserid" : "{{kitchen.user_id}}",
+                        "kitid" : "{{kitchen.id}}",
+                        "message" : $("#message").val(),
+                        "scheduledDate" : $("#scheduledorder").val(),
+                        "total": "{{subtotal}}",
+                        "address": $('input[name=address]:checked', '#checkoutform').val(),
+                        "mode": selectedmode
+                        }
+                    
+                }
+            {% else %}
+                var otherdetails = 
+                    {
+                    "kituserid" : "{{kitchen.user_id}}",
+                    "kitid" : "{{kitchen.id}}",
+                    "message" : $("#message").val(),
+                    "scheduledDate" : $("#scheduledorder").val(),
+                    "total": "{{subtotal}}",
+                    "address": $('input[name=address]:checked', '#checkoutform').val(),
+                    "mode": "Pick Up"
+                    }
+            {% endif %}
+            $('#loading').show();
+            socket.send(JSON.stringify({"items":items, "otherdetails": otherdetails}))
+        })
+    }
+    socket.onerror = function(e){
+        console.log("error", e)
+    }
+    socket.onclose = function(e){
+        console.log("close", e)
+    }
+    function deleteAllCookies() {
+        document.cookie.split(";").forEach(function (c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+    }
+</script>

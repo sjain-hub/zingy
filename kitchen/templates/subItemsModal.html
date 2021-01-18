@@ -1,0 +1,18 @@
+
+    
+    {% if error_message %}
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger large">{{ error_message }}</span>
+    </div>
+    {% endif %}
+    {% if subItems %}
+    {% for form in subItems.forms %}
+    {{ subItems.management_form }}
+    {% csrf_token %}
+    <tr>
+        {% for field in form %}
+        <td>{{ field }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    {% endif %}

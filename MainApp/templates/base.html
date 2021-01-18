@@ -1,0 +1,389 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Zingy</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
+
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lovers+Quarrel" rel="stylesheet">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="{% static 'css/open-iconic-bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+  <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+  <link rel="stylesheet" href="{% static 'css/ionicons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker.css' %}">
+  <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
+  <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+  <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  <!------ For bootstrap4 forms and tables ---------->
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+
+  <!------ For login and reg forms ---------->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
+</head>
+
+<body>
+
+
+
+  {% block content %}
+
+  {% endblock %}
+
+
+  <!-- Customer Login Modal -->
+  <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="container">
+            <br>
+            <div class="card bg-light">
+              <article class="card-body mx-auto" style="max-width: 400px;">
+                <h4 class="card-title mt-3 text-center">Login</h4>
+                <br>
+                <form role="form" method="post" enctype="multipart/form-data"
+                  id="login-form">
+                  {% csrf_token %}
+                  <div class="form-group input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                    </div>
+                    <input name="username" class="form-control" placeholder="Username" type="text">
+                  </div>
+                  <div class="form-group input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                    </div>
+                    <input name="password" class="form-control" placeholder="Password" type="password">
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                  </div>
+                  <p class="text-center">Don't have an account? <a href="" class="open-registermodal" data-dismiss="modal"
+                      data-toggle="modal" data-target="#registermodal">Register</a> </p>
+                </form>
+              </article>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(document).ready(function () {
+      $('#login-form').on('submit', function (event) {
+        event.preventDefault();
+        $.ajax({
+          url: '{% url 'login' %}',
+          type: 'POST',
+          headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+          data: $('#login-form').serialize(),
+
+          success: function (data) {
+            if (data.error_message) {
+              alert(data.error_message)
+              jQuery("#login").modal("show");
+            }
+            else {
+              jQuery("#login").modal("hide");
+              // $("#ftco-navbar").load(" #ftco-navbar > *");
+              location.reload(); 
+            }
+          },
+
+        });
+      });
+    });
+  </script>
+
+  <!-- Customer Register Modal -->
+  <div class="modal fade" id="registermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="container">
+            <br>
+            <div class="card bg-light">
+              <article class="card-body mx-auto" style="max-width: 400px;">
+                <h4 class="card-title mt-3 text-center">Create Account</h4>
+                <br>
+                <br>
+                <form method="post" role="form" id="registerform" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div id="fields">
+
+                  </div>
+                  <!-- <div class="form-group input-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                      <span class="text-danger small">{{ form.username.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                    </div>
+                    {{form.username}}
+                  </div>
+                  <div class="form-group input-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                      <span class="text-danger small">{{ form.first_name.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                    </div>
+                    {{form.first_name}}
+                  </div>
+                  <div class="form-group input-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                      <span class="text-danger small">{{ form.last_name.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                    </div>
+                    {{form.last_name}}
+                  </div>
+                  <div class="form-group input-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                      <span class="text-danger small">{{ form.email.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+                    </div>
+                    {{form.email}}
+                  </div>
+                  <div class="form-group input-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                      <span class="text-danger small">{{ form.phone.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
+                    </div>
+                    {{form.phone}}
+                  </div>
+                  <div class="form-group input-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                      <span class="text-danger small">{{ form.password.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                    </div>
+                    {{form.password}}
+                  </div>
+                  <div class="form-group input-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                      <span class="text-danger small">{{ form.rpassword.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                    </div>
+                    {{form.rpassword}}
+                  </div> -->
+                  <div class="form-group">
+                    <button type="submit" class="send-registermodal btn btn-primary btn-block"> Create Account </button>
+                  </div>
+                  <p class="text-center">Have an account? <a href="" data-dismiss="modal"
+                      data-toggle="modal" data-target="#login">Log In</a> </p>
+                </form>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(document).on("click", ".open-registermodal", function () {
+      $.ajax({
+        url: '{% url 'register' %}',
+        type: 'GET',
+
+        success: function (data) {
+          $("#registermodal .modal-body #fields").html(data)
+          $("#registermodal").modal("show");
+        },
+
+      });
+    });
+
+    $(document).on("click", ".send-registermodal", function (event) {
+      event.preventDefault();
+      $.ajax({
+        url: '{% url 'register' %}',
+        type: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        data: $('#registerform').serialize(),
+
+        success: function (data) {
+          if(data.success_message){
+            $("#registermodal").modal("hide");
+            alert(data.success_message)
+          }
+          else{
+            console.log("success")
+            console.log(data)
+            $("#registermodal .modal-body #fields").html(data)
+          }
+          
+        },
+        // error: function (data) {
+        //   console.log("error")
+        //   console.log(data)
+        //   $("#registermodal .modal-body #fields").html(data)
+        // },
+      });
+    });
+  </script>
+
+
+  <style>
+    .divider-text {
+      position: relative;
+      text-align: center;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+
+    .divider-text span {
+      padding: 7px;
+      font-size: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .divider-text:after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      border-bottom: 1px solid #ddd;
+      top: 55%;
+      left: 0;
+      z-index: 1;
+    }
+  </style>
+
+
+  <footer class="ftco-footer ftco-bg-dark ftco-section">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-md-6 col-lg-3">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Kusina</h2>
+            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the
+              blind texts.</p>
+            <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-3">
+              <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+              <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+              <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Open Hours</h2>
+            <ul class="list-unstyled open-hours">
+              <li class="d-flex"><span>Monday</span><span>9:00 - 24:00</span></li>
+              <li class="d-flex"><span>Tuesday</span><span>9:00 - 24:00</span></li>
+              <li class="d-flex"><span>Wednesday</span><span>9:00 - 24:00</span></li>
+              <li class="d-flex"><span>Thursday</span><span>9:00 - 24:00</span></li>
+              <li class="d-flex"><span>Friday</span><span>9:00 - 02:00</span></li>
+              <li class="d-flex"><span>Saturday</span><span>9:00 - 02:00</span></li>
+              <li class="d-flex"><span>Sunday</span><span> Closed</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Newsletter</h2>
+            <p>Far far away, behind the word mountains, far from the countries.</p>
+            <form action="#" class="subscribe-form">
+              <div class="form-group">
+                <input type="text" class="form-control mb-2 text-center" placeholder="Enter email address">
+                <input type="submit" value="Subscribe" class="form-control submit px-3">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Instagram</h2>
+            <div class="thumb d-sm-flex">
+              <a href="#" class="thumb-menu img" style="background-image: url({% static 'images/insta-1.jpg' %});">
+              </a>
+              <a href="#" class="thumb-menu img" style="background-image: url({% static 'images/insta-2.jpg' %});">
+              </a>
+              <a href="#" class="thumb-menu img" style="background-image: url({% static 'images/insta-3.jpg' %});">
+              </a>
+            </div>
+            <div class="thumb d-flex">
+              <a href="#" class="thumb-menu img" style="background-image: url({% static 'images/insta-4.jpg' %});">
+              </a>
+              <a href="#" class="thumb-menu img" style="background-image: url({% static 'images/insta-5.jpg' %});">
+              </a>
+              <a href="#" class="thumb-menu img" style="background-image: url({% static 'images/insta-6.jpg' %});">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-center">
+
+          <p>
+            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+            Copyright &copy;
+            <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with
+            <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- loader -->
+  <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px">
+      <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee" />
+      <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10"
+        stroke="#F96D00" /></svg></div>
+
+
+  <script src="{% static 'js/jquery.min.js' %}"></script>
+  <script src="{% static 'js/jquery-migrate-3.0.1.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
+  <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+  <script src="{% static 'js/jquery.stellar.min.js' %}"></script>
+  <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+  <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+  <script src="{% static 'js/aos.js' %}"></script>
+  <script src="{% static 'js/jquery.animateNumber.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
+  <script src="{% static 'js/jquery.timepicker.min.js' %}"></script>
+  <script src="{% static 'js/scrollax.min.js' %}"></script>
+  <!--  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>-->
+  <!--<script src="{% static 'js/google-map.js' %}"></script>-->
+  <script src="{% static 'js/main.js' %}"></script>
+
+</body>
+
+</html>

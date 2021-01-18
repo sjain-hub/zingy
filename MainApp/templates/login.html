@@ -1,0 +1,31 @@
+<div class="card bg-light">
+    <article class="card-body mx-auto" style="max-width: 400px;">
+      <h4 class="card-title mt-3 text-center">Login</h4>
+      {% if error_message %}
+      <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger large">{{ error_message }}</span>
+      </div>
+      {% endif %}
+      <br>
+      <form role="form" action="{% url 'login' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+          </div>
+          <input name="username" class="form-control" placeholder="Username" type="text">
+        </div>
+        <div class="form-group input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+          </div>
+          <input name="password" class="form-control" placeholder="Password" type="password">
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </div>
+        <p class="text-center">Don't have an account? <a href="{% url 'register'  %}" data-dismiss="modal"
+            data-toggle="modal" data-target="#custRegister">Register</a> </p>
+      </form>
+    </article>
+  </div>

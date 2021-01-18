@@ -1,0 +1,68 @@
+{% if error_message %}
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger large">{{ error_message }}</span>
+    </div>
+{% endif %}
+<div class="form-group input-group">
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger small">{{ form.username.errors }}</span>
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+    </div>
+    {{form.username}}
+</div>
+<div class="form-group input-group">
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger small">{{ form.first_name.errors }}</span>
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+    </div>
+    {{form.first_name}}
+</div>
+<div class="form-group input-group">
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger small">{{ form.last_name.errors }}</span>
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+    </div>
+    {{form.last_name}}
+</div>
+<div class="form-group input-group">
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger small">{{ form.email.errors }}</span>
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+    </div>
+    {{form.email}}
+</div>
+<div class="form-group input-group">
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger small">{{ form.phone.errors }}</span>
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
+    </div>
+    {{form.phone}}
+</div>
+<div class="form-group input-group">
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger small">{{ form.password.errors }}</span>
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+    </div>
+    {{form.password}}
+</div>
+<div class="form-group input-group">
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger small">{{ form.rpassword.errors }}</span>
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+    </div>
+    {{form.rpassword}}
+</div>

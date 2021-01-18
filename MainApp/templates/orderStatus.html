@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="/">Zingy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
+
+        {% if user.is_authenticated %}
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Orders</a></li>
+                <!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
+				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
+				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
+				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
+            </ul>
+        </div>
+        <h4>Hello, {{ user }}</h4>
+        {% else %}
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
+                <li class="nav-item"><a href="{% url 'test' %}" class="nav-link">Test</a></li>
+                <!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
+				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
+				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
+				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</nav>
+<!-- END nav -->
+
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">{{ kitchen.kitName }}</h1>
+                <p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i
+                                class="ion-ios-arrow-forward"></i></a></span> <span>Cart<i
+                            class="ion-ios-arrow-forward"></i></span></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div class="meta">
+    <div><a style="font-size:30px;">Order Status.{{ order.id }}</a></div>
+</div>
+
+{% include "websocket.html" %}
+{% endblock %}
