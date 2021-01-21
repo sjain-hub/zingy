@@ -4,6 +4,12 @@ from django.contrib.gis.geos import Point
 from django.conf import settings
 from datetime import date, datetime
 import re
+from django.db.models import DateTimeField
+
+
+class DateTimeWithoutTZField(DateTimeField):
+    def db_type(self, connection):
+        return 'timestamp'
 
 
 def get_upload_path(instance, filename):
@@ -58,7 +64,7 @@ class Kitchens(models.Model):
 	description = models.TextField(max_length=500, blank=True)
 	acceptAdvcOrders = models.BooleanField(default=False)
 	deliveryTime = models.TimeField(blank=False)
-	registrationDate = models.DateTimeField(blank=False)
+	registrationDate = DateTimeWithoutTZField(blank=False)
 
 	def __str__(self):
 		return self.kitName + ", by : " + self.user.username

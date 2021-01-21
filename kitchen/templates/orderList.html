@@ -52,133 +52,141 @@
         <a class="btn btn-outline-info" href="{% url 'orderHistory' %}">Order History</a>
         <br>
         <br>
-        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
-            <thead>
-                <tr>
-                    <th class="text-center">
-                        Order ID
-                    </th>
-                    <th class="text-center">
-                        Placed On
-                    </th>
-                    <th class="text-center">
-                        Scheduled On
-                    </th>
-                    <th class="text-center">
-                        Customer
-                    </th>
-                    <th class="text-center">
-                        Items
-                    </th>
-                    <th class="text-center">
-                        Customer's Message
-                    </th>
-                    <th class="text-center">
-                        Mode
-                    </th>
-                    <th class="text-center">
-                        Address
-                    </th>
-                    <th class="text-center">
-                        Total Amount
-                    </th>
-                    <th class="text-center">
-                        Status
-                    </th>
-                    <th class="text-center">
-                        Message to Customer
-                    </th>
-                    <th class="text-center">
-                        Action
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
+        
+        <div class="accordion" id="accordionExample">
+            {% for day in days %}
+            <div class="card">
+                <div class="card-header" id="heading{{ day.day }}">
+                    <h2 class="mb-0">
+                        <button class="btn btn-block text-center collapsed" type="button" data-toggle="collapse"
+                            data-target="#collapse{{ day.day }}" aria-expanded="true"
+                            aria-controls="collapse{{ day.day }}">
+                            <h4>{% if day == days.1 %}Today's Orders{% else %}{{ day }}{% endif %}</h4>
+                        </button>
+                    </h2>
+                </div>
 
-                {% csrf_token %}
-                {% if orders|length == 0 %}
-                <tr>
-                    <td colspan="11" class="text-center">
-                        <h3>No Orders</h3>
-                    </td>
-                </tr>
-                {% else %}
-                {% for day in days %}
-                    <tr>
-                        <td colspan="12" class="text-center">
-                            {% if day == days.0 %}<h3>Today's Orders</h3>{% else %}<h3>{{ day }}</h3>{% endif %}
-                        </td>
-                    </tr>
-                    {% for order in orders %}
-                        {% if order.scheduled_order.date == day %}
-                        <tr>
-                            <td>{{ order.id }}</td>
-                            <td>{{ order.created_at }}</td>
-                            <td><b>{{ order.scheduled_order }}</b></td>
-                            <td><h5><b>{{ order.customer }}</b></h5></td>
-                            <td>
-                                {% for item in order.itemswithquantity %}
-                                {{ item }}<br>
-                                {% endfor %}
-                            </td>
-                            <td>{{ order.message }}</td>
-                            <td>{{ order.mode }}</td>
-                            <td>{{ order.delivery_addr }}</td>
-                            <td>&#8377; {{ order.total_amount }}</td>
-                            <form method="POST" enctype="multipart/form-data">
+                <div id="collapse{{ day.day }}" class="collapse {% if day == days.1 %}show{% endif %}"
+                    aria-labelledby="heading{{ day.day }}" data-parent="#accordionExample">
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Order ID
+                                    </th>
+                                    <th class="text-center">
+                                        Placed On
+                                    </th>
+                                    <th class="text-center">
+                                        Scheduled On
+                                    </th>
+                                    <th class="text-center">
+                                        Customer
+                                    </th>
+                                    <th class="text-center">
+                                        Items
+                                    </th>
+                                    <th class="text-center">
+                                        Customer's Message
+                                    </th>
+                                    <th class="text-center">
+                                        Mode
+                                    </th>
+                                    <th class="text-center">
+                                        Address
+                                    </th>
+                                    <th class="text-center">
+                                        Total Amount
+                                    </th>
+                                    <th class="text-center">
+                                        Status
+                                    </th>
+                                    <th class="text-center">
+                                        Message to Customer
+                                    </th>
+                                    <th class="text-center">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {% csrf_token %}
-                                <td>
-                                    <select name="status{{order.id}}" id="status{{order.id}}">
-                                        {% if order.mode == "Delivery" %}
-                                        <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
-                                        </option>
-                                        <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
-                                        </option>
-                                        <option value="Packed" {% if order.status == "Packed" %} selected {% endif %}>Packed
-                                        </option>
-                                        <option value="Dispatched" {% if order.status == "Dispatched" %} selected {% endif %}>
-                                            Dispatched</option>
-                                        <option value="Delivered" {% if order.status == "Delivered" %} selected {% endif %}>
-                                            Delivered</option>
-                                        <option value="Rejected" {% if order.status == "Rejected" %} selected {% endif %}>
-                                            Rejected</option>
-                                        {% else %}
-                                        <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
-                                        </option>
-                                        <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
-                                        </option>
-                                        <option value="Packed" {% if order.status == "Packed" %} selected {% endif %}>Packed
-                                        </option>
-                                        <option value="Picked" {% if order.status == "Picked" %} selected {% endif %}>Picked
-                                        </option>
-                                        <option value="Rejected" {% if order.status == "Rejected" %} selected {% endif %}>
-                                            Rejected</option>
-                                        {% endif %}
-                                    </select><br><br>
-                                    {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
-                                    {{ order.completed_at }}
+                                {% for order in orders %}
+                                    {% if order.scheduled_order.date == day %}
+                                    <tr>
+                                        <td>{{ order.id }}</td>
+                                        <td>{{ order.created_at }}</td>
+                                        <td><b>{{ order.scheduled_order }}</b></td>
+                                        <td><h5><b>{{ order.customer }}</b></h5></td>
+                                        <td>
+                                            {% for item in order.itemswithquantity %}
+                                            {{ item }}<br>
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ order.message }}</td>
+                                        <td>{{ order.mode }}</td>
+                                        <td>{{ order.delivery_addr }} &nbsp; ({{ order.dist_from_kit }} km)</td>
+                                        <td>&#8377; {{ order.total_amount }}</td>
+                                        <form method="POST" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <td>
+                                                {% if order.status == "Cancelled" %}
+                                                Cancelled
+                                                {% else %}
+                                                <select name="status{{order.id}}" id="status{{order.id}}">
+                                                    {% if order.mode == "Delivery" %}
+                                                    <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
+                                                    </option>
+                                                    <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
+                                                    </option>
+                                                    <option value="Packed" {% if order.status == "Packed" %} selected {% endif %}>Packed
+                                                    </option>
+                                                    <option value="Dispatched" {% if order.status == "Dispatched" %} selected {% endif %}>
+                                                        Dispatched</option>
+                                                    <option value="Delivered" {% if order.status == "Delivered" %} selected {% endif %}>
+                                                        Delivered</option>
+                                                    <option value="Rejected" {% if order.status == "Rejected" %} selected {% endif %}>
+                                                        Rejected</option>
+                                                    {% else %}
+                                                    <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
+                                                    </option>
+                                                    <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
+                                                    </option>
+                                                    <option value="Packed" {% if order.status == "Packed" %} selected {% endif %}>Packed
+                                                    </option>
+                                                    <option value="Picked" {% if order.status == "Picked" %} selected {% endif %}>Picked
+                                                    </option>
+                                                    <option value="Rejected" {% if order.status == "Rejected" %} selected {% endif %}>
+                                                        Rejected</option>
+                                                    {% endif %}
+                                                </select>
+                                                {% endif %}
+                                                <br><br>
+                                                {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
+                                                {{ order.completed_at }}
+                                                {% endif %}
+                                            </td>
+                                            <td><textarea id="msgtocust{{order.id}}" name="msgtocust{{order.id}}" rows="2" cols="20">{{ order.msgtocust }}</textarea></td>
+                                            <td>
+                                                <input type="hidden" name="custid{{order.id}}" id="custid{{order.id}}" value="{{ order.customer.id }}" />
+                                                <button data-id="{{order.id}}" type="button" class="setstatus btn 
+                                                    {% if order.status == "Waiting" %}btn-danger{% elif order.status == "Rejected" %}btn-dark{% elif order.status == "Delivered" or order.status == "Picked" %}btn-success{% elif order.status == "Cancelled" %}btn-light{% else %}btn-warning{% endif %}">Set Status</button>
+                                            </td>
+                                        </form>
+                                    </tr>
                                     {% endif %}
-                                </td>
-                                <td><textarea id="msgtocust{{order.id}}" name="msgtocust{{order.id}}" rows="2" cols="20">{{ order.msgtocust }}</textarea></td>
-                                <td>
-                                    <input type="hidden" name="custid{{order.id}}" id="custid{{order.id}}" value="{{ order.customer.id }}" />
-                                    <!-- <input type="hidden" name="orderid" id="orderid" value="{{order.id}}"> -->
-                                    <!-- <input type="submit" value="Set Status" name="submit" /> -->
-                                    <button data-id="{{order.id}}" type="button" class="setstatus btn btn-success">Set Status</button>
-                                </td>
-                            </form>
-                        </tr>
-                        {% endif %}
-                    {% endfor %}
-                {% endfor %}
-                
-                {% endif %}
-
-            </tbody>
-        </table>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </section>
-
+<br>
 
 
 

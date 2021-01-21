@@ -5,9 +5,8 @@ from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
 from .models import User, Addresses, Order
 from kitchen.models import Kitchens
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from django.utils import dateparse
-import pytz
 
 
 class Customer(AsyncConsumer):
@@ -53,7 +52,7 @@ class Customer(AsyncConsumer):
                 activeOrders = await self.check_active_orders(me.id)
                 
                 if activeOrders<2:
-                    order = await self.create_order(otherDetails.get('total'), otherDetails.get('mode'), itemswithquantity, deliveryadd, otherDetails.get('message'), scheduledDate, me, kitchen)
+                    order = await self.create_order(otherDetails.get('total'), otherDetails.get('mode'), itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, me, kitchen)
                     # print(order)
                 else:
                     response = {
@@ -115,7 +114,7 @@ class Customer(AsyncConsumer):
         deliveryaddress = Addresses.objects.filter(id=addid)[0]
         distance = deliveryaddress.location.distance(kitchen.location) * 100
         context = {
-            "distance": distance,
+            "distance": round(distance,1),
             "deliveryadd": deliveryaddress.address + ", Floor No.- " + deliveryaddress.floorNo,
         }
         return json.dumps(context)
@@ -125,14 +124,15 @@ class Customer(AsyncConsumer):
         return Order.objects.filter(customer_id=custid, status="Placed").count() + Order.objects.filter(customer_id=custid, status="Packed").count() + Order.objects.filter(customer_id=custid, status="Dispatched").count() + Order.objects.filter(customer_id=custid, status="Waiting").count()
 
     @database_sync_to_async
-    def create_order(self, total, mode, itemswithquantity, add, msg, scheduledDate, cust, kit):
+    def create_order(self, total, mode, itemswithquantity, add, dist, msg, scheduledDate, cust, kit):
+        currentDate = datetime.now() + timedelta(hours=5, minutes=30)
         if scheduledDate:
             var = dateparse.parse_datetime(scheduledDate)
-            scheduledDate = datetime.now().replace(var.year, var.month, var.day, var.hour, var.minute)
-            return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, message=msg, scheduled_order=scheduledDate, customer=cust, kitchen=kit)
+            scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute) + timedelta(hours=5, minutes=30)
+            return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, customer=cust, kitchen=kit, created_at=currentDate)
         else:
-            return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, message=msg, scheduled_order=datetime.now(), customer=cust, kitchen=kit)
+            return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate, customer=cust, kitchen=kit, created_at=currentDate)
 
     @database_sync_to_async
     def update_order_status(self, status, msgtocust, orderid):
-        return Order.objects.filter(id=orderid).update(status=status, msgtocust=msgtocust, completed_at=datetime.now())
+        return Order.objects.filter(id=orderid).update(status=status, msgtocust=msgtocust, completed_at=datetime.now() + timedelta(hours=5, minutes=30))

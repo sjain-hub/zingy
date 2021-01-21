@@ -83,6 +83,17 @@
             {% endif %}
             $('#loading').show();
             socket.send(JSON.stringify({"items":items, "otherdetails": otherdetails}))
+            // setTimeout(function() {
+            //     $('#loading').hide();
+            //     var data = {
+            //         "msgtocust": "Kitchen Not Responding",
+            //         "custid": "{{ user.id }}",
+            //         "status": "Cancelled",
+            //         "orderid": $("#orderid").val(),
+            //     }
+            //     console.log(data)
+            //     socket.send(JSON.stringify(data))
+            // }, 5000);
         })
     }
     socket.onerror = function(e){

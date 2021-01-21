@@ -9,9 +9,10 @@ from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.contrib.gis.geos import Point
 from django.forms import inlineformset_factory
-from django.db.models import Q
+from django.db.models import Q, DateTimeField
 from datetime import datetime, timedelta, date
 import calendar
+
 
 
 @login_required(login_url='/kitLogin/')
@@ -218,11 +219,11 @@ def orderList(request):
 	orders = Order.objects.filter(kitchen_id=request.user.kitchens.id).order_by("scheduled_order")
 
 	for i in orders:
-		# print(i.scheduled_order.date())
 		i.itemswithquantity = i.itemswithquantity.split(",")
 	
 	days = []
 	todaysDate = datetime.today().date()
+	days.append(todaysDate - timedelta(days=1))
 	days.append(todaysDate)
 	days.append(todaysDate + timedelta(days=1))
 	days.append(todaysDate + timedelta(days=2))
