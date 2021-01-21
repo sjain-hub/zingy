@@ -203,6 +203,8 @@
                             <!-- <button type="button" class="btn btn-success">Repeat Order</button><br><br> -->
                             <button type="button" data-id="{{ order.kitchen.id }}" class="ratingsmodal btn btn-success"
                                 data-toggle="modal">Rate Order</button>
+                            {% elif order.status == "Cancelled" %}
+                            Order Cancelled
                             {% else %}
                             <a href="{% url 'orderStatus' order.id %}">
                                 <button type="button" class="btn btn-info">Track Order</button>

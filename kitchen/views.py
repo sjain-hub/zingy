@@ -275,8 +275,9 @@ def orderHistory(request):
 			if todayOrder.created_at.date() == day:
 				todayOrder.itemswithquantity = todayOrder.itemswithquantity.split(",")
 				orderstemp.append(todayOrder)
-				monthTotal = monthTotal + todayOrder.total_amount
-				dayTotal = dayTotal + todayOrder.total_amount
+				if todayOrder.status == "Delivered" or todayOrder.status == "Picked":
+					monthTotal = monthTotal + todayOrder.total_amount
+					dayTotal = dayTotal + todayOrder.total_amount
 		temp.append(orderstemp)
 		temp.append(dayTotal)
 		dayWiseOrders.append(temp)

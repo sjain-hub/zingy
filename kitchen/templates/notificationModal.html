@@ -54,17 +54,9 @@
         $(".modal-body #orderid").val(data.orderid);
         $(".modal-body #scheduledDate").val(data.scheduledDate);
         $("#kitnotification").modal("show");
-        // setTimeout(function() {
-        //     var data = {
-        //         "msgtocust": "Kitchen Not Responding",
-        //         "custid": $("#custid").val(),
-        //         "status": "Cancelled",
-        //         "orderid": $("#orderid").val(),
-        //     }
-        //     console.log(data)
-        //     socket.send(JSON.stringify(data))
-        //     window.location.reload();
-        // }, 5000);
+        setTimeout(function() {
+            window.location.reload();
+        }, 5000);
         
     }
 

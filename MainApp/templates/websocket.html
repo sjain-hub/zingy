@@ -14,19 +14,36 @@
     socket.onmessage = function(e){
         console.log("message", e)
         var data = JSON.parse(e.data);
-        $('#loading').hide();
-        var status = data.status
-        var msg = data.msgtocust
-        alert(status)
-
-        if(status == "Placed"){
-            deleteAllCookies()
+        if(data.orderId != undefined){
+            setTimeout(function() {
+                $('#loading').hide();
+                var data1 = {
+                    "msgtocust": "Kitchen Not Responding",
+                    "custid": "{{ user.id }}",
+                    "status": "Cancelled",
+                    "orderid": data.orderId,
+                }
+                console.log(data1)
+                socket.send(JSON.stringify(data1))
+            }, 5000);
         }
-        window.location.reload();
-        // if(window.location.pathname == "/orders/" || window.location.pathname.split("/")[1] == "orderStatus"){
-        //     window.location.reload();
-        // }
-        // console.log(window.location.pathname.split("/")[1])
+        else{
+            $('#loading').hide();
+            var status = data.status
+            var msg = data.msgtocust
+            var orderid = data.orderid
+            alert(status)
+            if(status == "Placed"){
+                deleteAllCookies()
+                window.location.href = "/orderStatus/"+data.orderid;
+            }
+            else if(status == "Packed" || status == "Dispatched"){
+                window.location.href = "/orderStatus/"+data.orderid;
+            }
+            else{
+                window.location.reload()
+            }
+        }
     }
     socket.onopen = function(e){
         console.log("open", e)

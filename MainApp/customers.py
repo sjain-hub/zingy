@@ -16,7 +16,7 @@ class Customer(AsyncConsumer):
             f"notification_group_{self.scope['url_route']['kwargs']['otheruserid']}",
             self.channel_name
         )
-       
+
         await self.send({
             "type": "websocket.accept"
         })
@@ -26,78 +26,15 @@ class Customer(AsyncConsumer):
         me = self.scope['user']
         text = event.get('text', None)
         if text is not None:
+            textdata = json.loads(text)
             if me.is_customer:
-                textdata = json.loads(text)
-                items = textdata.get('items')
-
-                itemswithquantity = ""
-                for i in items:
-                    itemswithquantity = itemswithquantity + \
-                        i.get('itemName') + "  X  " + i.get('quantity') + ", "
-
-                otherDetails = textdata.get('otherdetails')
-                # print("otherDetails",otherDetails)
-                kituserid = otherDetails.get('kituserid')
-                kituser = User.objects.filter(id=kituserid)[0]
-
-                kitid = otherDetails.get('kitid')
-                kitchen = Kitchens.objects.filter(id=kitid)[0]
-                addid = otherDetails.get('address')
-                context = await self.calc_distance(kitchen, addid)
-                distance = json.loads(context).get('distance')
-                deliveryadd = json.loads(context).get('deliveryadd')
-                scheduledDate = otherDetails.get('scheduledDate')
-                
-
-                activeOrders = await self.check_active_orders(me.id)
-                
-                if activeOrders<2:
-                    order = await self.create_order(otherDetails.get('total'), otherDetails.get('mode'), itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, me, kitchen)
-                    # print(order)
+                if textdata.get('status') != None:
+                    await self.kitchenFunction(textdata)
                 else:
-                    response = {
-                        "status": "Order can't be placed, Maximum 2 active orders are allowed."
-                    }
-                    await self.send({
-                        "type": "websocket.send",
-                        "text": json.dumps(response)
-                    })
-
-                response = {
-                    "items": items,
-                    "otherdetails": otherDetails,
-                    "custid": me.id,
-                    "scheduledDate": scheduledDate,
-                    "deliveryadd": deliveryadd,
-                    "distance": distance,
-                    "orderid": order.id
-                }
-                await self.channel_layer.group_send(
-                    f"notification_group_{kituser}",
-                    {
-                        "type": "send_notification",
-                        "text": json.dumps(response)
-                    }
-                )
+                    await self.customerFunction(textdata, me)
             elif me.is_kitchen:
-                textdata = json.loads(text)
-                msgtocust = textdata.get('msgtocust')
-                custid = textdata.get('custid')
-                status = textdata.get('status')
-                orderid = textdata.get('orderid')
-                cust = User.objects.filter(id=custid)[0]
-                response = {
-                    "msgtocust": msgtocust,
-                    "status": status
-                }
-                await self.update_order_status(status, msgtocust, orderid)
-                await self.channel_layer.group_send(
-                    f"notification_group_{cust}",
-                    {
-                        "type": "send_notification",
-                        "text": json.dumps(response)
-                    }
-                )
+                await self.kitchenFunction(textdata)
+
 
     async def send_notification(self, event):
         print("sending..............", event)
@@ -106,8 +43,91 @@ class Customer(AsyncConsumer):
             "text": event['text']
         })
 
+
     async def websocket_disconnect(self, event):
         print("disconnected", event)
+
+    
+    async def kitchenFunction(self, textdata):
+        msgtocust = textdata.get('msgtocust')
+        custid = textdata.get('custid')
+        status = textdata.get('status')
+        orderid = textdata.get('orderid')
+        cust = User.objects.filter(id=custid)[0]
+        response = {
+            "msgtocust": msgtocust,
+            "status": status,
+            "orderid": orderid,
+        }
+        await self.update_order_status(status, msgtocust, orderid)
+        await self.channel_layer.group_send(
+            f"notification_group_{cust}",
+            {
+                "type": "send_notification",
+                "text": json.dumps(response)
+            }
+        )
+
+    
+    async def customerFunction(self, textdata, me):
+        items = textdata.get('items')
+
+        itemswithquantity = ""
+        for i in items:
+            itemswithquantity = itemswithquantity + \
+                i.get('itemName') + "  X  " + i.get('quantity') + ", "
+
+        otherDetails = textdata.get('otherdetails')
+        kituserid = otherDetails.get('kituserid')
+        kituser = User.objects.filter(id=kituserid)[0]
+
+        kitid = otherDetails.get('kitid')
+        kitchen = Kitchens.objects.filter(id=kitid)[0]
+        addid = otherDetails.get('address')
+        context = await self.calc_distance(kitchen, addid)
+        distance = json.loads(context).get('distance')
+        deliveryadd = json.loads(context).get('deliveryadd')
+        scheduledDate = otherDetails.get('scheduledDate')
+        
+
+        activeOrders = await self.check_active_orders(me.id)
+        
+        if activeOrders<2:
+            order = await self.create_order(otherDetails.get('total'), otherDetails.get('mode'), itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, me, kitchen)
+        else:
+            response = {
+                "status": "Order can't be placed, Maximum 2 active orders are allowed."
+            }
+            await self.send({
+                "type": "websocket.send",
+                "text": json.dumps(response)
+            })
+
+        response = {
+            "items": items,
+            "otherdetails": otherDetails,
+            "custid": me.id,
+            "scheduledDate": scheduledDate,
+            "deliveryadd": deliveryadd,
+            "distance": distance,
+            "orderid": order.id
+        }
+        await self.channel_layer.group_send(
+            f"notification_group_{kituser}",
+            {
+                "type": "send_notification",
+                "text": json.dumps(response)
+            }
+        )
+        response = {
+            "orderId": order.id
+        }
+        await self.send({
+            "type": "websocket.send",
+            "text": json.dumps(response)
+        })
+
+
 
     @database_sync_to_async
     def calc_distance(self, kitchen, addid):
