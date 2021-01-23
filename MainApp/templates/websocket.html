@@ -25,14 +25,14 @@
                 }
                 console.log(data1)
                 socket.send(JSON.stringify(data1))
-            }, 5000);
+            }, 60000);
         }
         else{
             $('#loading').hide();
             var status = data.status
             var msg = data.msgtocust
             var orderid = data.orderid
-            alert(status)
+
             if(status == "Placed"){
                 deleteAllCookies()
                 window.location.href = "/orderStatus/"+data.orderid;
@@ -43,6 +43,7 @@
             else{
                 window.location.reload()
             }
+            alert(status)
         }
     }
     socket.onopen = function(e){

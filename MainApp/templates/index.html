@@ -103,8 +103,8 @@
 					//get the coordinates
 					if (navigator.geolocation) {
 						navigator.geolocation.getCurrentPosition(position => {
-							document.getElementById('lon').value = position.coords.longitude;
-							document.getElementById('lat').value = position.coords.latitude;
+							document.cookie = "lon=" + position.coords.longitude + ";Path=/";
+							document.cookie = "lat=" + position.coords.latitude + ";Path=/";
 							var marker = new mapboxgl.Marker({
 								draggable: true
 							})
@@ -113,8 +113,8 @@
 
 							function onDragEnd() {
 								var lngLat = marker.getLngLat();
-								document.getElementById('lon').value = lngLat.lng;
-								document.getElementById('lat').value = lngLat.lat;
+								document.cookie = "lon=" + lngLat.lng + ";Path=/";
+								document.cookie = "lat=" + lngLat.lat + ";Path=/";
 							}
 
 							marker.on('dragend', onDragEnd);
@@ -143,8 +143,6 @@
 				</div>
 				<form action="/kitchens/" method="POST">
 					{% csrf_token %}
-					<input type="text" id="lon" name="lon" hidden>
-					<input type="text" id="lat" name="lat" hidden>
 					<div class="row">
 						<div class="col-md-6">
 							<div class="form-group">

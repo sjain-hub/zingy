@@ -19,6 +19,10 @@
                     <input type="text" name="msgtocust" id="msgtocust" />
                     <span id="deliveryadd">
                     </span>
+                    <br>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="reject btn btn-primary" data-dismiss="modal">Reject Order</button>
@@ -29,6 +33,12 @@
     </div>
 </form>
 <script>
+    $(document).ready(function() {
+        $(".progress-bar").animate({
+            width: "100%"
+        }, 60000);
+    });
+
     var loc = window.location
     var wsStart = "ws://"
     if (loc.protocol == 'https:') {
@@ -56,8 +66,7 @@
         $("#kitnotification").modal("show");
         setTimeout(function() {
             window.location.reload();
-        }, 5000);
-        
+        }, 60000);
     }
 
     socket.onopen = function (e) {

@@ -37,7 +37,7 @@ class KitchenForm(forms.ModelForm):
 
 	class Meta:
 		model = Kitchens
-		fields = ['kitName', 'mode', 'acceptAdvcOrders', 'deliveryTime','address', 'city', 'landmark', 'postalCode', 'floorNo', 'latitude',
+		fields = ['kitName', 'mode', 'acceptAdvcOrders', 'deliveryTime', 'visibilityRadius','address', 'city', 'landmark', 'postalCode', 'floorNo', 'latitude',
 					'longitude', 'dp', 'video', 'fssaiLicNo', 'fssaiName', 'fssaiAdd', 'fssaiExpiry', 'fssaiCerti', 'kyc', 'degree']
 
 

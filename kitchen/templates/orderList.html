@@ -13,19 +13,19 @@
 
         <div class="collapse navbar-collapse" id="ftco-nav">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item active"><a href="{% url 'orderList' %}" class="nav-link">Orders <span
-                            class="badge badge-danger badge-counter" id="newNotificationCount">
-                            {{waitingorderscount}}
-                        </span></a></li>
+                <li class="nav-item"><a href="{% url 'orderList' %}" class="nav-link">Orders
+                    {% if waitingorderscount > 0 %}
+                    <span class="badge badge-danger badge-counter" id="newNotificationCount">{{waitingorderscount}}</span>
+                    {% endif %}
+                </a></li>
                 <li class="nav-item"><a href="{% url 'addFoodItems' %}" class="nav-link">Add Items</a></li>
-                <li class="nav-item"><a href="{% url 'updateKitchen' %}" class="nav-link">Profile</a></li>
                 <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                <li class="nav-item"><a href="{% url 'updateKitchen' %}" class="nav-link"><h4>Hello, {{ user }}</h4></a></li>
                 <!--	        	<li class="nav-item"><a href="reservation.html" class="nav-link">Reservation</a></li>-->
                 <!--	        	<li class="nav-item active"><a href="blog.html" class="nav-link">Stories</a></li>-->
                 <!--	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>-->
             </ul>
         </div>
-        <h4>Hello, {{ user }}</h4>
     </div>
 </nav>
 

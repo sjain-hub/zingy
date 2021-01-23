@@ -89,18 +89,19 @@
 					{% for kit in kit_object %}
 					<div class="col-md-4 ftco-animate">
 						<div class="blog-entry">
-							<a href="{% url 'menu' kit.id %}" class="block-20"
-								{% if kit.status == "Closed" %}
-								style="background-image: url({{kit.dp.url}});-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+							<a href="{% url 'menu' kit.0.id %}" class="block-20"
+								{% if kit.0.status == "Closed" %}
+								style="background-image: url({{kit.0.dp.url}});-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
 								filter: grayscale(100%);pointer-events: none;cursor: default;"
 								{% else %}
-								style="background-image: url({{kit.dp.url}});"
+								style="background-image: url({{kit.0.dp.url}});"
 								{% endif %}>
 							</a>
 							<div class="text px-4 pt-3 pb-4">
-								<h3 class="heading"><a href="#">{{kit.kitName}}</a></h3>
+								<h3 class="heading"><a href="#">{{kit.0.kitName}}</a></h3>
+								({{kit.1}} km)
 								<div class="meta">
-									{% if kit.acceptAdvcOrders %}<span class="text-success"> Accepts Advance Orders upto 2 Days.</span>{% endif %}
+									{% if kit.0.acceptAdvcOrders %}<span class="text-success"> Accepts Advance Orders upto 2 Days.</span>{% endif %}
 									<div><a href="#">Cakes, Pastries, Cookies, Chocolates, etc.</a></div>
 								</div>
 								<p class="clearfix">

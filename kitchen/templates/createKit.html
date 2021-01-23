@@ -15,12 +15,13 @@
         <div class="collapse navbar-collapse" id="ftco-nav">
             <ul class="navbar-nav ml-auto">
                 {% if user.kit_Created %}
-                <li class="nav-item"><a href="{% url 'orderList' %}" class="nav-link">Orders <span
-                    class="badge badge-danger badge-counter" id="newNotificationCount">
-                    {{waitingorderscount}}
-                </span></a></li>
+                <li class="nav-item"><a href="{% url 'orderList' %}" class="nav-link">Orders
+                    {% if waitingorderscount > 0 %}
+                    <span class="badge badge-danger badge-counter" id="newNotificationCount">{{waitingorderscount}}</span>
+                    {% endif %}
+                </a></li>
                 <li class="nav-item"><a href="{% url 'addFoodItems' %}" class="nav-link">Add Items</a></li>
-                <li class="nav-item active"><a href="{% url 'updateKitchen' %}" class="nav-link">Profile</a></li>
+                <li class="nav-item active"><a href="{% url 'updateKitchen' %}" class="nav-link"><h4>Hello, {{ user }}</h4></a></li>
                 {% endif %}
                 <li class="nav-item"><a href="/logout" class="nav-link">Logout</a></li>
                 <!--				<li class="nav-item"><a href="/about" class="nav-link">About</a></li>-->
@@ -30,7 +31,6 @@
                 <!--				<li class="nav-item"><a href="/contact" class="nav-link">Contact</a></li>-->
             </ul>
         </div>
-        <h4>Hello, {{ user }}</h4>
     </div>
 </nav>
 
@@ -111,6 +111,14 @@
                             </div>
                             <label class="col">How much time will you take to prepare and deliver the order in your range ? :</label>
                             {{ form.deliveryTime }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.visibilityRadius.errors }}</span>
+                            </div>
+                            <label class="col">For how much Distance you want your Kitchen to visible? :</label>
+                            {{ form.visibilityRadius }}
+                            <small id="radiusHelp" class="form-text text-muted">(If you opt for "Delivery", then you should be able to Deliver to this much Distance.)</small>
                         </div>
                         <div class="col-12 ">
                             <div class="col-sm-offset-2 col-sm-12">

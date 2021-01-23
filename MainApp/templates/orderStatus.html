@@ -55,10 +55,19 @@
     </div>
 </section>
 
-
+{% if order.status == "Placed" %}
 <div class="meta">
-    <div><a style="font-size:30px;">Order Status.{{ order.id }}</a></div>
+    <img id="gif" src="{% static 'gifs/panda.gif' %}" />
 </div>
+{% elif order.status == "Packed" %}
+<div class="meta">
+    <img id="gif" src="{% static 'gifs/oven.gif' %}" />
+</div>
+{% elif order.status == "Dispatched" %}
+<div class="meta">
+    <img id="gif" src="{% static 'gifs/oven.gif' %}" />
+</div>
+{% endif %}
 
 {% include "websocket.html" %}
 {% endblock %}

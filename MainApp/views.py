@@ -32,12 +32,20 @@ def Logout(request):
 
 
 def nearbyKitchens(request):
-	if request.method == "POST":
-		longitude = request.POST['lon']
-		latitude = request.POST['lat']
+	longitude = request.COOKIES['lon']
+	latitude = request.COOKIES['lat']
 	user_location = Point(float(longitude), float(latitude), srid=4326)
-	kit_object = Kitchens.objects.filter(location__dwithin=(user_location, 0.03), approved=True).annotate(
-		distance=Distance("location", user_location)).order_by("distance")
+	# kit_object = Kitchens.objects.filter(location__dwithin=(user_location, 0.02), approved=True).annotate(
+	# 	distance=Distance("location", user_location)).order_by("distance")
+	kit_object = []
+	kitchens = Kitchens.objects.filter(approved=True)
+	for i in kitchens:
+		dist = user_location.distance(i.location) * 100
+		if dist <= i.visibilityRadius:
+			temp = []
+			temp.append(i)
+			temp.append(round(dist,1))
+			kit_object.append(temp)
 	cartitemcount = countCartItems(request)
 	context = {
  		'kit_object': kit_object,

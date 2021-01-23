@@ -452,9 +452,12 @@
 
 {% endif %}
 
-<!-- LOADER spinner -->
+<!-- LOADER -->
 <div id="loading">
-    <img id="loading-image" src="{% static 'images/ajax-loader.gif' %}" alt="Loading..." />
+    <img id="loading-image" src="{% static 'gifs/ajax-loader.gif' %}" alt="Loading..." />
+    <div class="progress">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
 </div>
 <style>
     #loading {
@@ -480,7 +483,11 @@
 <script>
     $(window).on('load', function(){
         $('#loading').hide();
+        $(".progress-bar").animate({
+            width: "100%"
+        }, 60000);
     });
+    
 </script>
 
 {% if user.is_authenticated %}
