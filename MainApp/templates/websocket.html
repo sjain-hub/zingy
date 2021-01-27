@@ -1,6 +1,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
 <!------- websocket for chat purpose ------->
 <script>
+    $(function () {  
+        $(document).keydown(function (e) {  
+            return (e.which || e.keyCode) != 116;  
+        });  
+    }); 
     var loc = window.location
     var wsStart = "ws://"
     if(loc.protocol == 'https:'){
@@ -23,7 +28,6 @@
                     "status": "Cancelled",
                     "orderid": data.orderId,
                 }
-                console.log(data1)
                 socket.send(JSON.stringify(data1))
             }, 60000);
         }
@@ -37,20 +41,37 @@
                 deleteAllCookies()
                 window.location.href = "/orderStatus/"+data.orderid;
             }
-            else if(status == "Packed" || status == "Dispatched"){
+            else if(status == "Packed" || status == "Preparing" || status == "Dispatched"){
                 window.location.href = "/orderStatus/"+data.orderid;
             }
             else{
-                window.location.reload()
+                if(window.location.pathname.split("/")[1] == "orderStatus") {
+                    window.location.href = "/orders/";
+                }
+                else {
+                    window.location.reload()
+                }
             }
             alert(status)
         }
     }
     socket.onopen = function(e){
         console.log("open", e)
+
+        $(document).on("click", ".cancel", function (event) {
+            var orderId = $(this).data('id');
+            var data = {
+                    "msgtocust": "Order Cancelled By User.",
+                    "custid": "{{ user.id }}",
+                    "status": "Cancelled",
+                    "orderid": orderId,
+                }
+            socket.send(JSON.stringify(data))
+            window.location.href = "/kitchens/";
+        })
+
         $("#checkoutform").submit(function(event){
             event.preventDefault()
-            // console.log("submitted", $("#scheduledorder").val())
             
             var items = [
                 {% for item in items %}
@@ -101,17 +122,6 @@
             {% endif %}
             $('#loading').show();
             socket.send(JSON.stringify({"items":items, "otherdetails": otherdetails}))
-            // setTimeout(function() {
-            //     $('#loading').hide();
-            //     var data = {
-            //         "msgtocust": "Kitchen Not Responding",
-            //         "custid": "{{ user.id }}",
-            //         "status": "Cancelled",
-            //         "orderid": $("#orderid").val(),
-            //     }
-            //     console.log(data)
-            //     socket.send(JSON.stringify(data))
-            // }, 5000);
         })
     }
     socket.onerror = function(e){
@@ -121,6 +131,11 @@
         console.log("close", e)
     }
     function deleteAllCookies() {
-        document.cookie.split(";").forEach(function (c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+        document.cookie.split(";").forEach(function (c) { 
+            var key = c.replace(/^ +/, "").split("=")[0]
+            if (key != "lon" && key != "lat") {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            }
+        });
     }
 </script>

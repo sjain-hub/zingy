@@ -38,7 +38,11 @@
             width: "100%"
         }, 60000);
     });
-
+    $(function () {  
+        $(document).keydown(function (e) {  
+            return (e.which || e.keyCode) != 116;  
+        });  
+    }); 
     var loc = window.location
     var wsStart = "ws://"
     if (loc.protocol == 'https:') {

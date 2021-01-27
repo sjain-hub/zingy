@@ -131,7 +131,6 @@ def updateKitchen(request):
 	kitform = KitchenForm(request.POST or None, request.FILES or None,
 	                      instance=request.user.kitchens, user=request.user)
 	if request.POST:
-		# print(request.POST)
 		print(kitform.errors)
 		if kitform.is_valid():
 			kitform.save()

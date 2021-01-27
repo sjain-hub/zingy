@@ -4,9 +4,9 @@ from .models import User, Addresses
 class CustomerSignUpForm(forms.ModelForm):
 	email = forms.CharField(widget=forms.EmailInput(
 		attrs={'class': 'form-control', 'placeholder': 'Email'}))
-	rpassword = forms.CharField(widget=forms.PasswordInput(
+	rpassword = forms.CharField(widget=forms.PasswordInput(render_value = True,
 		attrs={'class': 'form-control', 'placeholder': 'Re-enter Password'}))
-	password = forms.CharField(widget=forms.PasswordInput(
+	password = forms.CharField(widget=forms.PasswordInput(render_value = True,
 		attrs={'class': 'form-control', 'placeholder': 'Password'}))
 	first_name = forms.CharField(widget=forms.TextInput(
 		attrs={'class': 'form-control', 'placeholder': 'First Name'}))

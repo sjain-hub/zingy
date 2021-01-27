@@ -139,7 +139,7 @@
                                     <td>{{ order.delivery_addr }}</td>
                                     <td>&#8377; {{ order.total_amount }}</td>
                                     <td>{{ order.status }}<br>
-                                        {% if order.status == "Rejected" %}
+                                        {% if order.status == "Rejected" or order.status == "Cancelled" %}
                                         Reason: {{ order.msgtocust }}<br>
                                         {% endif %}
                                         {{ order.completed_at }}
@@ -175,7 +175,12 @@
     });
 
     function deleteAllCookies() {
-        document.cookie.split(";").forEach(function (c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+        document.cookie.split(";").forEach(function (c) { 
+            var key = c.replace(/^ +/, "").split("=")[0]
+            if (key != "lon" && key != "lat") {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            }
+        });
     }
 </script>
 

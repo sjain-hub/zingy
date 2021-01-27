@@ -63,49 +63,6 @@
 </style>
 
 
-<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
-    <div class="container">
-        <a class="navbar-brand" href="/">Zingy</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
-            aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="oi oi-menu"></span> Menu
-        </button>
-
-        {% if user.is_authenticated %}
-        <div class="collapse navbar-collapse" id="ftco-nav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
-                <li class="nav-item active"><a href="{% url 'orders' %}" class="nav-link">Orders</a></li>
-                <li class="nav-item"><a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-bell fa-fw"></i>
-                    <!-- Counter - Alerts -->
-                    <span class="badge badge-danger badge-counter" id="newNotificationCount">
-                      0
-                    </span>
-                  </a>
-                </li>
-                <!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-            </ul>
-        </div>
-        <h4>{{ user.username }}</h4>
-        {% else %}
-        <div class="collapse navbar-collapse" id="ftco-nav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
-                <li class="nav-item"><a href="{% url 'test' %}" class="nav-link">Test</a></li>
-                <!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-            </ul>
-        </div>
-        {% endif %}
-    </div>
-</nav>
-
 <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
     data-stellar-background-ratio="0.5">
     <div class="overlay"></div>
@@ -113,11 +70,6 @@
         <div class="row no-gutters slider-text align-items-center justify-content-center">
             <div class="col-md-9 ftco-animate text-center">
                 <h1 class="mb-2 bread">Manage Your Orders</h1>
-                <p class="breadcrumbs">
-                    <span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
-                    <span class="mr-2"><a href="/kitchens">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
-                    <span>Menu<i class="ion-ios-arrow-forward"></i></span>
-                </p>
             </div>
         </div>
     </div>
@@ -237,18 +189,27 @@
             success: function (data) {
                 $(".modal-body #comment").val(data.reviews);
                 $(".modal-body #starrating").html('');
-                var i;
-                for (i = 5; i > 0; i--) {
-                    if (data.ratings >= i) {
-                        $(".modal-body #starrating").append("<input checked type='radio' id='star" + i + "' name='rating' value='" + i + "'/>" + "<label for='star" + i + "' title='" + i + " stars'>" + i + " stars</label>");
-                    }
-                    else {
+                $(".modal-body .button").html('');
+                if (data.reviews == "" && data.ratings == "") {
+                    var i;
+                    for (i = 5; i > 0; i--) {
                         $(".modal-body #starrating").append("<input type='radio' id='star" + i + "' name='rating' value='" + i + "'/>" + "<label for='star" + i + "' title='" + i + " stars'>" + i + " stars</label>");
                     }
+                    $(".modal-body .button").append("<input type='submit' value='Submit' name='Submit' class='btn btn-success btn-lg' />");
+                    $("#ratingsmodal").modal("show");
                 }
-                $("#ratingsmodal").modal("show");
+                else {
+                    document.getElementById("comment").readOnly = true;
+                    var i;
+                    for (i = 5; i > 0; i--) {
+                        if (data.ratings >= i) {
+                            $(".modal-body #starrating").append("<input disabled checked type='checkbox' id='star" + i + "' name='rating' value='" + i + "'/>" + "<label for='star" + i + "' title='" + i + " stars'>" + i + " stars</label>");
+                        }
+                    }
+                    $(".modal-body .button").append("<input type='button' value='Update' name='Update' class='update btn btn-success btn-lg' />");
+                    $("#ratingsmodal").modal("show");
+                }
             },
-
         });
     });
 </script>
@@ -297,7 +258,9 @@
                                             aria-label="With textarea"></textarea>
                                     </div>
                                     <br>
-                                    <input type="submit" value="Add" name="Add" class="btn btn-success btn-lg" />
+                                    <div class="button">
+                                        <!-- <input type="submit" value="Add" name="Add" class="btn btn-success btn-lg" /> -->
+                                    </div>
                                 </div>
                         </form>
                     </div>
@@ -322,6 +285,18 @@
                 },
             });
             $("#ratingsmodal").modal("hide");
+        });
+
+        $(document).on("click", ".update", function (event) {
+            $(".modal-body #comment").val('');
+            document.getElementById("comment").readOnly = false;
+            $(".modal-body #starrating").html('');
+            var i;
+            for (i = 5; i > 0; i--) {
+                $(".modal-body #starrating").append("<input type='radio' id='star" + i + "' name='rating' value='" + i + "'/>" + "<label for='star" + i + "' title='" + i + " stars'>" + i + " stars</label>");
+            }
+            $(".modal-body .button").html('');
+            $(".modal-body .button").append("<input type='submit' value='Submit' name='Submit' class='btn btn-success btn-lg' />");
         });
     });
 </script>

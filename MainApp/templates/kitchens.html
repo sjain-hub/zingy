@@ -1,51 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block nav %}
+<form class="form-inline" role="search" method="get">
+	<div class="form-group mx-sm-3 mb-2">
+	  <input type="text" class="form-control" name="search" value="{{ request.GET.search }}" id="search" placeholder="Search Kitchen">
+	</div>
+	<button type="submit" class="btn btn-primary mb-2"><i class="fa fa-search"></i></button>
+</form>
+{% endblock %}
 
 {% block content %}
-
-<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
-	<div class="container">
-		<a class="navbar-brand" href="/">Zingy</a>
-		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
-			aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="oi oi-menu"></span> Menu
-		</button>
-
-		{% if user.is_authenticated %}
-		<div class="collapse navbar-collapse" id="ftco-nav">
-			<ul class="navbar-nav ml-auto">
-				<li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
-				<li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Orders</a></li>
-				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-			</ul>
-			<h4>Hello, {{ user }}</h4>
-			<a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
-				<i class="fa fa-shopping-cart"></i> Cart
-				<span class="badge badge-light" id="cartitemcount">{{cartitemcount}}</span>
-			</a>
-		</div>
-		{% else %}
-		<div class="collapse navbar-collapse" id="ftco-nav">
-			<ul class="navbar-nav ml-auto">
-				<li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
-				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-			</ul>
-			<a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
-				<i class="fa fa-shopping-cart"></i> Cart
-				<span class="badge badge-light" id="cartitemcount">{{cartitemcount}}</span>
-			</a>
-		</div>
-		{% endif %}
-	</div>
-</nav>
-<!-- END nav -->
 
 <section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_4.jpg' %});"
 	data-stellar-background-ratio="0.5">

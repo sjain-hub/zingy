@@ -15,50 +15,6 @@
 </style>
 
 
-<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
-  <div class="container">
-    <a class="navbar-brand" href="/">Zingy</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav"
-      aria-expanded="false" aria-label="Toggle navigation">
-      <span class="oi oi-menu"></span> Menu
-    </button>
-
-    {% if user.is_authenticated %}
-		<div class="collapse navbar-collapse" id="ftco-nav">
-			<ul class="navbar-nav ml-auto">
-        <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
-        <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Orders</a></li>
-				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-      </ul>
-      <h4>Hello, {{ user }}</h4>
-      <a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
-        <i class="fa fa-shopping-cart"></i> Cart
-        <span class="badge badge-light" id="cartitemcount">{{cartitemcount}}</span>
-      </a>
-		</div>
-		{% else %}
-		<div class="collapse navbar-collapse" id="ftco-nav">
-			<ul class="navbar-nav ml-auto">
-				<li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
-				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-      </ul>
-      <a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
-        <i class="fa fa-shopping-cart"></i> Cart
-        <span class="badge badge-light" id="cartitemcount">{{cartitemcount}}</span>
-      </a>
-		</div>
-		{% endif %}
-  </div>
-</nav>
-<!-- END nav -->
-
-
 <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
   data-stellar-background-ratio="0.5">
   <div class="overlay"></div>
@@ -68,7 +24,7 @@
         <h1 class="mb-2 bread">{{ kitchen.kitName }}</h1>
         <p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
           <span class="mr-2"><a href="{% url 'kitchens' %}">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
-          <span>Menu<i class="ion-ios-arrow-forward"></i></span></p>
+          <span>{{ kitchen.kitName }}<i class="ion-ios-arrow-forward"></i></span></p>
         <p class="breadcrumbs"><span class="mr-2"><a href="#reviews"><span
                 class="icon-star text-warning"></span>{{ avgrating.ratings__avg }} ({{ reviews|length }}
               Reviews)</a></span></p>
@@ -285,7 +241,12 @@
   }
 
   function deleteAllCookies() {
-    document.cookie.split(";").forEach(function (c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+      document.cookie.split(";").forEach(function (c) { 
+          var key = c.replace(/^ +/, "").split("=")[0]
+          if (key != "lon" && key != "lat") {
+              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+          }
+      });
   }
 
   function handlesubcounter(id, subid, quant, totalquant) {
@@ -343,6 +304,7 @@
             <div id="map"></div>
             <script>
               mapboxgl.accessToken = 'pk.eyJ1IjoiamFpbnNodWJoYW0iLCJhIjoiY2tkcG5lYzgyMjNteTMwbXIzYjkxaWtjayJ9.mV7uussgvFw4MXHVyMkIBg';
+              var marker1 = new mapboxgl.Marker({ "color": "#b40219" })
 
               var map = new mapboxgl.Map({
                 container: 'map', // container id
@@ -356,19 +318,30 @@
               map.addControl(new mapboxgl.FullscreenControl());
 
               // Add geolocate control to the map.
-              map.addControl(
-                new mapboxgl.GeolocateControl(
-                  {
+              var geolocate = new mapboxgl.GeolocateControl
+                  ({
                     positionOptions: {
-                      enableHighAccuracy: true
+                      enableHighAccuracy: true,
+                      watchPosition: true
                     },
-                    trackUserLocation: true,
+                    trackUserLocation: false,
                     showUserLocation: false,
                   })
-              );
+              map.addControl(geolocate);
+              
+              // Listen to geolocate control
+              geolocate.on('geolocate', function (ev) {
+                marker1.setLngLat([ev.coords.longitude, ev.coords.latitude])
+                  .addTo(map);
+              });
 
+              var popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+                '<b>{{ kitchen.kitName }}</b>'+
+                '<a class="block-20" style="background-image: url({{kitchen.dp.url}}); width:100px; height:100px;">'
+              );
               new mapboxgl.Marker()
                 .setLngLat([{{ kitchen.longitude }}, {{ kitchen.latitude }}])
+                .setPopup(popup)
                 .addTo(map);
             </script>
           </div>

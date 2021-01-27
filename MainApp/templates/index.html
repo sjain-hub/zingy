@@ -6,6 +6,12 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css" rel="stylesheet" />
+
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet'
+    href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.css'
+	type='text/css' />
+
 <style>
 	body {
 		margin: 0;
@@ -35,40 +41,6 @@
 	}
 </style>
 
-<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
-	<div class="container">
-		<a class="navbar-brand" href="/">Zingy</a>
-		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
-			aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="oi oi-menu"></span> Menu
-		</button>
-		{% if user.is_authenticated %}
-		<div class="collapse navbar-collapse" id="ftco-nav">
-			<ul class="navbar-nav ml-auto">
-				<li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
-				<li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Orders</a></li>
-				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-			</ul>
-		</div>
-		<h4>{{ user.first_name }}</h4>
-		{% else %}
-		<div class="collapse navbar-collapse" id="ftco-nav">
-			<ul class="navbar-nav ml-auto">
-				<li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
-				<li class="nav-item"><a href="/kitLogin" class="nav-link">Chef Login</a></li>
-				<!-- <li class="nav-item"><a href="/menu" class="nav-link">Specialties</a></li>
-				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>
-				 <li class="nav-item"><a href="#custLogin" data-toggle="modal" class="nav-link">Contact</a></li>  -->
-			</ul>
-		</div>
-		{% endif %}
-	</div>
-</nav>
-
 <section class="ftco-section ftco-no-pt ftco-no-pb">
 	<div class="container-fluid">
 		<div class="row d-flex">
@@ -76,48 +48,100 @@
 				<div id="map"></div>
 				<script>
 					mapboxgl.accessToken = 'pk.eyJ1IjoiamFpbnNodWJoYW0iLCJhIjoiY2tkcG5lYzgyMjNteTMwbXIzYjkxaWtjayJ9.mV7uussgvFw4MXHVyMkIBg';
+					var marker1 = new mapboxgl.Marker({ "color": "#b40219", draggable: true })
+					var marker2 = new mapboxgl.Marker({ "color": "#b40219", draggable: true })
+					var marker3 = new mapboxgl.Marker({ "color": "#b40219", draggable: true })
 
 					var map = new mapboxgl.Map({
 						container: 'map', // container id
 						style: 'mapbox://styles/mapbox/streets-v11',
 						center: [77.2230, 28.5086], // starting position
-						zoom: 8, // starting zoom
+						zoom: 11, // starting zoom
 						attributionControl: false,
+					});
+
+					//search location
+					var geocoder = new MapboxGeocoder({ // Initialize the geocoder
+						accessToken: mapboxgl.accessToken, // Set the access token
+						mapboxgl: mapboxgl, // Set the mapbox-gl instance
+						marker: false, // Do not use the default marker style
+						placeholder: 'Search for places', // Placeholder text for the search bar
+						// bbox: [-122.30937, 37.84214, -122.23715, 37.89838], // Boundary for Berkeley
+						proximity: {
+							longitude: 77.2230,
+							latitude: 28.5086
+						} // Coordinates of UC Berkeley
+					});
+
+					// Add the geocoder to the map
+					map.addControl(geocoder);
+
+					//point the searched location
+					map.on('load', function () {
+						geocoder.on('result', function (ev) {
+							marker1.remove();
+							marker3.remove();
+							marker2.setLngLat([ev.result.geometry.coordinates[0], ev.result.geometry.coordinates[1]])
+								.addTo(map);
+
+							function onDragEnd() {
+								var lngLat = marker2.getLngLat();
+								document.cookie = "lon=" + lngLat.lng + ";Path=/";
+								document.cookie = "lat=" + lngLat.lat + ";Path=/";
+							}
+
+							marker2.on('dragend', onDragEnd);
+						});
 					});
 
 					//for full screen
 					map.addControl(new mapboxgl.FullscreenControl());
 
 					// Add geolocate control to the map.
-					map.addControl(
-						new mapboxgl.GeolocateControl(
-							{
+					var geolocate = new mapboxgl.GeolocateControl
+							({
 								positionOptions: {
-									enableHighAccuracy: true
+									enableHighAccuracy: true,
+									watchPosition: true
 								},
-								trackUserLocation: true,
+								trackUserLocation: false,
 								showUserLocation: false,
 							})
-					);
+					map.addControl(geolocate);
+					
+					// Listen to geolocate control
+					geolocate.on('geolocate', function (ev) {
+						marker1.remove();
+						marker2.remove();
+						marker3.setLngLat([ev.coords.longitude, ev.coords.latitude])
+							.addTo(map);
+
+						function onDragEnd() {
+							var lngLat = marker3.getLngLat();
+							document.cookie = "lon=" + lngLat.lng + ";Path=/";
+							document.cookie = "lat=" + lngLat.lat + ";Path=/";
+						}
+
+						marker3.on('dragend', onDragEnd);
+					});
 
 					//get the coordinates
 					if (navigator.geolocation) {
 						navigator.geolocation.getCurrentPosition(position => {
 							document.cookie = "lon=" + position.coords.longitude + ";Path=/";
 							document.cookie = "lat=" + position.coords.latitude + ";Path=/";
-							var marker = new mapboxgl.Marker({
-								draggable: true
-							})
-								.setLngLat([position.coords.longitude, position.coords.latitude])
+							marker3.remove();
+						    marker2.remove();
+							marker1.setLngLat([position.coords.longitude, position.coords.latitude])
 								.addTo(map);
 
 							function onDragEnd() {
-								var lngLat = marker.getLngLat();
+								var lngLat = marker1.getLngLat();
 								document.cookie = "lon=" + lngLat.lng + ";Path=/";
 								document.cookie = "lat=" + lngLat.lat + ";Path=/";
 							}
 
-							marker.on('dragend', onDragEnd);
+							marker1.on('dragend', onDragEnd);
 
 						});
 					}

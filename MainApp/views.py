@@ -7,7 +7,7 @@ from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Avg
+from django.db.models import Avg, Q
 
 
 def index(request):
@@ -23,12 +23,14 @@ def test(request):
 
 
 def Logout(request):
-	if request.user.is_kitchen:
-		logout(request)
-		return redirect("kitchenLogin")
-	else:
-		logout(request)
-		return redirect("index")
+	logout(request)
+	return redirect("index")
+	# if request.user.is_kitchen:
+	# 	logout(request)
+	# 	return redirect("kitchenLogin")
+	# else:
+	# 	logout(request)
+	# 	return redirect("index")
 
 
 def nearbyKitchens(request):
@@ -37,8 +39,13 @@ def nearbyKitchens(request):
 	user_location = Point(float(longitude), float(latitude), srid=4326)
 	# kit_object = Kitchens.objects.filter(location__dwithin=(user_location, 0.02), approved=True).annotate(
 	# 	distance=Distance("location", user_location)).order_by("distance")
+	query 	= request.GET.get('search')
+	if query:
+		kitchens=Kitchens.objects.filter(Q(kitName__icontains=query))
+	else:
+		kitchens = Kitchens.objects.filter(approved=True)
+
 	kit_object = []
-	kitchens = Kitchens.objects.filter(approved=True)
 	for i in kitchens:
 		dist = user_location.distance(i.location) * 100
 		if dist <= i.visibilityRadius:
@@ -267,6 +274,28 @@ def Register(request):
 		return render(request, 'register.html', context)
 
 
+def updateProfile(request):
+	form = CustomerSignUpForm(request.POST or None, instance=request.user)
+	if request.POST:
+		if form.is_valid():
+			user = form.save(commit=False)
+			password = form.cleaned_data['password']
+			rpassword = request.POST['rpassword']
+			if password != rpassword:
+				context = {
+					'form': form,
+					'error_message': 'Passwords did not Matched'
+				}
+				return render(request, 'register.html', context)
+			user.set_password(password)
+			user.save()
+			return JsonResponse({"success_message": 'Updated Successfully.'}, status=200)
+	context = {
+			'form': form
+		}
+	return render(request, 'register.html', context)
+
+
 def kitchenRegistration(request):
 	form = KitchenSignUpForm(request.POST or None)
 	if form.is_valid():
@@ -328,13 +357,14 @@ def Checkout(request):
 
 @login_required(login_url='/login/')
 def orders(request):
-
+	cartitemcount = countCartItems(request)
 	orders = Order.objects.filter(customer_id=request.user.id).order_by("-created_at")
 
 	for i in orders:
 		i.itemswithquantity = i.itemswithquantity.split(",")
 	
 	context = {
+		'cartitemcount': cartitemcount,
 		'orders': orders,
 	}
 	return render(request, 'orders.html', context)
