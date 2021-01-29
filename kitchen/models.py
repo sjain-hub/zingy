@@ -65,6 +65,7 @@ class Kitchens(models.Model):
 	acceptAdvcOrders = models.BooleanField(default=False)
 	deliveryTime = models.TimeField(blank=False)
 	visibilityRadius = models.FloatField(blank=False, default=2.0)
+	pureVeg = models.BooleanField(default=False)
 	registrationDate = DateTimeWithoutTZField(blank=False)
 
 	def __str__(self):

@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from MainApp.forms import KitchenSignUpForm
-from .forms import KitchenForm, CategoryForm, ItemForm, SubItemForm, MenuForm
+from .forms import KitchenForm, CategoryForm, ItemForm, SubItemForm, MenuForm, KitchenSignUpForm, KitchenUserProfileForm
 from django.contrib.auth.decorators import login_required
 from .models import Kitchens, Items, SubItems, Categories, Menus
-from MainApp.models import Order
+from MainApp.models import Order, User
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.contrib.gis.geos import Point
@@ -13,6 +12,89 @@ from django.db.models import Q, DateTimeField
 from datetime import datetime, timedelta, date
 import calendar
 
+
+def kitchenRegistration(request):
+	form = KitchenSignUpForm(request.POST or None)
+	if form.is_valid():
+		user = form.save(commit=False)
+		username = form.cleaned_data['username']
+		password = form.cleaned_data['password']
+		user.is_kitchen = True
+		user.set_password(password)
+		user.save()
+		user = authenticate(username=username, password=password)
+		if user is not None:
+			if user.is_active:
+				login(request, user)
+				return redirect("createKitchen")
+	context = {
+		'form': form
+	}
+	return render(request, 'kitRegister.html', context)
+
+
+def updateKitUserProfile(request):
+	form = KitchenUserProfileForm(request.POST or None, instance=request.user)
+	print(request.method)
+	if request.POST:
+		if form.is_valid():
+			if 'submit' in request.POST.keys():
+				type = request.POST['submit']
+				if type == "username":
+					print("username")
+					User.objects.filter(id=request.user.id).update(username=form.cleaned_data['username'])
+				elif type == "fname":
+					print("fname")
+					User.objects.filter(id=request.user.id).update(first_name=form.cleaned_data['first_name'])
+				elif type == "lname":
+					print("lname")
+					User.objects.filter(id=request.user.id).update(last_name=form.cleaned_data['last_name'])
+				elif type == "email":
+					print("email")
+					User.objects.filter(id=request.user.id).update(email=form.cleaned_data['email'])
+				elif type == "phone":
+					print("phone")
+					User.objects.filter(id=request.user.id).update(phone=form.cleaned_data['phone'])
+				elif type == "pass":
+					user = form.save(commit=False)
+					username = form.cleaned_data['username']
+					password = form.cleaned_data['password']
+					rpassword = request.POST['rpassword']
+					if password != rpassword:
+						context = {
+							'form': form,
+							'error_message': "Passwords didn't Match"
+						}
+						return render(request, 'kitUserProfile.html', context)
+					user.set_password(password)
+					user.save()
+					user = authenticate(username=username, password=password)
+					if user is not None:
+						if user.is_active:
+							login(request, user)
+	context = {
+			'form': form
+		}
+	return render(request, 'kitUserProfile.html', context)
+
+
+def kitchenLogin(request):
+	if request.method == "POST":
+		username = request.POST['username']
+		password = request.POST['password']
+		user = authenticate(username=username, password=password)
+		if user is not None:
+			if user.is_active:
+				login(request, user)
+				if user.kit_Created:
+					return redirect("kitchenHomePage")
+				else:
+					return redirect("createKitchen")
+			else:
+				return render(request, 'kitLogin.html', {'error_message': 'Your account disable'})
+		else:
+			return render(request, 'kitLogin.html', {'error_message': 'Invalid Login'})
+	return render(request, 'kitLogin.html')
 
 
 @login_required(login_url='/kitLogin/')
@@ -112,7 +194,7 @@ def createKitchen(request):
 			kitinstance.location = Point(lon, lat, srid=4326)
 			kitinstance.user = request.user
 			kitinstance.status = "Closed"
-			kitinstance.registrationDate = datetime.now()
+			kitinstance.registrationDate = datetime.now() + timedelta(hours=5, minutes=30)
 			kitinstance.save()
 
 			userinstance = userform.save(commit=False)

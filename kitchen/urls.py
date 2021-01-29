@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('kitRegister/', views.kitchenRegistration, name='kitchenRegistration'),
+    path('updateKitUserProfile/', views.updateKitUserProfile, name='updateKitUserProfile'),
+    path('kitLogin/', views.kitchenLogin, name='kitchenLogin'),
     path('createKitchen/', views.createKitchen, name='createKitchen'),
     path('updateKitchen/', views.updateKitchen, name='updateKitchen'),
     path('kitHome/', views.kitchenHomePage, name='kitchenHomePage'),

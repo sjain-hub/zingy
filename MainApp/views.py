@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
-from .forms import CustomerSignUpForm, KitchenSignUpForm, UserAddressesForm
+from .forms import CustomerSignUpForm, UserAddressesForm, CustomerUserProfileForm
 from django.contrib.auth.decorators import login_required
 from .models import User, Addresses, Order
 from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews
@@ -246,13 +246,6 @@ def Register(request):
 			user = form.save(commit=False)
 			username = form.cleaned_data['username']
 			password = form.cleaned_data['password']
-			rpassword = request.POST['rpassword']
-			if password != rpassword:
-				context = {
-					'form': form,
-					'error_message': 'Passwords did not Matched'
-				}
-				return render(request, 'register.html', context)
 			user.is_customer = True
 			user.set_password(password)
 			user.save()
@@ -275,71 +268,48 @@ def Register(request):
 
 
 def updateProfile(request):
-	form = CustomerSignUpForm(request.POST or None, instance=request.user)
+	form = CustomerUserProfileForm(request.POST or None, instance=request.user)
+	print(request.POST)
 	if request.POST:
 		if form.is_valid():
-			user = form.save(commit=False)
-			password = form.cleaned_data['password']
-			rpassword = request.POST['rpassword']
-			if password != rpassword:
-				context = {
-					'form': form,
-					'error_message': 'Passwords did not Matched'
-				}
-				return render(request, 'register.html', context)
-			user.set_password(password)
-			user.save()
-			return JsonResponse({"success_message": 'Updated Successfully.'}, status=200)
+			if 'submit' in request.POST.keys():
+				type = request.POST['submit']
+				if type == "username":
+					print("username")
+					User.objects.filter(id=request.user.id).update(username=form.cleaned_data['username'])
+				elif type == "fname":
+					print("fname")
+					User.objects.filter(id=request.user.id).update(first_name=form.cleaned_data['first_name'])
+				elif type == "lname":
+					print("lname")
+					User.objects.filter(id=request.user.id).update(last_name=form.cleaned_data['last_name'])
+				elif type == "email":
+					print("email")
+					User.objects.filter(id=request.user.id).update(email=form.cleaned_data['email'])
+				elif type == "phone":
+					print("phone")
+					User.objects.filter(id=request.user.id).update(phone=form.cleaned_data['phone'])
+				elif type == "pass":
+					user = form.save(commit=False)
+					username = form.cleaned_data['username']
+					password = form.cleaned_data['password']
+					rpassword = request.POST['rpassword']
+					if password != rpassword:
+						context = {
+							'form': form,
+							'error_message': "Passwords didn't Match"
+						}
+						return render(request, 'userProfile.html', context)
+					user.set_password(password)
+					user.save()
+					user = authenticate(username=username, password=password)
+					if user is not None:
+						if user.is_active:
+							login(request, user)
 	context = {
 			'form': form
 		}
-	return render(request, 'register.html', context)
-
-
-def kitchenRegistration(request):
-	form = KitchenSignUpForm(request.POST or None)
-	if form.is_valid():
-		user = form.save(commit=False)
-		username = form.cleaned_data['username']
-		password = form.cleaned_data['password']
-		rpassword = request.POST['rpassword']
-		if password != rpassword:
-			context = {
-				'form': form,
-				'error_message': 'Passwords did not Matched'
-			}
-			return render(request, 'kitRegister.html', context)
-		user.is_kitchen = True
-		user.set_password(password)
-		user.save()
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			if user.is_active:
-				login(request, user)
-				return redirect("createKitchen")
-	context = {
-		'form': form
-	}
-	return render(request, 'kitRegister.html', context)
-
-
-def kitchenLogin(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			if user.is_active:
-				login(request, user)
-				if user.kit_Created:
-					return redirect("kitchenHomePage")
-				else:
-					return redirect("createKitchen")
-			else:
-				return render(request, 'kitLogin.html', {'error_message': 'Your account disable'})
-		else:
-			return render(request, 'kitLogin.html', {'error_message': 'Invalid Login'})
-	return render(request, 'kitLogin.html')
+	return render(request, 'userProfile.html', context)
 
 
 def Checkout(request):

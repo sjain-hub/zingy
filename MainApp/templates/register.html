@@ -3,6 +3,11 @@
         <span class="text-danger large">{{ error_message }}</span>
     </div>
 {% endif %}
+{% if form.non_field_errors %}
+    <div class="col-sm-offset-2 col-sm-12">
+        <span class="text-danger large">{{ form.non_field_errors }}</span>
+    </div>
+{% endif %}
 <div class="form-group input-group">
     <div class="col-sm-offset-2 col-sm-12">
         <span class="text-danger small">{{ form.username.errors }}</span>

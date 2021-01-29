@@ -1,0 +1,239 @@
+{% extends 'baseKit.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_4.jpg' %});" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Register</h1>
+                <p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Register <i class="ion-ios-arrow-forward"></i></span></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
+
+
+<div class="container">
+    <br>
+    <div class="card bg-light" id="profile">
+        <article class="card-body mx-auto" style="max-width: 400px;">
+            <h4 class="card-title mt-3 text-center">Edit Your Profile</h4>
+            <br>
+            {% if error_message %}
+            <div class="col-sm-offset-2 col-sm-12">
+                <span class="text-danger large">{{ error_message }}</span>
+            </div>
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div class="col-sm-offset-2 col-sm-12">
+                    <span class="text-danger large">{{ form.non_field_errors }}</span>
+                </div>
+            {% endif %}
+            <br>
+            <form method="post" role="form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group input-group" id="username">
+                    <div class="col-sm-offset-2 col-sm-12">
+                        <span class="text-danger small">{{ form.username.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                    </div>
+                    {{form.username}}
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="edit-username"><a style='cursor: pointer; color: rgb(63, 153, 238);' title="Edit" class="edit-username"><i class="fa fa-edit"></i></a></span>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group input-group" id="fname">
+                    <div class="col-sm-offset-2 col-sm-12">
+                        <span class="text-danger small">{{ form.first_name.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                    </div>
+                    {{form.first_name}}
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="edit-fname"><a style='cursor: pointer; color: rgb(63, 153, 238);' title="Edit" class="edit-fname"><i class="fa fa-edit"></i></a></span>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group input-group" id="lname">
+                    <div class="col-sm-offset-2 col-sm-12">
+                        <span class="text-danger small">{{ form.last_name.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                    </div>
+                    {{form.last_name}}
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="edit-lname"><a style='cursor: pointer; color: rgb(63, 153, 238);' title="Edit" class="edit-lname"><i class="fa fa-edit"></i></a></span>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group input-group" id="email">
+                    <div class="col-sm-offset-2 col-sm-12">
+                        <span class="text-danger small">{{ form.email.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+                    </div>
+                    {{form.email}}
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="edit-email"><a style='cursor: pointer; color: rgb(63, 153, 238);' title="Edit" class="edit-email"><i class="fa fa-edit"></i></a></span>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group input-group" id="phone">
+                    <div class="col-sm-offset-2 col-sm-12">
+                        <span class="text-danger small">{{ form.phone.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
+                    </div>
+                    {{form.phone}}
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="edit-phone"><a style='cursor: pointer; color: rgb(63, 153, 238);' title="Edit" class="edit-phone"><i class="fa fa-edit"></i></a></span>
+                    </div>
+                    <div class="form-group input-group" id="phoneotp">
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group input-group" id="pass">
+                    <div class="col-sm-offset-2 col-sm-12">
+                        <span class="text-danger small">{{ form.password.errors }}</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                    </div>
+                    {{form.password}}
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="edit-pass"><a style='cursor: pointer; color: rgb(63, 153, 238);' title="Edit" class="edit-pass"><i class="fa fa-edit"></i></a></span>
+                    </div>
+                    <div class="form-group input-group" id="rpass">
+                    </div>
+                </div>
+            </form>
+        </article>
+    </div>
+</div>
+<script>
+
+    $(document).on("click", ".edit-username", function (event) {
+      $("#fname").load(" #fname > *");
+      $("#lname").load(" #lname > *");
+      $("#email").load(" #email > *");
+      $("#phone").load(" #phone > *");
+      $("#pass").load(" #pass > *");
+      document.getElementById('id_username').readOnly = false;
+      $("#edit-username").html('');
+      $("#edit-username").append("<button type='submit' value='username' name='submit' class='btn'> <i class='fa fa-check' style='color: green;' ></i> </button>");
+    });
+
+    $(document).on("click", ".edit-fname", function (event) {
+      $("#username").load(" #username > *");
+      $("#lname").load(" #lname > *");
+      $("#email").load(" #email > *");
+      $("#phone").load(" #phone > *");
+      $("#pass").load(" #pass > *");
+      document.getElementById('id_first_name').readOnly = false;
+      $("#edit-fname").html('');
+      $("#edit-fname").append("<button type='submit' value='fname' name='submit' class='btn'> <i class='fa fa-check' style='color: green;' ></i> </button>");
+    });
+
+    $(document).on("click", ".edit-lname", function (event) {
+      $("#fname").load(" #fname > *");
+      $("#username").load(" #username > *");
+      $("#email").load(" #email > *");
+      $("#phone").load(" #phone > *");
+      $("#pass").load(" #pass > *");
+      document.getElementById('id_last_name').readOnly = false;
+      $("#edit-lname").html('');
+      $("#edit-lname").append("<button type='submit' value='lname' name='submit' class='btn'> <i class='fa fa-check' style='color: green;' ></i> </button>");
+    });
+
+    $(document).on("click", ".edit-email", function (event) {
+      $("#fname").load(" #fname > *");
+      $("#lname").load(" #lname > *");
+      $("#username").load(" #username > *");
+      $("#phone").load(" #phone > *");
+      $("#pass").load(" #pass > *");
+      document.getElementById('id_email').readOnly = false;
+      $("#edit-email").html('');
+      $("#edit-email").append("<button type='submit' value='email' name='submit' class='btn'> <i class='fa fa-check' style='color: green;' ></i> </button>");
+    });
+
+    $(document).on("click", ".edit-phone", function (event) {
+      $("#fname").load(" #fname > *");
+      $("#lname").load(" #lname > *");
+      $("#email").load(" #email > *");
+      $("#username").load(" #username > *");
+      $("#pass").load(" #pass > *");
+      document.getElementById('id_phone').readOnly = false;
+      $("#edit-phone").html('');
+      $("#edit-phone").append("<button type='button' class='verify-phone btn'>Send OTP</button>");
+    });
+
+    $(document).on("click", ".verify-phone", function (event) {
+      $("#fname").load(" #fname > *");
+      $("#lname").load(" #lname > *");
+      $("#email").load(" #email > *");
+      $("#username").load(" #username > *");
+      $("#pass").load(" #pass > *");
+      document.getElementById('id_phone').readOnly = true;
+      $("#edit-phone").html('');
+      $("#edit-phone").append("<button type='submit' value='phone' name='submit' class='btn'> <i class='fa fa-check' style='color: green;' ></i> </button>");
+      $("#phoneotp").html('');
+      $("#phoneotp").append("<input type='text' name='otp' class='form-control' placeholder='Enter OTP' required id='otp'>");
+    });
+
+    $(document).on("click", ".edit-pass", function (event) {
+      $("#fname").load(" #fname > *");
+      $("#lname").load(" #lname > *");
+      $("#email").load(" #email > *");
+      $("#phone").load(" #phone > *");
+      $("#username").load(" #username > *");
+      document.getElementById('id_password').readOnly = false;
+      document.getElementById('id_password').value = "";
+      $("#edit-pass").html('');
+      $("#edit-pass").append("<button type='submit' value='pass' name='submit' class='btn'> <i class='fa fa-check' style='color: green;' ></i> </button>");
+      $("#rpass").html('');
+      $("#rpass").append("<div class='input-group-prepend'><span class='input-group-text'> <i class='fa fa-lock'></i> </span></div><input type='password' name='rpassword' class='form-control' placeholder='Re-enter Password' required id='id_rpassword'>");
+    });
+    
+</script>
+
+
+<br><br>
+
+<style>
+    .divider-text {
+    position: relative;
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.divider-text span {
+    padding: 7px;
+    font-size: 12px;
+    position: relative;
+    z-index: 2;
+}
+.divider-text:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    top: 55%;
+    left: 0;
+    z-index: 1;
+}
+</style>
+
+{% endblock %}

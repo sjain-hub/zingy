@@ -42,10 +42,6 @@
   <nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
     <div class="container">
       <a class="navbar-brand" href="/">Zingy</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
-        aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="oi oi-menu"></span> Menu
-      </button>
       <div class="collapse navbar-collapse" id="ftco-nav">
         {% block nav %}
 
@@ -60,7 +56,7 @@
             {{ user.first_name }}
           </a>
           <div class="dropdown-menu">
-            <a class="open-profileupdatemodal dropdown-item" href="" data-toggle="modal" data-target="#registermodal">Profile</a>
+            <a class="dropdown-item" href="{% url 'updateProfile' %}">My Profile</a>
             <a class="dropdown-item" href="{% url 'orders' %}">Orders</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
@@ -73,7 +69,7 @@
       {% else %}
         <ul class="navbar-nav ml-auto">
           <li class="nav-item"><a href="" class="nav-link" data-toggle="modal" data-target="#login">Login</a></li>
-          <li class="nav-item"><a href="/kitLogin" class="nav-link">Chef Login</a></li>
+          <li class="nav-item"><a href="{% url 'kitchenLogin' %}" class="nav-link">Chef Login</a></li>
         </ul>
         <a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
           <i class="fa fa-shopping-cart"></i> Cart
@@ -177,17 +173,11 @@
                   <div id="fields">
 
                   </div>
-                  {% if user.is_authenticated %}
-                  <div class="form-group">
-                    <button type="submit" class="send-profileupdatemodal btn btn-primary btn-block"> Update Details </button>
-                  </div>
-                  {% else %}
                   <div class="form-group">
                     <button type="submit" class="send-registermodal btn btn-primary btn-block"> Create Account </button>
                   </div>
                   <p class="text-center">Have an account? <a href="" data-dismiss="modal"
                       data-toggle="modal" data-target="#login">Log In</a> </p>
-                  {% endif %}
                 </form>
               </article>
             </div>
@@ -200,19 +190,6 @@
     $(document).on("click", ".open-registermodal", function () {
       $.ajax({
         url: '{% url 'register' %}',
-        type: 'GET',
-
-        success: function (data) {
-          $("#registermodal .modal-body #fields").html(data)
-          $("#registermodal").modal("show");
-        },
-
-      });
-    });
-
-    $(document).on("click", ".open-profileupdatemodal", function () {
-      $.ajax({
-        url: '{% url 'updateProfile' %}',
         type: 'GET',
 
         success: function (data) {
@@ -238,29 +215,6 @@
           }
           else{
             console.log("success")
-            console.log(data)
-            $("#registermodal .modal-body #fields").html(data)
-          }
-        },
-      });
-    });
-
-    $(document).on("click", ".send-profileupdatemodal", function (event) {
-      event.preventDefault();
-      $.ajax({
-        url: '{% url 'updateProfile' %}',
-        type: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-        data: $('#registerform').serialize(),
-
-        success: function (data) {
-          if(data.success_message){
-            $("#registermodal").modal("hide");
-            alert(data.success_message)
-          }
-          else{
-            console.log("success")
-            console.log(data)
             $("#registermodal .modal-body #fields").html(data)
           }
         },
