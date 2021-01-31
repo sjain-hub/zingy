@@ -1,0 +1,82 @@
+{% extends 'baseUser.html' %}
+{% load static %}
+
+
+{% block content %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_4.jpg' %});"
+	data-stellar-background-ratio="0.5">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row no-gutters slider-text align-items-center justify-content-center">
+			<div class="col-md-9 ftco-animate text-center">
+				<h1 class="mb-2 bread">Favourite Kitchens <i class="fa fa-heart" style='color: red; font-size: xx-large;'></i></h1>
+			</div>
+		</div>
+	</div>
+</section>
+
+<br>
+
+<section>
+    <div class="container">
+        <div class="row">
+            {% if kit_object %}
+            {% for kit in kit_object %}
+            <div class="col-md-4 ftco-animate">
+                <div class="blog-entry">
+                    <a href="{% url 'menu' kit.0.id %}" class="block-20"
+                        {% if kit.0.status == "Closed" %}
+                        style="background-image: url({{kit.0.dp.url}});-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+                        filter: grayscale(100%);pointer-events: none;cursor: default;"
+                        {% else %}
+                        style="background-image: url({{kit.0.dp.url}});"
+                        {% endif %}>
+                    </a>
+                    <div class="text px-4 pt-3 pb-4">
+                        <h3 class="heading"><a href="#">{{kit.0.kitName}}</a></h3>
+                        {{kit.2}} km
+                        <div class="meta">
+                            <div><a>{{kit.1}}</a></div>
+                        </div>
+                        <p class="clearfix">
+                            {% if kit.3.ratings__avg != None %}
+                            <span class="icon-star {% if kit.3.ratings__avg >= 4.0 %}text-success{% elif kit.3.ratings__avg >= 3.0 %}text-warning{% else %}text-danger{% endif %}"> {{kit.3.ratings__avg}}</span>
+                            {% endif %}
+                            <span class="float-right read">{{kit.0.mode}} ({{kit.0.deliveryTime}} mins.)</span>
+                        </p>
+                        {% if kit.0.acceptAdvcOrders %}
+                        <hr>
+                        <span class="text-primary"> Accepts Advance Orders upto 2 Days.</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="meta">
+                <div><a style="font-size:30px;">No Nearby Kitchens in your area till now, we are looking forward
+                        to be there soon.</a></div>
+            </div>
+            {% endif %}
+        </div>
+        <!-- <div class="row no-gutters my-5">
+            <div class="col text-center">
+                <div class="block-27">
+                    <ul>
+                        <li><a href="#">&lt;</a></li>
+                        <li class="active"><span>1</span></li>
+                        <li><a href="#">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">4</a></li>
+                        <li><a href="#">5</a></li>
+                        <li><a href="#">&gt;</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</section>
+	
+
+
+{% endblock %}

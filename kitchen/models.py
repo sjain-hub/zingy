@@ -63,7 +63,7 @@ class Kitchens(models.Model):
 	approved = models.BooleanField(default=False)
 	description = models.TextField(max_length=500, blank=True)
 	acceptAdvcOrders = models.BooleanField(default=False)
-	deliveryTime = models.TimeField(blank=False)
+	deliveryTime = models.IntegerField(blank=False, default=45)
 	visibilityRadius = models.FloatField(blank=False, default=2.0)
 	pureVeg = models.BooleanField(default=False)
 	registrationDate = DateTimeWithoutTZField(blank=False)

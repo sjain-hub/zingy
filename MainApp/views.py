@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import CustomerSignUpForm, UserAddressesForm, CustomerUserProfileForm
 from django.contrib.auth.decorators import login_required
-from .models import User, Addresses, Order
+from .models import User, Addresses, Order, FavouriteKitchens
 from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Avg, Q
+import http.client
 
 
 def index(request):
@@ -42,17 +43,39 @@ def nearbyKitchens(request):
 	query 	= request.GET.get('search')
 	if query:
 		kitchens=Kitchens.objects.filter(Q(kitName__icontains=query))
-	else:
-		kitchens = Kitchens.objects.filter(approved=True)
-
-	kit_object = []
-	for i in kitchens:
-		dist = user_location.distance(i.location) * 100
-		if dist <= i.visibilityRadius:
+		kit_object = []
+		for i in kitchens:
+			dist = user_location.distance(i.location) * 100
 			temp = []
 			temp.append(i)
+			catdesc = ""
+			categories = Categories.objects.filter(kit_id=i.id)
+			for cat in categories:
+				catdesc = catdesc + cat.category + ", "
+			temp.append(catdesc)
 			temp.append(round(dist,1))
+			reviews = Reviews.objects.filter(kit_id=i.id)
+			avgrating = reviews.aggregate(Avg('ratings'))
+			temp.append(avgrating)
 			kit_object.append(temp)
+	else:
+		kitchens = Kitchens.objects.filter(approved=True)
+		kit_object = []
+		for i in kitchens:
+			dist = user_location.distance(i.location) * 100
+			if dist <= i.visibilityRadius:
+				temp = []
+				temp.append(i)
+				catdesc = ""
+				categories = Categories.objects.filter(kit_id=i.id)
+				for cat in categories:
+					catdesc = catdesc + cat.category + ", "
+				temp.append(catdesc)
+				temp.append(round(dist,1))
+				reviews = Reviews.objects.filter(kit_id=i.id)
+				avgrating = reviews.aggregate(Avg('ratings'))
+				temp.append(avgrating)
+				kit_object.append(temp)
 	cartitemcount = countCartItems(request)
 	context = {
  		'kit_object': kit_object,
@@ -61,12 +84,53 @@ def nearbyKitchens(request):
 	return render(request, 'kitchens.html', context)
 
 
+def favouriteKitchens(request):
+	longitude = request.COOKIES['lon']
+	latitude = request.COOKIES['lat']
+	user_location = Point(float(longitude), float(latitude), srid=4326)
+	kitchen_ids = FavouriteKitchens.objects.filter(customer=request.user)
+	kit_object = []
+	for i in kitchen_ids:
+		dist = user_location.distance(i.kitchen.location) * 100
+		temp = []
+		temp.append(i.kitchen)
+		catdesc = ""
+		categories = Categories.objects.filter(kit_id=i.kitchen.id)
+		for cat in categories:
+			catdesc = catdesc + cat.category + ", "
+		temp.append(catdesc)
+		temp.append(round(dist,1))
+		reviews = Reviews.objects.filter(kit_id=i.kitchen.id)
+		avgrating = reviews.aggregate(Avg('ratings'))
+		temp.append(avgrating)
+		kit_object.append(temp)
+	cartitemcount = countCartItems(request)
+	context = {
+ 		'kit_object': kit_object,
+		'cartitemcount': cartitemcount,
+	}
+	return render(request, 'favouriteKitchens.html', context)
+
+
 def update_variable(value):
     data = value
     return data
 
 
+def add_to_favourite(request, pk=None):
+	fav = FavouriteKitchens.objects.filter(customer_id=request.user.id, kitchen_id=pk).first()
+	if fav == None:
+		FavouriteKitchens.objects.create(kitchen_id=pk, customer=request.user)
+	else:
+		FavouriteKitchens.objects.filter(id=fav.id).delete()
+
+
 def Menu(request, pk=None):
+	fav = FavouriteKitchens.objects.filter(customer_id=request.user.id, kitchen_id=pk).first()
+	if fav == None:
+		favourite = False
+	else:
+		favourite = True
 	categories = Categories.objects.filter(kit_id=pk)
 	menu = Menus.objects.filter(kit_id=pk)
 	kitchen = Kitchens.objects.filter(id=pk)
@@ -131,6 +195,7 @@ def Menu(request, pk=None):
 		'reviews': reviews,
 		'avgrating': avgrating,
 		'cartitemcount': cartitemcount,
+		'favourite': favourite,
 	}
 	return render(request, 'menu.html', context)
 
@@ -364,6 +429,27 @@ def orderStatus(request, pk=None):
 		'order': Order.objects.filter(id=pk)[0],
 	}
 	return render(request, 'orderStatus.html', context)
+
+
+# def sendOTP(request):
+
+# 	conn = http.client.HTTPSConnection("d7sms.p.rapidapi.com")
+
+# 	payload = "{\n    \"coding\": \"8\",\n    \"from\": \"SMSInfo\",\n    \"hex-content\": \"00480065006c006c006f\",\n    \"to\": 9582270031\n}"
+
+# 	headers = {
+# 		'content-type': "application/json",
+# 		'authorization': "Basic c2phaW5odWI6c2phaW5odWIxOTk1",
+# 		'x-rapidapi-key': "801da32802msh5a6b81ed8c0336cp125b90jsncd7649e27e3d",
+# 		'x-rapidapi-host': "d7sms.p.rapidapi.com"
+# 		}
+
+# 	conn.request("POST", "/secure/send", payload, headers)
+
+# 	res = conn.getresponse()
+# 	data = res.read()
+
+# 	print(data.decode("utf-8"))
 
 
 def Contact(request):

@@ -24,14 +24,26 @@
         <h1 class="mb-2 bread">{{ kitchen.kitName }}</h1>
         <p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
           <span class="mr-2"><a href="{% url 'kitchens' %}">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
-          <span>{{ kitchen.kitName }}<i class="ion-ios-arrow-forward"></i></span></p>
+          <span>{{ kitchen.kitName }}</span>
+        </p>
         <p class="breadcrumbs"><span class="mr-2"><a href="#reviews"><span
                 class="icon-star text-warning"></span>{{ avgrating.ratings__avg }} ({{ reviews|length }}
-              Reviews)</a></span></p>
+              Reviews)</a></span>{% if kitchen.pureVeg %}<span class="mr-2">/ Pure Veg
+                <i class="fa fa-leaf" style='color: green; font-size: large;'></i></span>{% endif %}
+        </p>
+        <input type="checkbox" {% if favourite %}checked{% endif %} class="form-check-input" id="favourite">
+        <label class="form-check-label bread" for="favourite"><i class="fa fa-heart" style='color: red; font-size: x-large;'></i></label>
       </div>
     </div>
   </div>
 </section>
+<script>
+  $('#favourite').on('change', function () {
+    $.ajax({
+        url: "{% url 'add_to_favourite' kitchen.id %}",
+    })
+  });
+</script>
 
 
 <!-- Main Menu -->
@@ -39,25 +51,17 @@
   <div class="container">
     <div class="row py-3">
       <!-- <div class="col-2 w3-card w3-medium" id="sticky-sidebar">
-      <div class="sticky-top sidebar ftco-animate">
-        <div class="sidebar-box ftco-animate">
-          <br>
-          <br>
-          <h3>Category</h3>
-          <br>
-          <ul class="categories">
-            <li><a href="/cart">South Indian<span>(6)</span></a></li>
-            <li><a href="#">Lunch <span>(8)</span></a></li>
-            <li><a href="#">Dinner <span>(2)</span></a></li>
-            <li><a href="#">Desserts <span>(2)</span></a></li>
-            <li><a href="#">Drinks <span>(2)</span></a></li>
-            <li><a href="#">Wine <span>(2)</span></a></li>
-          </ul>
+        <div class="sticky-top sidebar ftco-animate">
+          <div class="sidebar-box ftco-animate">
+            <br>
+            <br>
+            <br>
+            
+          </div>
         </div>
-      </div>
-    </div> -->
+      </div> -->
 
-      <div class="col-11 ftco-animate">
+      <div class="col-12 ftco-animate">
         <div class="container py-3">
           <div class="row justify-content-center mb-5 pb-2">
             <div class="col-md-7 text-center heading-section ftco-animate">
@@ -140,6 +144,7 @@
           </div>
         </div>
       </div> <!-- .col-md-8 -->
+      
     </div>
   </div>
 </section>

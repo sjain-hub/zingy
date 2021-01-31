@@ -69,14 +69,9 @@ class Order(models.Model):
 		return str(self.id) +' '+self.status
 
 
-# class orderItem(models.Model):
-# 	id 			= models.AutoField(primary_key=True)
-# 	item_id 	= models.ForeignKey(Menus ,on_delete=models.CASCADE)
-# 	ord_id  	= models.ForeignKey(Order,on_delete=models.CASCADE)
-# 	quantity 	= models.IntegerField(default=0)
-	
-# 	def __str__(self):
-# 		return str(self.id) 
+class FavouriteKitchens(models.Model):
+	customer          = models.ForeignKey(User ,on_delete=models.CASCADE)
+	kitchen			  = models.ForeignKey(Kitchens ,on_delete=models.CASCADE)
 
-
-# class Notification(models.Model):
+	def __str__(self):
+		return str(self.customer.first_name) +' => '+self.kitchen.kitName
