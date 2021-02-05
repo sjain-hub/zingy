@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Redirecting...</title>
+    </head>
+    <body>
+        <h1><center>Redirecting to payment gateway<br>Please do not refresh or go back.</center></h1>
+        <form method="POST" action="{{ payment_url }}", name="paytm">
+        {% csrf_token %}
+        {% for key, value in data_dict.items %}
+            <input type="hidden" name="{{key}}" value="{{value}}">
+        {% endfor %}
+            <script type="text/javascript">
+                document.paytm.submit();
+            </script>
+        </form>
+    </body>
+</html>

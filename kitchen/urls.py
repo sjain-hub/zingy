@@ -12,5 +12,8 @@ urlpatterns = [
     path('handleStatus/', views.handleStatus, name='handleStatus'),
     path('orderList/', views.orderList, name='orderList'),
     path('orderHistory/', views.orderHistory, name='orderHistory'),
+    path('subscription/', views.subscription, name='subscription'),
+    path('paymentHistory/', views.paymentHistory, name='paymentHistory'),
+    path('handlePaytmResponse/', views.handlePaytmResponse, name='handlePaytmResponse'),
     # path('addSubItems/', views.addSubItems, name='addSubItems'),
 ]

@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'MainApp.apps.MainappConfig',
     'django.contrib.gis',
     'channels',
-    'kitchen'
+    'kitchen',
+
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +124,17 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+
+#PayTm Credentials
+PAYTM_CHANNEL_ID = "WEB"
+PAYTM_INDUSTRY_TYPE_ID = "Retail"
+PAYTM_MERCHANT_KEY = "uYaOCcYpqE8#Ke0w"
+PAYTM_MERCHANT_ID = "kxBdmk25542761731498"
+PAYTM_CALLBACK_URL = "http://127.0.0.1:8000/kitchen/handlePaytmResponse/" # Hardcode
+PAYTM_WEBSITE = "WEBSTAGING"
+PAYTM_PAYMENT_GATEWAY_URL = "https://securegw-stage.paytm.in/order/process"
+PAYTM_TRANSACTION_STATUS_URL = "https://securegw-stage.paytm.in/order/status"
 
 
 # Static files (CSS, JavaScript, Images)

@@ -83,6 +83,8 @@
 							marker3.remove();
 							marker2.setLngLat([ev.result.geometry.coordinates[0], ev.result.geometry.coordinates[1]])
 								.addTo(map);
+							document.cookie = "lon=" + ev.result.geometry.coordinates[0] + ";Path=/";
+							document.cookie = "lat=" + ev.result.geometry.coordinates[1] + ";Path=/";
 
 							function onDragEnd() {
 								var lngLat = marker2.getLngLat();
@@ -115,10 +117,12 @@
 						marker2.remove();
 						marker3.setLngLat([ev.coords.longitude, ev.coords.latitude])
 							.addTo(map);
+						document.cookie = "lon=" + ev.coords.longitude + ";Path=/";
+						document.cookie = "lat=" + ev.coords.latitude + ";Path=/";
 
 						function onDragEnd() {
 							var lngLat = marker3.getLngLat();
-							document.cookie = "lon=" + lngLat.lng + ";Path=/";
+							document.cookie = "lon=" + ev.coords.longitude + ";Path=/";
 							document.cookie = "lat=" + lngLat.lat + ";Path=/";
 						}
 

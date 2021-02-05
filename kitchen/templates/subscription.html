@@ -1,0 +1,119 @@
+{% extends 'baseKit.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_4.jpg' %});" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Subscription</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="card active" id="cart">
+                <div class="card-header bg-dark text-light">
+                    <i class="fa fa-battery-half" aria-hidden="true"></i>
+                    Active Subscription
+                    <div class="clearfix"></div>
+                </div>
+                <div class="card-body row">
+                    <div class="d-flex col-md-5 mb-4 mb-md-0">
+                        <div class="card-bottom pt-3 px-3 mb-2">
+                            <div class="d-flex flex-row justify-content-center text-align-center">
+                                <div class="d-flex flex-column"><span>Days Left</span>
+                                    <p><span class="text-white">{{delta}}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <h5>Pack Details</h5>
+                        <div class="table-responsive">
+                          <table class="table table-sm table-borderless mb-0">
+                            <tbody>
+                              <tr>
+                                <th class="pl-0 w-50" scope="row">Valid Till:</th>
+                                <td>{{expiryDate}}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <hr>
+                        <a href="{% url 'paymentHistory' %}"><button type="button" class="btn btn-primary btn-md mr-1 mb-2">Payment History</button></a>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .card-bottom {
+                    background: #5d6975;
+                    border-radius: 6px;
+                    width: 100%;
+                }
+    
+                .flex-column {
+                    color: #adb5bd;
+                    font-size: 20px
+                }
+    
+                .flex-column p {
+                    letter-spacing: 1px;
+                    font-size: 50px;
+                    text-align: center;
+                }
+            </style>
+            
+            <div class="card shopping-cart" id="delivery">
+                <form id="subscriptionform" method="post" role="form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="card-header bg-dark text-light">
+                        <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                        Choose your Plan
+                    </div>
+                    <div class="card-body">
+                        {% for plan in plans %}
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input" checked type="radio" name="plan" id="{{plan.id}}" value="{{plan.id}}">
+                                    &nbsp;&nbsp;
+                                    <label class="form-check-label" for="{{plan.name}}">
+                                        <h4>&#8377; {{plan.amount}} : </h4>
+                                    </label>&nbsp;
+                                    <medium>Includes {{plan.name}}.</medium>&nbsp;
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success btn-md mr-1 mb-2">Checkout</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+    
+
+<style>
+    .active {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        margin-right: 50px;
+        width: 35%;
+    }
+    .shopping-cart {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        width: 55%;
+    }
+</style>
+
+{% endblock %}

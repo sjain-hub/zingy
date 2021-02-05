@@ -67,6 +67,8 @@ class Kitchens(models.Model):
 	visibilityRadius = models.FloatField(blank=False, default=2.0)
 	pureVeg = models.BooleanField(default=False)
 	registrationDate = DateTimeWithoutTZField(blank=False)
+	subscriptionExpiry = DateTimeWithoutTZField(blank=False)
+	subscriptionExpired = models.BooleanField(default=False, blank=False)
 
 	def __str__(self):
 		return self.kitName + ", by : " + self.user.username
@@ -130,6 +132,29 @@ class Reviews(models.Model):
 	kit = models.ForeignKey(Kitchens, on_delete=models.CASCADE)
 	ratings = models.IntegerField(blank=True, default=0)
 	reviews = models.CharField(max_length=200, blank=True)
+
+	def __str__(self):
+		return self.kit.kitName
+
+
+class PlanList(models.Model):
+	amount = models.IntegerField(blank=False)
+	days = models.IntegerField(blank=False)
+	name = models.CharField(max_length=30, blank=False)
+
+	def __str__(self):
+		return self.name
+
+
+class PaymentHistory(models.Model):
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+	kit = models.ForeignKey(Kitchens, on_delete=models.CASCADE)
+	pack_name = models.CharField(max_length=30, blank=False)
+	recharge_date = DateTimeWithoutTZField(blank=False)
+	amount = models.IntegerField(blank=False)
+	start_date = DateTimeWithoutTZField(blank=False)
+	end_date = DateTimeWithoutTZField(blank=False)
+	plan = models.ForeignKey(PlanList, on_delete=models.CASCADE)
 
 	def __str__(self):
 		return self.kit.kitName
