@@ -2,7 +2,7 @@
 from django.contrib.gis.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-from kitchen.models import Kitchens, Menus, DateTimeWithoutTZField as DateTimeField
+from kitchen.models import Kitchens, Menus
 from django.contrib.gis.geos import Point
 from django.db.models import Q
 
@@ -30,9 +30,9 @@ class Addresses(models.Model):
 class Order(models.Model):
 	id 				  = models.AutoField(primary_key=True)
 	total_amount      = models.IntegerField(default=0)
-	created_at        = DateTimeField(blank=False)
-	completed_at 	  = DateTimeField(null=True, blank=True)
-	scheduled_order   = DateTimeField(null=True, blank=True)
+	created_at        = models.DateTimeField(blank=False)
+	completed_at 	  = models.DateTimeField(null=True, blank=True)
+	scheduled_order   = models.DateTimeField(null=True, blank=True)
 	mode 			  = models.CharField(max_length=50,blank=True)
 	itemswithquantity = models.CharField(max_length=300,blank=True)
 	delivery_addr     = models.CharField(max_length=50,blank=True)

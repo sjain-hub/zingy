@@ -10,6 +10,7 @@ from django.contrib.gis.geos import Point
 from django.forms import inlineformset_factory
 from django.db.models import Q, DateTimeField
 from datetime import datetime, timedelta, date
+from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from celery import shared_task
 from django.views.decorators.csrf import csrf_exempt
@@ -20,7 +21,10 @@ import json
 from .PayTm import Checksum
 
 
-def kitchenRegistration(request):
+currentDate = datetime.now() + timedelta(hours=5, minutes=30)
+
+
+def kitchenUserRegistration(request):
     form = KitchenSignUpForm(request.POST or None)
     if form.is_valid():
         user = form.save(commit=False)
@@ -89,7 +93,7 @@ def kitchenLogin(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
-        if user is not None:
+        if user is not None and user.is_kitchen:
             if user.is_active:
                 login(request, user)
                 if user.kit_Created:
@@ -174,9 +178,8 @@ def createKitchen(request):
             kitinstance.location = Point(lon, lat, srid=4326)
             kitinstance.user = request.user
             kitinstance.status = "Closed"
-            currentDate = datetime.now()
-            kitinstance.registrationDate = currentDate + timedelta(hours=5, minutes=30)
-            kitinstance.subscriptionExpiry = currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=180, hours=5, minutes=30)
+            kitinstance.registrationDate = currentDate
+            kitinstance.subscriptionExpiry = currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=180)
             kitinstance.save()
 
             userinstance = userform.save(commit=False)
@@ -184,8 +187,8 @@ def createKitchen(request):
             userinstance.save()
 
             plan = PlanList.objects.filter(days=180)[0]
-            PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate + timedelta(hours=5, minutes=30),
-                                          amount=0, start_date=currentDate + timedelta(hours=5, minutes=30), end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days, hours=5, minutes=30))
+            PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate,
+                                          amount=0, start_date=currentDate, end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
 
             return redirect("kitchenHomePage")
         context = {
@@ -271,13 +274,6 @@ def addFoodItems(request):
 
 @login_required(login_url='/kitLogin/')
 def orderList(request):
-    # if request.POST:
-    # 	oid = request.POST['orderid']
-    # 	select = request.POST['status']
-    # 	# order = Order.objects.filter(id=oid)
-    # 	print(oid, select)
-    # 	Order.objects.filter(id=int(oid)).update(status=select, completed_at=datetime.now())
-
     orders = Order.objects.filter(
         kitchen_id=request.user.kitchens.id).order_by("scheduled_order")
 
@@ -285,7 +281,7 @@ def orderList(request):
         i.itemswithquantity = i.itemswithquantity.split(",")
 
     days = []
-    todaysDate = datetime.today().date()
+    todaysDate = currentDate.date()
     days.append(todaysDate - timedelta(days=1))
     days.append(todaysDate)
     days.append(todaysDate + timedelta(days=1))
@@ -301,7 +297,7 @@ def orderList(request):
 
 @login_required(login_url='/kitLogin/')
 def orderHistory(request):
-    todaysDate = datetime.today().date()
+    todaysDate = currentDate.date()
     registrationDateOfKitchen = request.user.kitchens.registrationDate
     years = getYears(registrationDateOfKitchen)
 
@@ -320,11 +316,17 @@ def orderHistory(request):
             days = days_in_month(month, year)
     else:
         year = todaysDate.year
-        month = todaysDate.month
         months = getMonths(year, registrationDateOfKitchen)
-        orders = Order.objects.filter(kitchen_id=request.user.kitchens.id,
-                                      created_at__month=month, created_at__year=year).order_by("created_at")
-        days = days_in_month(month, year)
+        if 'month' in request.COOKIES.keys():
+            month = datetime.strptime(request.COOKIES['month'], "%B").month
+            orders = Order.objects.filter(kitchen_id=request.user.kitchens.id,
+                                          created_at__month=month, created_at__year=year).order_by("created_at")
+            days = days_in_month(month, year)
+        else:
+            month = todaysDate.month
+            orders = Order.objects.filter(kitchen_id=request.user.kitchens.id,
+                                        created_at__month=month, created_at__year=year).order_by("created_at")
+            days = days_in_month(month, year)
 
     monthHistory = []
     dayWiseOrders = []
@@ -373,15 +375,15 @@ def days_in_month(m, y):
 
 
 def getYears(kitregdate):
-    y = datetime.now()
+    y = currentDate
     kitregyear = kitregdate.year
     delta = y.year-kitregyear
     return [(kitregyear + i) for i in range(delta + 1)]
 
 
 def getMonths(year, kitregdate):
-    if year == datetime.now().year:
-        return [(calendar.month_name[i+1]) for i in range(datetime.now().month)]
+    if year == currentDate.year:
+        return [(calendar.month_name[i+1]) for i in range(currentDate.month)]
     elif year == kitregdate.year:
         return [(calendar.month_name[i+kitregdate.month]) for i in range(13 - kitregdate.month)]
     else:
@@ -394,16 +396,15 @@ def countWaitingOrders(request):
 
 
 def subscription(request):
-    currentDate = datetime.now()
     expiryDate = request.user.kitchens.subscriptionExpiry
     if request.POST:
         plan = PlanList.objects.filter(id=request.POST['plan'])[0]
         if request.user.kitchens.subscriptionExpired:
             order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate + timedelta(hours=5, minutes=30),
-                    amount=plan.amount, start_date=currentDate + timedelta(hours=5, minutes=30), end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days, hours=5, minutes=30))
+                    amount=plan.amount, start_date=currentDate, end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
         else:
-            order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate + timedelta(hours=5, minutes=30),
-                    amount=plan.amount, start_date=expiryDate.replace(hour=0, minute=0, microsecond=0) + timedelta(days=1, hours=5, minutes=30), end_date=expiryDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days, hours=5, minutes=30))
+            order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate,
+                    amount=plan.amount, start_date=expiryDate.replace(hour=0, minute=0, microsecond=0) + timedelta(days=1), end_date=expiryDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
         param_dict = {
 
                 'MID': settings.PAYTM_MERCHANT_ID,
@@ -463,7 +464,7 @@ def VerifyPaytmResponse(response):
             data = '{"MID":"%s","ORDERID":"%s"}'%(MID, ORDERID)
             check_resp = requests.post(STATUS_URL, data=data, headers=headers).json()
             if check_resp['STATUS']=='TXN_SUCCESS':
-                Kitchens.objects.filter(id=kitchen.id).update(subscriptionExpiry = kitchen.subscriptionExpiry.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days, hours=5, minutes=30))
+                Kitchens.objects.filter(id=kitchen.id).update(subscriptionExpiry = kitchen.subscriptionExpiry.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
                 response_dict['verified'] = True
                 response_dict['paytm'] = check_resp
                 return (response_dict)
@@ -492,7 +493,6 @@ def paymentHistory(request):
 @shared_task
 def checkKitchensValidity():
     kitchens = Kitchens.objects.filter()
-    currentDate = datetime.now()
     for kitchen in kitchens:
         if currentDate >= kitchen.subscriptionExpiry:
             Kitchens.objects.filter(id=kitchen.id).update(

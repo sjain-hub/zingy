@@ -293,7 +293,7 @@ def Login(request):
 		username = request.POST['username']
 		password = request.POST['password']
 		user     = authenticate(username=username,password=password)
-		if user is not None:
+		if user is not None and not user.is_kitchen:
 			if user.is_active:
 				login(request,user)
 				return JsonResponse({"success_message": 'Login Successful.'}, status=200)

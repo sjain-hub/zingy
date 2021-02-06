@@ -9,6 +9,9 @@ from datetime import datetime, timedelta
 from django.utils import dateparse
 
 
+currentDate = datetime.now() + timedelta(hours=5, minutes=30)
+
+
 class Customer(AsyncConsumer):
     async def websocket_connect(self, event):
         print("connected", event)
@@ -145,10 +148,9 @@ class Customer(AsyncConsumer):
 
     @database_sync_to_async
     def create_order(self, total, mode, itemswithquantity, add, dist, msg, scheduledDate, cust, kit):
-        currentDate = datetime.now() + timedelta(hours=5, minutes=30)
         if scheduledDate:
             var = dateparse.parse_datetime(scheduledDate)
-            scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute) + timedelta(hours=5, minutes=30)
+            scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute)
             return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, customer=cust, kitchen=kit, created_at=currentDate)
         else:
             return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate, customer=cust, kitchen=kit, created_at=currentDate)

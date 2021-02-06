@@ -4,12 +4,12 @@ from django.contrib.gis.geos import Point
 from django.conf import settings
 from datetime import date, datetime
 import re
-from django.db.models import DateTimeField
+# from django.db.models import DateTimeField
 
 
-class DateTimeWithoutTZField(DateTimeField):
-    def db_type(self, connection):
-        return 'timestamp'
+# class DateTimeWithoutTZField(DateTimeField):
+#     def db_type(self, connection):
+#         return 'timestamp'
 
 
 def get_upload_path(instance, filename):
@@ -66,8 +66,8 @@ class Kitchens(models.Model):
 	deliveryTime = models.IntegerField(blank=False, default=45)
 	visibilityRadius = models.FloatField(blank=False, default=2.0)
 	pureVeg = models.BooleanField(default=False)
-	registrationDate = DateTimeWithoutTZField(blank=False)
-	subscriptionExpiry = DateTimeWithoutTZField(blank=False)
+	registrationDate = models.DateTimeField(blank=False)
+	subscriptionExpiry = models.DateTimeField(blank=False)
 	subscriptionExpired = models.BooleanField(default=False, blank=False)
 
 	def __str__(self):
@@ -150,10 +150,10 @@ class PaymentHistory(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	kit = models.ForeignKey(Kitchens, on_delete=models.CASCADE)
 	pack_name = models.CharField(max_length=30, blank=False)
-	recharge_date = DateTimeWithoutTZField(blank=False)
+	recharge_date = models.DateTimeField(blank=False)
 	amount = models.IntegerField(blank=False)
-	start_date = DateTimeWithoutTZField(blank=False)
-	end_date = DateTimeWithoutTZField(blank=False)
+	start_date = models.DateTimeField(blank=False)
+	end_date = models.DateTimeField(blank=False)
 	plan = models.ForeignKey(PlanList, on_delete=models.CASCADE)
 
 	def __str__(self):
