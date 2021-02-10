@@ -6,10 +6,10 @@ from channels.db import database_sync_to_async
 from .models import User, Addresses, Order
 from kitchen.models import Kitchens
 from datetime import datetime, timedelta
-from django.utils import dateparse
+from django.utils import dateparse, timezone
 
 
-currentDate = datetime.now() + timedelta(hours=5, minutes=30)
+currentDate = datetime.now()
 
 
 class Customer(AsyncConsumer):
@@ -157,4 +157,4 @@ class Customer(AsyncConsumer):
 
     @database_sync_to_async
     def update_order_status(self, status, msgtocust, orderid):
-        return Order.objects.filter(id=orderid).update(status=status, msgtocust=msgtocust, completed_at=datetime.now() + timedelta(hours=5, minutes=30))
+        return Order.objects.filter(id=orderid).update(status=status, msgtocust=msgtocust, completed_at=currentDate)

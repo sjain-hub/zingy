@@ -36,8 +36,8 @@
 
 <form id="checkoutform" method="post" role="form" enctype="multipart/form-data">
     
-    <section>
-        <div class="container" id="cart">
+    <section id="cart">
+        <div class="container">
             <h1>{{ kitchen.kitName }}</h1>
             <div class="card shopping-cart">
                 <div class="card-header bg-dark text-light">
@@ -109,17 +109,19 @@
                     {% if kitchen.mode == "Delivery" %}
                     <div class="pull-left" style="margin: 10px" id="modedropdown">
                         <label for="mode">Select mode :</label>
-                        <select name="mode" id="mode">
-                            <option value="delivery" selected>Delivery</option>
-                            <option value="pickup">Pick Up</option>
+                        <select name="mode" id="mode" onchange="modeChange(value);">
+                            <option value="Delivery" {% if modeSelected == "Delivery" %}selected{% endif %}>Delivery</option>
+                            <option value="PickUp" {% if modeSelected == "PickUp" %}selected{% endif %}>Pick Up</option>
                         </select>
                     </div>
                     {% endif %}
                     
                     <div class="pull-right" style="margin: 10px">
+                        {% if modeSelected == "Delivery" %}
                         <div class="pull-right" style="margin: 5px" id="subtotal1">
                             Subtotal: <b>{{subtotal}} &#8377; </b>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -130,46 +132,21 @@
             document.getElementById('quantity' + id).innerHTML = quant;
             document.cookie = id + "=" + quant + ";Path=/";
             document.cookie = "kit={{kitchen.id}};Path=/";
-            $("#cart").load(" #cart > *");
-            $("#delivery").load(" #delivery > *");
+            $("#checkoutform").load(" #checkoutform > *");
         }
         function handledelete(id) {
             document.cookie = id + "=" + 0 + ";Path=/";
             document.cookie = "kit={{kitchen.id}};Path=/";
-            $("#cart").load(" #cart > *");
-            $("#delivery").load(" #delivery > *");
+            $("#checkoutform").load(" #checkoutform > *");
         }
-        $(document).ready(function () {
-            {% if kitchen.mode == "Delivery" %}
-                $("#total").show();
-                $("#deliverycharge").show();
-                $("#subtotal1").show();
-                $("#subtotal2").hide();
-                $("#scheduledOrder").hide();
-            {% else %}
-                $("#total").hide();
-                $("#deliverycharge").hide();
-                $("#subtotal1").hide();
-                $("#subtotal2").show();
-                $("#scheduledOrder").hide();
-            {% endif %}
-            
-    
-            $('#mode').on('change', function () {
-                if (this.value == 'pickup') {
-                    $("#total").hide();
-                    $("#deliverycharge").hide();
-                    $("#subtotal1").hide();
-                    $("#subtotal2").show();
-                }
-                else {
-                    $("#total").show();
-                    $("#deliverycharge").show();
-                    $("#subtotal1").show();
-                    $("#subtotal2").hide();
-                }
-            });
-        });
+        function modeChange(value) {
+            document.cookie = "modeSelected=" + value + ";Path=/";
+            $("#checkoutform").load(" #checkoutform > *");
+        }
+        function advOrderHandle(value) {
+            document.cookie = "advanceOrder=" + value.checked + ";Path=/";
+            $("#checkoutform").load(" #checkoutform > *");
+        }
     </script>
     
     <section id="delivery">
@@ -185,66 +162,62 @@
                         <div class="clearfix"></div>
                     </div>
                     <div class="card-body">
-                        {% for add in addresses %}
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="address" id="{{add.id}}"
-                                        value="{{add.id}}" {% if add.place == addresses.0.place %} checked {% endif %}>
-                                    &nbsp;&nbsp;
-                                    <label class="form-check-label" for="exampleRadios1">
-                                        <h4>{{add.place}} : </h4>
-                                    </label>&nbsp;
-                                    <medium>{{add.address}},</medium>&nbsp;
-                                    <medium>Floor No. : {{add.floorNo}}</medium>
+                        {% if addresses %}
+                            {% for add in addresses %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="address" id="{{add.id}}"
+                                            value="{{add.id}}" {% if add.place == addresses.0.place %} checked {% endif %}>
+                                        &nbsp;&nbsp;
+                                        <label class="form-check-label" for="exampleRadios1">
+                                            <h4>{{add.place}} : </h4>
+                                        </label>&nbsp;
+                                        <medium>{{add.address}},</medium>&nbsp;
+                                        <medium>Floor No. : {{add.floorNo}}</medium>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            Please add some Address before checkout.
+                        {% endif %}
                         <hr>
+                        {% if modeSelected == "Delivery" %}
                         <div class="row pull-right">
                             <div class="col-md-12 pull-right" style="margin: 5px" id="deliverycharge">
-                                Delivery Charges: <b> 20 &#8377; </b>
+                                Delivery Charges: <b> {{kitchen.deliveryCharge}} &#8377; </b>
                             </div>
                         </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="advanceOrder">
-                            <label class="form-check-label" for="advanceOrder">Place Advance Order</label>
-                        </div>
-                        </br>
-                        <div id="scheduledOrder">
-                            <label for="scheduledorder">Schedule your Order :</label>
-                            <input type="datetime-local" id="scheduledorder" name="scheduledorder">
-                        </div>
-                        <script>
-                            let min = new Date()
-                            min.setTime(min.getTime() + (330 * 60 * 1000))
-                            let max = new Date()
-                            max.setDate(max.getDate() + 2)
-                            max.setTime(max.getTime() + (330 * 60 * 1000))
-                            document.getElementById("scheduledorder").setAttribute('min', min.toISOString().slice(0, 16));
-                            document.getElementById("scheduledorder").setAttribute('max', max.toISOString().slice(0, 16));
-
-                            $('#advanceOrder').on('change', function () {
-                               if(this.checked) {
-                                    $("#scheduledOrder").show();
-                               }
-                               else {
-                                $("#scheduledOrder").hide();
-                               }
-                            });
-                        </script>
+                        {% endif%}
+                        {% if kitchen.acceptAdvcOrders %}
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="advanceOrder" {% if advanceOrder %}checked{% endif %} onclick="advOrderHandle(this);">
+                                <label class="form-check-label" for="advanceOrder">Place Advance Order</label>
+                            </div>
+                            </br>
+                            {% if advanceOrder %}
+                            <div id="scheduledOrder">
+                                <label for="scheduledorder">Schedule your Order :</label>
+                                <input type="datetime-local" id="scheduledorder" name="scheduledorder" min="{{mindate}}" max="{{maxdate}}">
+                            </div>
+                            {% endif%}
+                        {% endif%}
                     </div>
                     <div class="card-footer">
                         <div class="pull-right" style="margin: 10px">
                             <button type="submit" value="deliveryorder" class="submit-form btn btn-success pull-right" {% if not addresses %} disabled {% endif %}>Place Order</button>
                         </div>
+                        {% if modeSelected == "Delivery" %}
                         <div class="pull-right" style="margin: 5px" id="total">
                             Total Amount: <b>{{total}} &#8377; </b>
                         </div>
+                        {% endif %}
+                        {% if modeSelected == "PickUp" %}
                         <div class="pull-right" style="margin: 5px" id="subtotal2">
                             Total Amount: <b>{{subtotal}} &#8377; </b>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

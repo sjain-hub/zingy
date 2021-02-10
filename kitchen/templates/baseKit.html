@@ -44,6 +44,9 @@
             {% if user.is_authenticated %}
                 {% if user.kit_Created and user.kitchens.approved %}
                     <a class="navbar-brand" href="{% url 'kitchenHomePage' %}">Zingy</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="oi oi-menu"></span> Menu
+                    </button>
                     {% if not user.kitchens.subscriptionExpired %}
                     <div class="collapse navbar-collapse" id="ftco-nav">
                         <ul class="navbar-nav ml-auto">
@@ -63,7 +66,7 @@
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{% url 'updateKitUserProfile' %}">My Profile</a>
                                 <a class="dropdown-item" href="{% url 'updateKitchen' %}">My Kitchen</a>
-                                <a class="dropdown-item" href="{% url 'subscription' %}">Subscription</a>
+                                <a class="dropdown-item" href="{% url 'subscription' %}">My Subscription</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
                             </div>
@@ -80,7 +83,7 @@
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{% url 'updateKitUserProfile' %}">My Profile</a>
                                 <a class="dropdown-item" href="{% url 'updateKitchen' %}">My Kitchen</a>
-                                <a class="dropdown-item" href="{% url 'subscription' %}">Subscription</a>
+                                <a class="dropdown-item" href="{% url 'subscription' %}">My Subscription</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
                             </div>
@@ -89,6 +92,9 @@
                     {% endif %}
                 {% else %}
                     <a class="navbar-brand" href="">Zingy</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="oi oi-menu"></span> Menu
+                    </button>
                     <div class="collapse navbar-collapse" id="ftco-nav">
                         <ul class="navbar-nav ml-auto"></ul>
                         <div class="btn-group">
@@ -136,8 +142,9 @@
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <div class="ftco-footer-widget mb-4">
-                        <h2 class="ftco-heading-2">Open Hours</h2>
+                        <h2 class="ftco-heading-2">About US</h2>
                         <ul class="list-unstyled open-hours">
+                            <li class="d-flex"><a href="{% url 'contactUs' %}"><span>Contact Us</span></a></li>
                             <li class="d-flex"><span>Monday</span><span>9:00 - 24:00</span></li>
                             <li class="d-flex"><span>Tuesday</span><span>9:00 - 24:00</span></li>
                             <li class="d-flex"><span>Wednesday</span><span>9:00 - 24:00</span></li>

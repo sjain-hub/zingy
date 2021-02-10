@@ -21,7 +21,7 @@ import json
 from .PayTm import Checksum
 
 
-currentDate = datetime.now() + timedelta(hours=5, minutes=30)
+currentDate = datetime.now()
 
 
 def kitchenUserRegistration(request):
@@ -44,6 +44,7 @@ def kitchenUserRegistration(request):
     return render(request, 'kitRegister.html', context)
 
 
+@login_required(login_url='/kitLogin/')
 def updateKitUserProfile(request):
     form = KitchenUserProfileForm(request.POST or None, instance=request.user)
     if request.POST:
@@ -395,12 +396,13 @@ def countWaitingOrders(request):
     return count
 
 
+@login_required(login_url='/kitLogin/')
 def subscription(request):
     expiryDate = request.user.kitchens.subscriptionExpiry
     if request.POST:
         plan = PlanList.objects.filter(id=request.POST['plan'])[0]
         if request.user.kitchens.subscriptionExpired:
-            order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate + timedelta(hours=5, minutes=30),
+            order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate,
                     amount=plan.amount, start_date=currentDate, end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
         else:
             order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate,
@@ -481,6 +483,7 @@ def VerifyPaytmResponse(response):
     return response_dict
 
 
+@login_required(login_url='/kitLogin/')
 def paymentHistory(request):
     history = PaymentHistory.objects.filter(kit_id=request.user.kitchens).order_by("-recharge_date")
     context = {

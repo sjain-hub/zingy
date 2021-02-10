@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import User, Addresses, Order, FavouriteKitchens
+from .models import User, Addresses, Order, FavouriteKitchens, Queries
 
 admin.site.register(User)
 admin.site.register(Addresses)
 admin.site.register(Order)
 admin.site.register(FavouriteKitchens)
+admin.site.register(Queries)

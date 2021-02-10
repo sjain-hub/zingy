@@ -45,98 +45,81 @@
             <input type="submit" value="Add/Update Items" name="submit" class="btn btn-success" />
             <br />
             <br />
-            <div class="row">
-                <!-- <div class="col-sm-1" id="spy">
-                <ul class="nav nav-pills flex-column">
-                    {% for form in cat.forms %}
-                    {% if form.category.value != None %}
-                    <li class="nav-item"><a class="nav-link" href="#scroll{{ form.id.value }}">{{ form.category.value }}</a>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </div> -->
-                <div class="col-sm-11 scrollspy-example" data-spy="scroll" data-target="#spy">
 
+            <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                <thead>
+                    <tr>
+                        <th class="text-center">
+                            Category
+                        </th>
+                        <th class="text-center">
+                            Name
+                        </th>
+                        <th class="text-center">
+                            Type
+                        </th>
+                        <th class="text-center">
+                            Price
+                        </th>
+                        <th class="text-center">
+                            Image
+                        </th>
+                        <th class="text-center">
+                            Condition
+                        </th>
+                        <th class="text-center">
+                            Description
+                        </th>
+                        <th class="text-center">
+
+                        </th>
+                        <th class="text-center">
+
+                        </th>
+                        <th class="text-center">
+                            Delete
+                        </th>
+                        <th class="text-center">
+
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in cat.forms %}
                     <div id="scroll{{ form.category.value }}">
-                        <table class="table table-bordered table-hover table-sortable" id="tab_logic">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">
-                                        Category
-                                    </th>
-                                    <th class="text-center">
-                                        Name
-                                    </th>
-                                    <th class="text-center">
-                                        Type
-                                    </th>
-                                    <th class="text-center">
-                                        Price
-                                    </th>
-                                    <th class="text-center">
-                                        Image
-                                    </th>
-                                    <th class="text-center">
-                                        Condition
-                                    </th>
-                                    <th class="text-center">
-                                        Description
-                                    </th>
-                                    <th class="text-center">
-
-                                    </th>
-                                    <th class="text-center">
-
-                                    </th>
-                                    <th class="text-center">
-                                        Delete
-                                    </th>
-                                    <th class="text-center">
-
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for category in cat.forms %}
-                                <div id="scroll{{ form.category.value }}">
-                                    <tr>
-                                        <td colspan="10" class="text-center">
-                                            {% if category.category.value != None %}
-                                            <h3>{{ category.category.value }}</h3>
-                                            {% else %}
-                                            <h3>Add New Item</h3>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% for item in existing.forms %}
-                                    {% if item.category.value == category.id.value %}
-                                    {{ existing.management_form }}
-                                    {% csrf_token %}
-                                    <tr>
-                                        {% for field in item %}
-                                        <td>{{ field }}</td>
-                                        {% endfor %}
-                                        {% if category.category.value != None %}
-                                        <td>
-                                            <button type="button" data-id="{{item.id.value}}" class="open-subItemsModal btn btn-info"
-                                                    data-toggle="modal">
-                                                Add/Update SubItems
-                                            </button>
-                                        </td>
-                                        {% endif %}
-                                    </tr>
-                                    {% endif %}
-                                    {% endfor %}
-                                </div>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-
-
+                        <tr>
+                            <td colspan="10" class="text-center">
+                                {% if category.category.value != None %}
+                                <h3>{{ category.category.value }}</h3>
+                                {% else %}
+                                <h3>Add New Item</h3>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% for item in existing.forms %}
+                        {% if item.category.value == category.id.value %}
+                        {{ existing.management_form }}
+                        {% csrf_token %}
+                        <tr>
+                            {% for field in item %}
+                            <td>{{ field }}</td>
+                            {% endfor %}
+                            {% if category.category.value != None %}
+                            <td>
+                                <button type="button" data-id="{{item.id.value}}" class="open-subItemsModal btn btn-info"
+                                        data-toggle="modal">
+                                    Add/Update SubItems
+                                </button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
                     </div>
-                </div>
-                <input type="submit" value="Add/Update Items" name="submit" class="btn btn-success" />
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input type="submit" value="Add/Update Items" name="submit" class="btn btn-success" />
         </form>
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">
             Add/Update Category

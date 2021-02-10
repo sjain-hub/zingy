@@ -14,9 +14,10 @@ urlpatterns = [
     path('contact/', views.Contact, name='contact'),
     path('logout/', views.Logout, name='logout'),
     path('test/', views.test, name='test'),
-    path('checkout/', views.Checkout, name='checkout'),
+    # path('checkout/', views.Checkout, name='checkout'),
     path('orders/', views.orders, name='orders'),
     path('addReview/', views.addReview, name='addReview'),
     path('orderStatus/<int:pk>/', views.orderStatus, name='orderStatus'),
+    path('contactUs/', views.contactUs, name='contactUs'),
     path('kitchen/', include('kitchen.urls')),
 ]

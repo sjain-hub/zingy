@@ -90,6 +90,14 @@
                         </div>
                         <div class="col-6 col-12-medium">
                             <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.deliveryCharge.errors }}</span>
+                            </div>
+                            <label class="col">How much you want to charge for your delivery in your area ? :</label>
+                            {{ form.deliveryCharge }} &#8377;
+                            <small id="dpHelp" class="form-text text-muted">(You can always ask for the increased delivery amount if you want to deliver out of the area.)</small>
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
                                 <span class="text-danger small">{{ form.visibilityRadius.errors }}</span>
                             </div>
                             <label class="col">For how much Distance you want your Kitchen to visible? :</label>

@@ -11,34 +11,12 @@
 	#map { position: absolute; top: 0; bottom: 0; width: 100%; }
 </style>
 
-
-<nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
-    <div class="container">
-        <a class="navbar-brand" href="/">Zingy</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="oi oi-menu"></span> Menu
-        </button>
-
-        <div class="collapse navbar-collapse" id="ftco-nav">
-            <ul class="navbar-nav ml-auto">
-                <!--				<li class="nav-item "><a href="/" class="nav-link">Home</a></li>-->
-                <!--				<li class="nav-item"><a href="/about" class="nav-link">About</a></li>-->
-                <!--				<li class="nav-item active"><a href="/menu" class="nav-link">Specialties</a></li>-->
-                <!--				<li class="nav-item"><a href="/reservation" class="nav-link">Reservation</a></li>-->
-                <!--				<li class="nav-item"><a href="/blog" class="nav-link">Stories</a></li>-->
-                <!--				<li class="nav-item"><a href="/contact" class="nav-link">Contact</a></li>-->
-            </ul>
-        </div>
-    </div>
-</nav>
-
 <section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_4.jpg' %});" data-stellar-background-ratio="0.5">
     <div class="overlay"></div>
     <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
             <div class="col-md-9 ftco-animate text-center">
-                <h1 class="mb-2 bread">Nearby Kitchens</h1>
-                <p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Kitchens <i class="ion-ios-arrow-forward"></i></span></p>
+                <h1 class="mb-2 bread">Contact Us</h1>
             </div>
         </div>
     </div>
@@ -48,27 +26,22 @@
     <div class="container">
         <div class="row d-flex mb-5 contact-info">
             <div class="col-md-12 mb-4">
-                <h2 class="h4 font-weight-bold">Contact Information</h2>
+                <h2 class="h4 font-weight-bold">In case of any query related to business or existing Kitchen with us, contact below:</h2>
             </div>
             <div class="w-100"></div>
             <div class="col-md-3 d-flex">
                 <div class="dbox">
-                    <p><span>Address:</span> 198 West 21th Street, Suite 721 New York NY 10016</p>
+                    <p><span><b>Address:</b></span> {{address}} </p>
                 </div>
             </div>
             <div class="col-md-3 d-flex">
                 <div class="dbox">
-                    <p><span>Phone:</span> <a href="tel://1234567920">+ 1235 2355 98</a></p>
+                    <p><span><b>Phone:</b></span> {{phone}} </p>
                 </div>
             </div>
             <div class="col-md-3 d-flex">
                 <div class="dbox">
-                    <p><span>Email:</span> <a href="mailto:info@yoursite.com">info@yoursite.com</a></p>
-                </div>
-            </div>
-            <div class="col-md-3 d-flex">
-                <div class="dbox">
-                    <p><span>Website</span> <a href="#">yoursite.com</a></p>
+                    <p><span><b>Email:</b></span> {{email}} </p>
                 </div>
             </div>
         </div>
@@ -79,22 +52,30 @@
     <div class="container">
         <div class="row d-flex align-items-stretch no-gutters">
             <div class="col-md-6 p-5 order-md-last">
-                <h2 class="h4 mb-5 font-weight-bold">Contact Us</h2>
-                <form action="#">
+                <h2 class="h4 mb-5 font-weight-bold">For any Complaints or Suggestions, submit your query here:</h2>
+                {% if formSubmitted %}
+                    <span class="text-success large">* Response submitted Successfully.</span>
+                {% endif %}
+                <p class="form-text text-muted">Our Team will revert you within 24 hours.</p>
+                <form method="post" disabled>
+                    {% csrf_token %}
                     <div class="form-group">
-                        <input type="radio" name="delivery" value="delivery" id="delivery"/> Delivery
+                        <input type="text" class="form-control" name="name" id="name" placeholder="Full Name *" required>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" id="lat" placeholder="Your Email">
+                        <input type="text" class="form-control" name="email" id="email" placeholder="Email *" required>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Subject">
+                        <input type="text" class="form-control" name="phone" id="phone" placeholder="Mobile Number (Optional)">
                     </div>
                     <div class="form-group">
-                        <textarea name="" id="" cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
+                        <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject *" required>
                     </div>
                     <div class="form-group">
-                        <input type="submit" value="Send Message" class="btn btn-primary py-3 px-5">
+                        <textarea name="message" id="message" cols="30" rows="7" class="form-control" placeholder="Message *" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Submit" class="btn btn-primary py-3 px-5" {% if formSubmitted %}disabled{% endif %}>
                     </div>
                 </form>
             </div>
@@ -102,47 +83,40 @@
                 <div id="map"></div>
                 <script>
                     mapboxgl.accessToken = 'pk.eyJ1IjoiamFpbnNodWJoYW0iLCJhIjoiY2tkcG5lYzgyMjNteTMwbXIzYjkxaWtjayJ9.mV7uussgvFw4MXHVyMkIBg';
-                    var coordinates = document.getElementById('coordinates');
-
+                    var marker1 = new mapboxgl.Marker({ "color": "#b40219" })
+      
                     var map = new mapboxgl.Map({
-                    container: 'map', // container id
-                    style: 'mapbox://styles/mapbox/streets-v11',
-                    center: [77.2230, 28.5086], // starting position
-                    zoom: 6 // starting zoom
-                    });
-
+                      container: 'map', // container id
+                      style: 'mapbox://styles/mapbox/streets-v11',
+                      center: [{{ lon }}, {{ lat }}], // starting position
+                      zoom: 14, // starting zoom
+                      attributionControl: false,
+                      });
+      
+                    //for full screen
+                    map.addControl(new mapboxgl.FullscreenControl());
+      
                     // Add geolocate control to the map.
-                    map.addControl(
-                    new mapboxgl.GeolocateControl({
-                    positionOptions: {
-                    enableHighAccuracy: true
-                    },
-                    trackUserLocation: true,
-                    showUserLocation: false
-                    })
-                    );
-
-                    if (navigator.geolocation){
-                        navigator.geolocation.getCurrentPosition(position => {
-                              document.getElementById('lon').value=position.coords.longitude;
-                              document.getElementById('lat').value=position.coords.latitude;
-                              var marker = new mapboxgl.Marker({
-                                draggable: true
-                                })
-                                .setLngLat([position.coords.longitude, position.coords.latitude])
-                                .addTo(map);
-
-                            function onDragEnd() {
-                            var lngLat = marker.getLngLat();
-                            document.getElementById('lon').value=lngLat.lng;
-                            document.getElementById('lat').value=lngLat.lat;
-                            }
-
-                            marker.on('dragend', onDragEnd);
-
-                        });
-                    }
-
+                    var geolocate = new mapboxgl.GeolocateControl
+                      ({
+                        positionOptions: {
+                          enableHighAccuracy: true,
+                          watchPosition: true
+                        },
+                        trackUserLocation: false,
+                        showUserLocation: true,
+                      })
+                    map.addControl(geolocate);
+      
+                    // Listen to geolocate control
+                    geolocate.on('geolocate', function (ev) {
+                      marker1.setLngLat([ev.coords.longitude, ev.coords.latitude])
+                        .addTo(map);
+                    });
+      
+                    new mapboxgl.Marker()
+                      .setLngLat([{{ lon }}, {{ lat }}])
+                      .addTo(map);
                 </script>
             </div>
         </div>

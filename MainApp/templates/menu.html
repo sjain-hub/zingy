@@ -8,10 +8,17 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css" rel="stylesheet" />
 <style>
-	#map { position: relative; top: 0; bottom: 0; width: 100%; height: 400px; }
+  #map {
+    position: relative;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 400px;
+  }
+
   .mapboxgl-ctrl-logo {
-		display: none !important;
-	}
+    display: none !important;
+  }
 </style>
 
 
@@ -26,13 +33,14 @@
           <span class="mr-2"><a href="{% url 'kitchens' %}">Kitchens <i class="ion-ios-arrow-forward"></i></a></span>
           <span>{{ kitchen.kitName }}</span>
         </p>
-        <p class="breadcrumbs"><span class="mr-2"><a href="#reviews"><span
-                class="icon-star text-warning" style='font-size: large;'></span>{{ avgrating.ratings__avg }} ({{ reviews|length }}
+        <p class="breadcrumbs"><span class="mr-2"><a href="#reviews"><span class="icon-star text-warning"
+                style='font-size: large;'></span>{{ avgrating.ratings__avg }} ({{ reviews|length }}
               Reviews)</a></span>{% if kitchen.pureVeg %}<span class="mr-2">/ Pure Veg
-                <i class="fa fa-leaf" style='color: green; font-size: large;'></i></span>{% endif %}
+            <i class="fa fa-leaf" style='color: green; font-size: large;'></i></span>{% endif %}
         </p>
         <input type="checkbox" {% if favourite %}checked{% endif %} class="form-check-input" id="favourite">
-        <label class="form-check-label bread" for="favourite"><i class="fa fa-heart" style='color: red; font-size: x-large;'></i></label>
+        <label class="form-check-label bread" for="favourite"><i class="fa fa-heart"
+            style='color: red; font-size: x-large;'></i></label>
       </div>
     </div>
   </div>
@@ -40,7 +48,7 @@
 <script>
   $('#favourite').on('change', function () {
     $.ajax({
-        url: "{% url 'add_to_favourite' kitchen.id %}",
+      url: "{% url 'add_to_favourite' kitchen.id %}",
     })
   });
 </script>
@@ -51,6 +59,14 @@
   <div class="container">
     <div class="row py-3">
       <!-- <div class="col-2 w3-card w3-medium" id="sticky-sidebar">
+        <nav id="navbar-example3" class="navbar navbar-light bg-light">
+          <a class="navbar-brand" href="#">Navbar</a>
+          <nav class="nav nav-pills flex-column">
+            {% for cat in categories %}
+            <a class="nav-link" href="#{{ cat.id }}">{{ cat }}</a>
+            {% endfor %}
+          </nav>
+        </nav>
         <div class="sticky-top sidebar ftco-animate">
           <div class="sidebar-box ftco-animate">
             <br>
@@ -70,81 +86,82 @@
             </div>
           </div>
           <div class="row">
-            {% for cat in categories %}
-            <div class="col-md-6 col-lg-12 menu-wrap">
-              <div class="heading-menu text-center ftco-animate">
-                <h3>{{ cat }}</h3>
-              </div>
-              {% for item in menuitems %}
-              {% if item.1 == cat %}
-              <div class="menus d-flex ftco-animate">
-                <div class="menu-img img" style="background-image: url({{ item.4.url }});">
+            <div data-spy="scroll" data-target="#navbar-example3" data-offset="0">
+              {% for cat in categories %}
+              <div class="col-md-6 col-lg-12 menu-wrap">
+                <div id="{{cat.id}}" class="heading-menu text-center ftco-animate">
+                  <h3>{{ cat }}</h3>
                 </div>
-                <div class="text">
-                  <div class="d-flex">
-                    <div class="one-half">
-                      <h3>{{ item.0 }}</h3>
-                      {% if item.2 == 'veg' %}
-                      <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" />
-                      {% else %}
-                      <img src="https://img.icons8.com/color/20/000000/non-vegetarian-food-symbol.png" />
-                      {% endif %}
-                      <p style="color:tomato;"><span>{{ item.12 }}</span></p>
-                      <p><span>{{ item.5 }}</span></p>
-                      {% if item.9 != 0 %}
-                      <p><span>Minimum Order: {{ item.9 }}</span></p>
-                      {% endif %}
-                    </div>
-                    <div class="one-forth">
-                      <span class="price">&#8377; {{ item.3 }}</span>
-                      <br>
-                      <br>
-                      <br>
-                      <div class="btn-group" role="group" aria-label="Basic example">
-                        {% if item.10|length == 0 %}
-                        <button id="down" type="button" class="btn btn-outline-success" onclick="
-                        if(document.querySelector('#quantity{{item.7}}').innerHTML>0){
-                          if(document.querySelector('#quantity{{item.7}}').innerHTML=={{item.9}}){
-                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-{{item.9}});
+                {% for item in menuitems %}
+                {% if item.1 == cat %}
+                <div class="menus d-flex ftco-animate">
+                  <div class="menu-img img" style="background-image: url({{ item.4.url }});">
+                  </div>
+                  <div class="text">
+                    <div class="d-flex">
+                      <div class="one-half">
+                        <h3>{{ item.0 }}</h3>
+                        {% if item.2 == 'veg' %}
+                        <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" />
+                        {% else %}
+                        <img src="https://img.icons8.com/color/20/000000/non-vegetarian-food-symbol.png" />
+                        {% endif %}
+                        <p style="color:tomato;"><span>{{ item.12 }}</span></p>
+                        <p><span>{{ item.5 }}</span></p>
+                        {% if item.9 != 0 %}
+                        <p><span>Minimum Order: {{ item.9 }}</span></p>
+                        {% endif %}
+                      </div>
+                      <div class="one-forth">
+                        <span class="price">&#8377; {{ item.3 }}</span>
+                        <br>
+                        <br>
+                        <br>
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                          {% if item.10|length == 0 %}
+                          <button id="down" type="button" class="btn btn-outline-success" onclick="
+                          if(document.querySelector('#quantity{{item.7}}').innerHTML>0){
+                            if(document.querySelector('#quantity{{item.7}}').innerHTML=={{item.9}}){
+                              handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-{{item.9}});
+                            }
+                            else {
+                              handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-1);
+                            }
+                          }"><span class="icon-minus"></span></button>
+                          {% else %}
+                          <button id="down" type="button" class="btn btn-outline-success" data-toggle="modal"
+                            data-target="#id{{ item.7 }}"><span class="icon-minus"></span></button>
+                          {% endif %}
+                          <button type="button" class="btn btn-default" disabled><span id='quantity{{item.7}}'
+                              name='quantity{{item.7}}'> {{item.11}}
+                            </span></button>
+                          {% if item.10|length == 0 %}
+                          <button id="up" type="button" class="btn btn-outline-success" onclick="
+                          if(document.querySelector('#quantity{{item.7}}').innerHTML==0 && {{item.9}}>0){
+                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+{{item.9}});
                           }
                           else {
-                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-1);
-                          }
-                      }"><span class="icon-minus"></span></button>
-                       {% else %}
-                       <button id="down" type="button" class="btn btn-outline-success" data-toggle="modal"
-                         data-target="#id{{ item.7 }}"><span class="icon-minus"></span></button>
-                       {% endif %}
-                        <button type="button" class="btn btn-default" disabled><span id='quantity{{item.7}}'
-                            name='quantity{{item.7}}'> {{item.11}}
-                          </span></button>
-                        {% if item.10|length == 0 %}
-                        <button id="up" type="button" class="btn btn-outline-success" onclick="
-                        if(document.querySelector('#quantity{{item.7}}').innerHTML==0 && {{item.9}}>0){
-                          handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+{{item.9}});
-                        }
-                        else {
-                          handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+1);
-                        }
-                        "><span class="icon-plus"></span></button>
-                        {% else %}
-                        <button id="up" type="button" class="btn btn-outline-success" data-toggle="modal"
-                          data-target="#id{{ item.7 }}"><span class="icon-plus"></span></button>
-                        {% endif %}
+                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+1);
+                          }"><span class="icon-plus"></span></button>
+                          {% else %}
+                          <button id="up" type="button" class="btn btn-outline-success" data-toggle="modal"
+                            data-target="#id{{ item.7 }}"><span class="icon-plus"></span></button>
+                          {% endif %}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+                {% endif %}
+                {% endfor %}
               </div>
-              {% endif %}
+              <hr>
               {% endfor %}
             </div>
-            <hr>
-            {% endfor %}
           </div>
         </div>
       </div> <!-- .col-md-8 -->
-      
+
     </div>
   </div>
 </section>
@@ -246,23 +263,23 @@
   }
 
   function deleteAllCookies() {
-      document.cookie.split(";").forEach(function (c) { 
-          var key = c.replace(/^ +/, "").split("=")[0]
-          if (key != "lon" && key != "lat") {
-              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-          }
-      });
+    document.cookie.split(";").forEach(function (c) {
+      var key = c.replace(/^ +/, "").split("=")[0]
+      if (key != "lon" && key != "lat") {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      }
+    });
   }
 
   function handlesubcounter(id, subid, quant, totalquant) {
     var x = getCookie('kit');
     if (x === 'NA' || parseInt(x) === {{ kitchen.id }}) {
-    document.getElementById('quantity' + subid).innerHTML = quant;
-    document.getElementById('quantity' + id).innerHTML = totalquant;
-    document.cookie = id + "-" + subid + "=" + quant + ";Path=/";
-    document.cookie = "kit={{kitchen.id}};Path=/";
-    $("#ftco-navbar").load(" #ftco-navbar > *");
-  }
+      document.getElementById('quantity' + subid).innerHTML = quant;
+      document.getElementById('quantity' + id).innerHTML = totalquant;
+      document.cookie = id + "-" + subid + "=" + quant + ";Path=/";
+      document.cookie = "kit={{kitchen.id}};Path=/";
+      $("#ftco-navbar").load(" #ftco-navbar > *");
+    }
     else {
       if (confirm("All Items currently present in the Cart will be removed.")) {
         deleteAllCookies()
@@ -271,12 +288,12 @@
         document.cookie = id + "-" + subid + "=" + quant + ";Path=/";
         document.cookie = "kit={{kitchen.id}};Path=/";
         $("#ftco-navbar").load(" #ftco-navbar > *");
+      }
+      else {
+        txt = "You pressed Cancel!";
+      }
     }
-    else {
-      txt = "You pressed Cancel!";
-    }
-  }
-  }
+  };
 </script>
 
 
@@ -315,7 +332,7 @@
                 container: 'map', // container id
                 style: 'mapbox://styles/mapbox/streets-v11',
                 center: [{{ kitchen.longitude }}, {{ kitchen.latitude }}], // starting position
-                zoom: 14, // starting zoom
+              zoom: 14, // starting zoom
                 attributionControl: false,
               });
 
@@ -324,16 +341,16 @@
 
               // Add geolocate control to the map.
               var geolocate = new mapboxgl.GeolocateControl
-                  ({
-                    positionOptions: {
-                      enableHighAccuracy: true,
-                      watchPosition: true
-                    },
-                    trackUserLocation: false,
-                    showUserLocation: false,
-                  })
+                ({
+                  positionOptions: {
+                    enableHighAccuracy: true,
+                    watchPosition: true
+                  },
+                  trackUserLocation: false,
+                  showUserLocation: false,
+                })
               map.addControl(geolocate);
-              
+
               // Listen to geolocate control
               geolocate.on('geolocate', function (ev) {
                 marker1.setLngLat([ev.coords.longitude, ev.coords.latitude])
@@ -341,7 +358,7 @@
               });
 
               var popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-                '<b>{{ kitchen.kitName }}</b>'+
+                '<b>{{ kitchen.kitName }}</b>' +
                 '<a class="block-20" style="background-image: url({{kitchen.dp.url}}); width:100px; height:100px;">'
               );
               new mapboxgl.Marker()

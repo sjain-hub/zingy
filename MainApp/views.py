@@ -2,16 +2,25 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import CustomerSignUpForm, UserAddressesForm, CustomerUserProfileForm
 from django.contrib.auth.decorators import login_required
-from .models import User, Addresses, Order, FavouriteKitchens
+from .models import User, Addresses, Order, FavouriteKitchens, Queries
 from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Avg, Q
+from datetime import datetime, timedelta
+from django.conf import settings
+from django.utils import timezone
 import http.client
 
 
+currentDate = datetime.now()
+
+
 def index(request):
+	if request.user.is_authenticated:
+		if request.user.is_kitchen:
+			return redirect("kitchenHomePage")
 	kit_object = Kitchens.objects.filter(approved=True)
 	context = {
 		'kit_object': kit_object
@@ -35,6 +44,9 @@ def Logout(request):
 
 
 def nearbyKitchens(request):
+	if request.user.is_authenticated:
+		if request.user.is_kitchen:
+			return redirect("kitchenHomePage")
 	longitude = request.COOKIES['lon']
 	latitude = request.COOKIES['lat']
 	user_location = Point(float(longitude), float(latitude), srid=4326)
@@ -84,7 +96,10 @@ def nearbyKitchens(request):
 	return render(request, 'kitchens.html', context)
 
 
+@login_required(login_url='/login/')
 def favouriteKitchens(request):
+	if request.user.is_kitchen:
+		return redirect("kitchenHomePage")
 	longitude = request.COOKIES['lon']
 	latitude = request.COOKIES['lat']
 	user_location = Point(float(longitude), float(latitude), srid=4326)
@@ -126,6 +141,9 @@ def add_to_favourite(request, pk=None):
 
 
 def Menu(request, pk=None):
+	if request.user.is_authenticated:
+		if request.user.is_kitchen:
+			return redirect("kitchenHomePage")
 	fav = FavouriteKitchens.objects.filter(customer_id=request.user.id, kitchen_id=pk).first()
 	if fav == None:
 		favourite = False
@@ -211,6 +229,9 @@ def countCartItems(request):
 
 
 def Cart(request):
+	if request.user.is_authenticated:
+		if request.user.is_kitchen:
+			return redirect("kitchenHomePage")
 	cartitemcount = countCartItems(request)
 	addform = UserAddressesForm(request.POST or None)
 	
@@ -270,7 +291,19 @@ def Cart(request):
 							temp.append(i.minOrder)
 							items.append(temp)
 		
-		total = subtotal + 20
+		modeSelected = kitchen.mode
+		advanceOrder = False
+		if "modeSelected" in request.COOKIES.keys():
+			modeSelected = request.COOKIES['modeSelected']
+		
+		if "advanceOrder" in request.COOKIES.keys():
+			if request.COOKIES['advanceOrder'] == "true":
+				advanceOrder = True
+
+		mindate = currentDate.isoformat()[:16]
+		maxdate = (currentDate.replace(hour=23, minute=59) + timedelta(days=2)).isoformat()[:16]
+			
+		total = subtotal + kitchen.deliveryCharge
 		context = {
 			'items': items,
 			'subtotal': subtotal,
@@ -279,6 +312,10 @@ def Cart(request):
 			'cartitemcount': cartitemcount,
 			'addressform': addform,
 			'addresses': addresses,
+			'modeSelected': modeSelected,
+			'advanceOrder': advanceOrder,
+			'mindate': mindate,
+			'maxdate': maxdate,
 		}
 		return render(request, 'cart.html', context)
 	else:
@@ -295,6 +332,7 @@ def Login(request):
 		user     = authenticate(username=username,password=password)
 		if user is not None and not user.is_kitchen:
 			if user.is_active:
+				print(user.is_active)
 				login(request,user)
 				return JsonResponse({"success_message": 'Login Successful.'}, status=200)
 			else:
@@ -331,10 +369,11 @@ def Register(request):
 		}
 		return render(request, 'register.html', context)
 
-
+@login_required(login_url='/login/')
 def updateProfile(request):
+	if request.user.is_kitchen:
+		return redirect("kitchenHomePage")
 	form = CustomerUserProfileForm(request.POST or None, instance=request.user)
-	print(request.POST)
 	if request.POST:
 		if form.is_valid():
 			if 'submit' in request.POST.keys():
@@ -377,21 +416,22 @@ def updateProfile(request):
 	return render(request, 'userProfile.html', context)
 
 
-def Checkout(request):
-	print("checkout")
-	addid = request.POST['address']
-	deladdress = Addresses.objects.filter(id=addid)
-	kitid = request.COOKIES['kit']
-	kitchen = Kitchens.objects.filter(id=kitid)
+# def Checkout(request):
+# 	addid = request.POST['address']
+# 	deladdress = Addresses.objects.filter(id=addid)
+# 	kitid = request.COOKIES['kit']
+# 	kitchen = Kitchens.objects.filter(id=kitid)
 
-	distance=deladdress[0].location.distance(kitchen[0].location) * 100
-	if distance > 3:
-		return JsonResponse({"error_message": 'This Kitchen does not deliver to this location.'}, status=200)
-	pass
+# 	distance=deladdress[0].location.distance(kitchen[0].location) * 100
+# 	if distance > 3:
+# 		return JsonResponse({"error_message": 'This Kitchen does not deliver to this location.'}, status=200)
+# 	pass
 
 
 @login_required(login_url='/login/')
 def orders(request):
+	if request.user.is_kitchen:
+		return redirect("kitchenHomePage")
 	cartitemcount = countCartItems(request)
 	orders = Order.objects.filter(customer_id=request.user.id).order_by("-created_at")
 
@@ -406,7 +446,6 @@ def orders(request):
 
 
 def addReview(request):
-	print(request.POST)
 	kitid = request.POST['kitid']
 	userid = request.user.id
 	reviews = Reviews.objects.filter(user_id=userid, kit_id=kitid)
@@ -423,12 +462,30 @@ def addReview(request):
 			return JsonResponse({"ratings": reviews[0].ratings, "reviews": reviews[0].reviews}, status=200)
 
 
-
+@login_required(login_url='/login/')
 def orderStatus(request, pk=None):
+	if request.user.is_kitchen:
+		return redirect("kitchenHomePage")
 	context = {
 		'order': Order.objects.filter(id=pk)[0],
 	}
 	return render(request, 'orderStatus.html', context)
+
+
+def contactUs(request):
+	submitted = False
+	if request.POST:
+		Queries.objects.create(name=request.POST['name'], email=request.POST['email'], phone=request.POST['phone'], subject=request.POST['subject'], message=request.POST['message'], reqDate=currentDate)
+		submitted = True
+	context = {
+		'address': settings.ADDRESS,
+		'phone': settings.PHONE,
+		'email': settings.EMAIL,
+		'lat': settings.LATITUDE,
+		'lon': settings.LONGITUDE,
+		'formSubmitted': submitted,
+	}
+	return render(request, 'contact.html', context)
 
 
 # def sendOTP(request):

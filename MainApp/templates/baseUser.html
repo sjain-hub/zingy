@@ -42,6 +42,9 @@
   <nav class="navbar navbar-expand-lg ftco_navbar ftco-navbar-light ftco-navbar-light-2" id="ftco-navbar">
     <div class="container">
       <a class="navbar-brand" href="/">Zingy</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="oi oi-menu"></span> Menu
+      </button>
       <div class="collapse navbar-collapse" id="ftco-nav">
         {% block nav %}
 
@@ -145,6 +148,7 @@
               jQuery("#login").modal("show");
             }
             else {
+              console.log(data)
               jQuery("#login").modal("hide");
               // $("#ftco-navbar").load(" #ftco-navbar > *");
               window.location.reload(); 
@@ -268,9 +272,9 @@
         </div>
         <div class="col-md-6 col-lg-3">
           <div class="ftco-footer-widget mb-4">
-            <h2 class="ftco-heading-2">Open Hours</h2>
+            <h2 class="ftco-heading-2">About Us</h2>
             <ul class="list-unstyled open-hours">
-              <li class="d-flex"><span>Monday</span><span>9:00 - 24:00</span></li>
+              <li class="d-flex"><a href="{% url 'contactUs' %}"><span>Contact Us</span></a></li>
               <li class="d-flex"><span>Tuesday</span><span>9:00 - 24:00</span></li>
               <li class="d-flex"><span>Wednesday</span><span>9:00 - 24:00</span></li>
               <li class="d-flex"><span>Thursday</span><span>9:00 - 24:00</span></li>

@@ -117,13 +117,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 #PayTm Credentials
@@ -135,6 +136,14 @@ PAYTM_CALLBACK_URL = "http://127.0.0.1:8000/kitchen/handlePaytmResponse/" # Hard
 PAYTM_WEBSITE = "WEBSTAGING"
 PAYTM_PAYMENT_GATEWAY_URL = "https://securegw-stage.paytm.in/order/process"
 PAYTM_TRANSACTION_STATUS_URL = "https://securegw-stage.paytm.in/order/status"
+
+
+#Contact Information
+ADDRESS = "75-A, South Anarkali Extension, Delhi-110051, (Near Baldev Park)"
+PHONE = "+91 9582270031"
+EMAIL = "sjainhub@gmail.com"
+LATITUDE = 28.6483940885258
+LONGITUDE = 77.2872738625539
 
 
 # Static files (CSS, JavaScript, Images)

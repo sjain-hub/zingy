@@ -10,7 +10,7 @@ from django.db.models import Q
 class User(AbstractUser):
 	is_customer = models.BooleanField(default=False)
 	is_kitchen = models.BooleanField(default=False)
-	phone = models.CharField(max_length=10, blank=False, default="", unique=True)
+	phone = models.CharField(max_length=10, blank=False, unique=True)
 	email = models.EmailField(unique=True, blank=False)
 	kit_Created = models.BooleanField(default=False)
 
@@ -31,8 +31,8 @@ class Order(models.Model):
 	id 				  = models.AutoField(primary_key=True)
 	total_amount      = models.IntegerField(default=0)
 	created_at        = models.DateTimeField(blank=False)
-	completed_at 	  = models.DateTimeField(null=True, blank=True)
-	scheduled_order   = models.DateTimeField(null=True, blank=True)
+	completed_at 	  = models.DateTimeField(null=True)
+	scheduled_order   = models.DateTimeField(null=True)
 	mode 			  = models.CharField(max_length=50,blank=True)
 	itemswithquantity = models.CharField(max_length=300,blank=True)
 	delivery_addr     = models.CharField(max_length=50,blank=True)
@@ -75,3 +75,18 @@ class FavouriteKitchens(models.Model):
 
 	def __str__(self):
 		return str(self.customer.first_name) +' => '+self.kitchen.kitName
+
+
+class Queries(models.Model):
+	name = models.CharField(max_length=50,blank=False)
+	email = models.CharField(max_length=50,blank=False)
+	phone = models.CharField(max_length=10, blank=True)
+	subject = models.CharField(max_length=100,blank=False)
+	message = models.CharField(max_length=300, blank=False)
+	reqDate = models.DateTimeField(blank=False)
+	resDate = models.DateTimeField(null=True)
+	resolved = models.BooleanField(blank=False, default=False)
+	resolution = models.CharField(max_length=200, blank=True)
+
+	def __str__(self):
+		return self.name + "+>" + self.subject

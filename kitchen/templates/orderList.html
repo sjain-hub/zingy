@@ -149,7 +149,7 @@
                                             <td>
                                                 <input type="hidden" name="custid{{order.id}}" id="custid{{order.id}}" value="{{ order.customer.id }}" />
                                                 <button data-id="{{order.id}}" type="button" class="setstatus btn 
-                                                    {% if order.status == "Waiting" %}btn-danger" if order.status == "Rejected" %}btn-dark" {% elif order.status == "Delivered" or order.status == "Picked" %}btn-success" {% elif order.status == "Cancelled" %}btn-light" disabled {% else %}btn-warning" {% endif %}>Set Status</button>
+                                                    {% if order.status == "Waiting" %}btn-danger" {% elif order.status == "Rejected" %}btn-dark" {% elif order.status == "Delivered" or order.status == "Picked" %}btn-success" {% elif order.status == "Cancelled" %}btn-light" disabled {% else %}btn-warning" {% endif %}>Set Status</button>
                                             </td>
                                         </form>
                                     </tr>
