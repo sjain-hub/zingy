@@ -100,8 +100,8 @@ class KitchenForm(forms.ModelForm):
 
 	class Meta:
 		model = Kitchens
-		fields = ['kitName', 'mode', 'acceptAdvcOrders', 'deliveryTime', 'deliveryCharge', 'visibilityRadius', 'pureVeg', 'address', 'city', 'landmark', 'postalCode', 'floorNo', 'latitude',
-					'longitude', 'dp', 'video', 'fssaiLicNo', 'fssaiName', 'fssaiAdd', 'fssaiExpiry', 'fssaiCerti', 'kyc', 'degree']
+		fields = ['kitName', 'mode', 'acceptAdvcOrders', 'wantAdvancePayment', 'deliveryTime', 'deliveryCharge', 'visibilityRadius', 'pureVeg', 'paytmLink', 'paytmNo', 'address', 'city', 'landmark', 'postalCode', 'floorNo', 'latitude',
+					'longitude', 'dp', 'video', 'QRCode', 'fssaiLicNo', 'fssaiName', 'fssaiAdd', 'fssaiExpiry', 'fssaiCerti', 'kyc', 'degree']
 
 
 class CategoryForm(forms.ModelForm):

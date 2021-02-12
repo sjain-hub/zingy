@@ -189,7 +189,7 @@ def createKitchen(request):
 
             plan = PlanList.objects.filter(days=180)[0]
             PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate,
-                                          amount=0, start_date=currentDate, end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
+                                          amount=0, start_date=currentDate, end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days), status="Successful")
 
             return redirect("kitchenHomePage")
         context = {
@@ -403,10 +403,10 @@ def subscription(request):
         plan = PlanList.objects.filter(id=request.POST['plan'])[0]
         if request.user.kitchens.subscriptionExpired:
             order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate,
-                    amount=plan.amount, start_date=currentDate, end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
+                    amount=plan.amount, start_date=currentDate, end_date=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days), status="Pending")
         else:
             order = PaymentHistory.objects.create(user=request.user, kit=request.user.kitchens, pack_name=plan.name, plan=plan, recharge_date=currentDate,
-                    amount=plan.amount, start_date=expiryDate.replace(hour=0, minute=0, microsecond=0) + timedelta(days=1), end_date=expiryDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days))
+                    amount=plan.amount, start_date=expiryDate.replace(hour=0, minute=0, microsecond=0) + timedelta(days=1), end_date=expiryDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=plan.days), status="Pending")
         param_dict = {
 
                 'MID': settings.PAYTM_MERCHANT_ID,
@@ -426,7 +426,7 @@ def subscription(request):
         }
         return render(request, 'paytm.html', context)
 
-    delta = expiryDate - currentDate
+    delta = expiryDate.date() - currentDate.date()
 
     plans = PlanList.objects.filter()
     context = {
@@ -455,9 +455,9 @@ def VerifyPaytmResponse(response):
         MID = data_dict['MID']
         ORDERID = data_dict['ORDERID']
         verify = Checksum.verify_checksum(data_dict, settings.PAYTM_MERCHANT_KEY, data_dict['CHECKSUMHASH'])
-        order = PaymentHistory.objects.filter(id=ORDERID)[0]
-        kitchen = order.kit
-        plan = order.plan
+        order = PaymentHistory.objects.filter(id=ORDERID)
+        kitchen = order[0].kit
+        plan = order[0].plan
         if verify:
             STATUS_URL = settings.PAYTM_TRANSACTION_STATUS_URL
             headers = {
@@ -471,12 +471,12 @@ def VerifyPaytmResponse(response):
                 response_dict['paytm'] = check_resp
                 return (response_dict)
             else:
-                order.delete()
+                order.update(status="Failed")
                 response_dict['verified'] = False
                 response_dict['paytm'] = check_resp
                 return (response_dict)
         else:
-            order.delete()
+            order.update(status="Failed")
             response_dict['verified'] = False
             return (response_dict)
     response_dict['verified'] = False

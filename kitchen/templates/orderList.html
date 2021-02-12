@@ -68,10 +68,16 @@
                                         Mode
                                     </th>
                                     <th class="text-center">
-                                        Address
+                                        Phone & Address
                                     </th>
                                     <th class="text-center">
                                         Total Amount
+                                    </th>
+                                    <th class="text-center">
+                                        Paid Amount
+                                    </th>
+                                    <th class="text-center">
+                                        Balance Amount
                                     </th>
                                     <th class="text-center">
                                         Status
@@ -100,8 +106,10 @@
                                         </td>
                                         <td>{{ order.message }}</td>
                                         <td>{{ order.mode }}</td>
-                                        <td>{{ order.delivery_addr }} &nbsp; ({{ order.dist_from_kit }} km)</td>
+                                        <td>+91 {{ order.customer.phone }},<br>{{ order.delivery_addr }} &nbsp; ({{ order.dist_from_kit }} km)</td>
                                         <td>&#8377; {{ order.total_amount }}</td>
+                                        <td>&#8377; {{ order.amount_paid }}</td>
+                                        <td>&#8377; <b>{{ order.balance }}</b></td>
                                         <form method="POST" enctype="multipart/form-data">
                                             {% csrf_token %}
                                             <td>

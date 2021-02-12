@@ -24,6 +24,7 @@
             <th scope="col">Package</th>
             <th scope="col">Start Date</th>
             <th scope="col">End Date</th>
+            <th scope="col">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -35,6 +36,7 @@
             <td>{{var.pack_name}}</td>
             <td>{{var.start_date}}</td>
             <td>{{var.end_date}}</td>
+            <td class="{% if var.status == "Successful" %}text-success{% elif var.status == "Failed" %}text-danger{% endif %}">{{var.status}}</td>
           </tr>
         {% endfor %}
         </tbody>

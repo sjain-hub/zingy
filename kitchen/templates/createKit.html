@@ -76,6 +76,20 @@
                         </div>
                         <div class="col-6 col-12-medium">
                             <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.wantAdvancePayment.errors }}</span>
+                            </div>
+                            <label class="col">Do you wish to always have Full payment in Advance ? :</label>
+                            {{ form.wantAdvancePayment }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.paytmLink.errors }}</span>
+                            </div>
+                            <label class="col">Provide the PayTm link for accepting online Payments :</label>
+                            {{ form.paytmLink }}
+                        </div>
+                        <div class="col-6 col-12-medium">
+                            <div class="col-sm-offset-2 col-sm-12">
                                 <span class="text-danger small">{{ form.pureVeg.errors }}</span>
                             </div>
                             <label class="col">Pure Veg ? <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" /> :</label>
@@ -103,6 +117,13 @@
                             <label class="col">For how much Distance you want your Kitchen to visible? :</label>
                             {{ form.visibilityRadius }}
                             <small id="radiusHelp" class="form-text text-muted">(If you opt for "Delivery", then you should be able to Deliver to this much Distance.)</small>
+                        </div>
+                        <div class="col-12 ">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.paytmNo.errors }}</span>
+                            </div>
+                            <label class="col">Paytm no of your Kitchen :</label>
+                            {{ form.paytmNo }}
                         </div>
                         <div class="col-12 ">
                             <div class="col-sm-offset-2 col-sm-12">
@@ -263,6 +284,14 @@
                                 Kitchen's page to make your kitchen Transparent to the customers. You can also add a
                                 video message that you want to convey to your customers through this video. This will
                                 create a Trust factor within customers.)</small>
+                        </div>
+                        <div class="col-12 row">
+                            <div class="col-sm-offset-2 col-sm-12">
+                                <span class="text-danger small">{{ form.QRCode.errors }}</span>
+                            </div>
+                            <label class="col">Upload PayTm QRCode :</label>
+                            {{ form.QRCode }}
+                            <small id="qrHelp" class="form-text text-muted">(This QRCode will help customers to scan and pay their bills online.)</small>
                         </div>
                         <div class="col-12">
                             <a href="#certificates" class="jumplink pic">

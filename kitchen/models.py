@@ -4,14 +4,15 @@ from django.contrib.gis.geos import Point
 from django.conf import settings
 from datetime import date, datetime
 import re
-from django.db.models import DateTimeField
-
+# from django.db.models import DateTimeField
+from django.core.validators import RegexValidator
 
 # used once to declare DateTimeField without TimeZone
-class DateTimeWithoutTZField(DateTimeField):
-    def db_type(self, connection):
-        return 'timestamp'
+# class DateTimeWithoutTZField(DateTimeField):
+#     def db_type(self, connection):
+#         return 'timestamp'
 
+phone_regex = RegexValidator(regex=r'^[6-9]\d{9}$', message="Please Enter a Valid Phone Number.")
 
 def get_upload_path(instance, filename):
 	kitname = re.sub(r"\W+|_", ' ', instance.kitName)
@@ -63,6 +64,7 @@ class Kitchens(models.Model):
 	degree = models.FileField(upload_to=get_upload_path, blank=True)
 	approved = models.BooleanField(default=False)
 	description = models.TextField(max_length=500, blank=True)
+	wantAdvancePayment = models.BooleanField(default=False)
 	acceptAdvcOrders = models.BooleanField(default=False)
 	deliveryTime = models.IntegerField(blank=False, default=45)
 	deliveryCharge = models.IntegerField(blank=False, default=25)
@@ -71,6 +73,9 @@ class Kitchens(models.Model):
 	registrationDate = models.DateTimeField(blank=False)
 	subscriptionExpiry = models.DateTimeField(blank=False)
 	subscriptionExpired = models.BooleanField(default=False, blank=False)
+	paytmLink = models.CharField(max_length=30, blank=False)
+	paytmNo = models.CharField(validators=[phone_regex], max_length=10, blank=False, unique=True)
+	QRCode = models.ImageField(upload_to=get_upload_path, blank=False)
 
 	def __str__(self):
 		return self.kitName + ", by : " + self.user.username
@@ -157,6 +162,7 @@ class PaymentHistory(models.Model):
 	start_date = models.DateTimeField(blank=False)
 	end_date = models.DateTimeField(blank=False)
 	plan = models.ForeignKey(PlanList, on_delete=models.CASCADE)
+	status = models.CharField(max_length=30, blank=False)
 
 	def __str__(self):
 		return self.kit.kitName
