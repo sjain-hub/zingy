@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import KitchenForm, CategoryForm, ItemForm, SubItemForm, MenuForm, KitchenSignUpForm, KitchenUserProfileForm
 from django.contrib.auth.decorators import login_required
-from .models import Kitchens, Items, SubItems, Categories, Menus, PaymentHistory, PlanList
+from .models import Kitchens, Items, SubItems, Categories, Menus, PaymentHistory, PlanList, ComplaintsAndRefunds
 from MainApp.models import Order, User
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
@@ -21,7 +21,8 @@ import json
 from .PayTm import Checksum
 
 
-currentDate = datetime.now()
+def getCurrentDate():
+	return datetime.now()
 
 
 def kitchenUserRegistration(request):
@@ -167,6 +168,7 @@ def handleStatus(request):
 
 @login_required(login_url='/kitLogin/')
 def createKitchen(request):
+    currentDate = getCurrentDate()
     if not request.user.kit_Created:
         kitform = KitchenForm(request.POST or None,
                               request.FILES or None, user=request.user)
@@ -282,7 +284,7 @@ def orderList(request):
         i.itemswithquantity = i.itemswithquantity.split(",")
 
     days = []
-    todaysDate = currentDate.date()
+    todaysDate = getCurrentDate().date()
     days.append(todaysDate - timedelta(days=1))
     days.append(todaysDate)
     days.append(todaysDate + timedelta(days=1))
@@ -298,7 +300,7 @@ def orderList(request):
 
 @login_required(login_url='/kitLogin/')
 def orderHistory(request):
-    todaysDate = currentDate.date()
+    todaysDate = getCurrentDate().date()
     registrationDateOfKitchen = request.user.kitchens.registrationDate
     years = getYears(registrationDateOfKitchen)
 
@@ -376,13 +378,14 @@ def days_in_month(m, y):
 
 
 def getYears(kitregdate):
-    y = currentDate
+    y = getCurrentDate()
     kitregyear = kitregdate.year
     delta = y.year-kitregyear
     return [(kitregyear + i) for i in range(delta + 1)]
 
 
 def getMonths(year, kitregdate):
+    currentDate = getCurrentDate()
     if year == currentDate.year:
         return [(calendar.month_name[i+1]) for i in range(currentDate.month)]
     elif year == kitregdate.year:
@@ -398,6 +401,7 @@ def countWaitingOrders(request):
 
 @login_required(login_url='/kitLogin/')
 def subscription(request):
+    currentDate = getCurrentDate()
     expiryDate = request.user.kitchens.subscriptionExpiry
     if request.POST:
         plan = PlanList.objects.filter(id=request.POST['plan'])[0]
@@ -433,6 +437,7 @@ def subscription(request):
         'expiryDate': expiryDate,
         'delta': delta.days,
         'plans': plans,
+        'waitingorderscount': countWaitingOrders(request),
     }
     return render(request, 'subscription.html', context)
 
@@ -488,15 +493,31 @@ def paymentHistory(request):
     history = PaymentHistory.objects.filter(kit_id=request.user.kitchens).order_by("-recharge_date")
     context = {
         'history': history,
+        'waitingorderscount': countWaitingOrders(request),
     }
     return render(request, 'paymentHistory.html', context)
+
+
+@login_required(login_url='/kitLogin/')
+def complaintsAndRefunds(request):
+    if request.POST:
+        requestId = request.POST['requestid']
+        status = request.POST['status'+requestId]
+        comments = request.POST['comments'+requestId]
+        ComplaintsAndRefunds.objects.filter(id=requestId).update(status=status, comments=comments, closing_date=getCurrentDate())
+    requests = ComplaintsAndRefunds.objects.filter(kit_id=request.user.kitchens).order_by("-id")
+    context = {
+        'requests': requests,
+        'waitingorderscount': countWaitingOrders(request),
+    }
+    return render(request, 'complaintsAndRefunds.html', context)
 
 
 #task called by celery
 @shared_task
 def checkKitchensValidity():
+    currentDate = getCurrentDate()
     kitchens = Kitchens.objects.filter()
     for kitchen in kitchens:
         if currentDate >= kitchen.subscriptionExpiry:
-            Kitchens.objects.filter(id=kitchen.id).update(
-                subscriptionExpired=True, status="Closed")
+            Kitchens.objects.filter(id=kitchen.id).update(subscriptionExpired=True, status="Closed")

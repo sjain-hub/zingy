@@ -13,7 +13,7 @@ phone_regex = RegexValidator(regex=r'^[6-9]\d{9}$', message="Please Enter a Vali
 class User(AbstractUser):
 	is_customer = models.BooleanField(default=False)
 	is_kitchen = models.BooleanField(default=False)
-	phone = models.CharField(validators=[phone_regex], max_length=10, blank=False, unique=True)
+	phone = models.CharField(max_length=10, blank=False, unique=True)
 	email = models.EmailField(unique=True, blank=False)
 	kit_Created = models.BooleanField(default=False)
 
@@ -43,13 +43,14 @@ class Order(models.Model):
 	message			  = models.CharField(max_length=100,blank=True)
 	msgtocust		  = models.CharField(max_length=100,blank=True)
 	amount_paid 	  = models.IntegerField(default=0)
-	balance		      = models.IntegerField(default=0)
+	balance		      = models.IntegerField(blank=False)
+	paymentOption     = models.CharField(max_length=20,blank=False)
 	customer          = models.ForeignKey(User ,on_delete=models.CASCADE)
 	kitchen			  = models.ForeignKey(Kitchens ,on_delete=models.CASCADE)
 	
 	ORDER_STATE_WAITING 	 = "Waiting"
 	ORDER_STATE_PLACED 		 = "Placed"
-	ORDER_STATE_CONFIRMED	 = "Confirmed"
+	ORDER_STATE_ACCEPTED	 = "Accepted"
 	ORDER_STATE_PREPARING	 = "Preparing"
 	ORDER_STATE_PACKED		 = "Packed"
 	ORDER_STATE_PICKED		 = "Picked"
@@ -61,7 +62,7 @@ class Order(models.Model):
 	ORDER_STATE_CHOICES = (
 		(ORDER_STATE_WAITING,ORDER_STATE_WAITING),
 	    (ORDER_STATE_PLACED, ORDER_STATE_PLACED),
-	    (ORDER_STATE_CONFIRMED, ORDER_STATE_CONFIRMED),
+	    (ORDER_STATE_ACCEPTED, ORDER_STATE_ACCEPTED),
 		(ORDER_STATE_PREPARING, ORDER_STATE_PREPARING),
 		(ORDER_STATE_PACKED, ORDER_STATE_PACKED),
 	    (ORDER_STATE_CANCELLED, ORDER_STATE_CANCELLED),
@@ -86,10 +87,10 @@ class FavouriteKitchens(models.Model):
 
 class Queries(models.Model):
 	name = models.CharField(max_length=50,blank=False)
-	email = models.CharField(max_length=50,blank=False)
-	phone = models.CharField(validators=[phone_regex], max_length=10, blank=True)
-	subject = models.CharField(max_length=100,blank=False)
-	message = models.CharField(max_length=300, blank=False)
+	email = models.EmailField(max_length=50,blank=False)
+	phone = models.CharField(max_length=10, blank=True)
+	subject = models.CharField(max_length=50,blank=False)
+	message = models.CharField(max_length=400, blank=False)
 	reqDate = models.DateTimeField(blank=False)
 	resDate = models.DateTimeField(null=True)
 	resolved = models.BooleanField(blank=False, default=False)

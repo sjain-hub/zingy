@@ -15,7 +15,7 @@ class CustomerSignUpForm(forms.ModelForm):
 	username = forms.CharField(widget=forms.TextInput(
 		attrs={'class': 'form-control', 'placeholder': 'Username'}))
 	phone = forms.CharField(widget=forms.TextInput(
-		attrs={'class': 'form-control', 'placeholder': 'Phone No.'}))
+		attrs={'class': 'form-control', 'placeholder': 'Phone No.', 'maxlength':'10', 'onkeypress':'return onlyNumberKey(event)'}))
 
 	class Meta:
 		model = User
@@ -49,7 +49,7 @@ class CustomerUserProfileForm(forms.ModelForm):
 	username = forms.CharField(widget=forms.TextInput(
 		attrs={'class': 'form-control', 'placeholder': 'Username', 'readonly': 'true'}))
 	phone = forms.CharField(widget=forms.TextInput(
-		attrs={'class': 'form-control', 'placeholder': 'Phone No.', 'readonly': 'true'}))
+		attrs={'class': 'form-control', 'placeholder': 'Phone No.', 'readonly': 'true', 'maxlength':'10', 'onkeypress':'return onlyNumberKey(event)'}))
 
 	class Meta:
 		model = User

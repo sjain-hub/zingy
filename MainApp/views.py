@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import CustomerSignUpForm, UserAddressesForm, CustomerUserProfileForm
 from django.contrib.auth.decorators import login_required
 from .models import User, Addresses, Order, FavouriteKitchens, Queries
-from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews
+from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews, ComplaintsAndRefunds
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.http import HttpResponse, JsonResponse
@@ -14,7 +14,8 @@ from django.utils import timezone
 import http.client
 
 
-currentDate = datetime.now()
+def getCurrentDate():
+	return datetime.now()
 
 
 def index(request):
@@ -300,8 +301,8 @@ def Cart(request):
 			if request.COOKIES['advanceOrder'] == "true":
 				advanceOrder = True
 
-		mindate = currentDate.isoformat()[:16]
-		maxdate = (currentDate.replace(hour=23, minute=59) + timedelta(days=2)).isoformat()[:16]
+		mindate = getCurrentDate().isoformat()[:16]
+		maxdate = (getCurrentDate().replace(hour=23, minute=59) + timedelta(days=2)).isoformat()[:16]
 			
 		total = subtotal + kitchen.deliveryCharge
 		context = {
@@ -462,6 +463,18 @@ def addReview(request):
 			return JsonResponse({"ratings": reviews[0].ratings, "reviews": reviews[0].reviews}, status=200)
 
 
+def sendQueries(request):
+	print(request.POST)
+	currentDate = datetime.now()
+	order = Order.objects.filter(id=request.POST['orderId'])[0]
+	paytmNo = request.POST['phone']
+	subject = request.POST['subject']
+	query = request.POST['query']
+	status = "Under Process"
+	ComplaintsAndRefunds.objects.create(kit=order.kitchen, order=order, user=order.customer, subject=subject, issue=query, status=status, paytmNo=paytmNo, request_date=currentDate)
+	return JsonResponse({"success_message": 'Query Submitted Successfully.'}, status=200)
+
+
 @login_required(login_url='/login/')
 def orderStatus(request, pk=None):
 	if request.user.is_kitchen:
@@ -475,7 +488,7 @@ def orderStatus(request, pk=None):
 def contactUs(request):
 	submitted = False
 	if request.POST:
-		Queries.objects.create(name=request.POST['name'], email=request.POST['email'], phone=request.POST['phone'], subject=request.POST['subject'], message=request.POST['message'], reqDate=currentDate)
+		Queries.objects.create(name=request.POST['name'], email=request.POST['email'], phone=request.POST['phone'], subject=request.POST['subject'], message=request.POST['message'], reqDate=getCurrentDate())
 		submitted = True
 	context = {
 		'address': settings.ADDRESS,
@@ -507,7 +520,3 @@ def contactUs(request):
 # 	data = res.read()
 
 # 	print(data.decode("utf-8"))
-
-
-def Contact(request):
-	return render(request, 'contact.html')

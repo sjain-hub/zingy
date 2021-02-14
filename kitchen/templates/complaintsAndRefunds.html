@@ -1,0 +1,76 @@
+{% extends 'baseKit.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_4.jpg' %});" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Complaints and Refund Requests</h1>
+            </div>
+        </div>
+    </div>
+</section>
+<br>
+<section class="container-fluid">
+    <table class="table table-bordered table-hover">
+        <thead class="table-danger">
+          <tr>
+            <th scope="col">Request ID</th>
+            <th scope="col">Order ID</th>
+            <th scope="col">Customer's Name</th>
+            <th scope="col">Request Date</th>
+            <th scope="col">Subject</th>
+            <th scope="col">Issue</th>
+            <th scope="col">PayTm No</th>
+            <th scope="col">Status</th>
+            <th scope="col">Comments</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for var in requests %}
+          <tr>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <th scope="row">{{var.id}}</th>
+                <th scope="row">{{var.order.id}}</th>
+                <td>{{var.user.first_name}} {{var.user.last_name}}</td>
+                <td>{{var.request_date}}</td>
+                <td>{{var.subject}}</td>
+                <td><textarea rows="4" cols="30" readonly>{{ var.issue }}</textarea></td>
+                <td>{{var.paytmNo}}</td>
+                <td>
+                    <select name="status{{var.id}}" id="status{{var.id}}">
+                        <option value="Under Process" {% if var.status == "Under Process" %} selected {% endif %}>Under Process
+                        </option>
+                        <option value="Closed" {% if var.status == "Closed" %} selected {% endif %}>Closed
+                        </option>
+                    </select>
+                    <br><br>
+                    {% if var.status == "Closed" %}
+                    {{ var.closing_date }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if var.status == "Closed" %}
+                    <textarea id="comments{{var.id}}" name="comments{{var.id}}" rows="4" cols="40" readonly>{{ var.comments }}</textarea>
+                    {% else %}
+                    <textarea id="comments{{var.id}}" name="comments{{var.id}}" rows="4" cols="40">{{ var.comments }}</textarea>
+                    {% endif %}
+                </td>
+                <td>
+                    <input type="hidden" name="requestid" id="requestid" value="{{ var.id }}" />
+                    <button type="submit" class="btn {% if var.status == "Under Process" %}btn-success" {% else %}btn-light" disabled{% endif %}>Set Status</button>
+                </td>
+            </form>
+          </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{% include "notificationModal.html" %}
+{% endblock %}

@@ -17,7 +17,7 @@ class KitchenSignUpForm(forms.ModelForm):
 	username = forms.CharField(widget=forms.TextInput(
 		attrs={'class': 'form-control', 'placeholder': 'Username'}))
 	phone = forms.CharField(widget=forms.TextInput(
-		attrs={'class': 'form-control', 'placeholder': 'Phone No.'}))
+		attrs={'class': 'form-control', 'placeholder': 'Phone No.', 'maxlength':'10', 'onkeypress':'return onlyNumberKey(event)'}))
 
 	class Meta:
 		model = User
@@ -51,7 +51,7 @@ class KitchenUserProfileForm(forms.ModelForm):
 	username = forms.CharField(widget=forms.TextInput(
 		attrs={'class': 'form-control', 'placeholder': 'Username', 'readonly': 'true'}))
 	phone = forms.CharField(widget=forms.TextInput(
-		attrs={'class': 'form-control', 'placeholder': 'Phone No.', 'readonly': 'true'}))
+		attrs={'class': 'form-control', 'placeholder': 'Phone No.', 'readonly': 'true', 'maxlength':'10', 'onkeypress':'return onlyNumberKey(event)'}))
 
 	class Meta:
 		model = User
@@ -70,7 +70,8 @@ class KitchenForm(forms.ModelForm):
 		attrs={'id': 'lat', 'readonly': 'true'}))
 	longitude = forms.FloatField(widget=forms.TextInput(
 		attrs={'id': 'lon', 'readonly': 'true'}))
-	# video = forms.FileField(help_text='Only Mp4 is supported')
+	paytmNo = forms.CharField(widget=forms.TextInput(
+		attrs={'class': 'form-control', 'placeholder': 'PayTm No.', 'maxlength':'10', 'onkeypress':'return onlyNumberKey(event)'}))
 
 	def __init__(self, *args, **kwargs):
 		self.user = kwargs.pop('user',None)

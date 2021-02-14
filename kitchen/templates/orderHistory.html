@@ -57,7 +57,7 @@
                     aria-labelledby="heading{{ dayHistory.0.day }}" data-parent="#accordionExample">
                     <div class="card-body">
                         <table class="table table-bordered table-hover table-sortable" id="tab_logic">
-                            <thead>
+                            <thead class="table-secondary">
                                 <tr>
                                     <th class="text-center">
                                         Order ID
@@ -82,6 +82,12 @@
                                     </th>
                                     <th class="text-center">
                                         Total Amount
+                                    </th>
+                                    <th class="text-center">
+                                        Amount Paid
+                                    </th>
+                                    <th class="text-center">
+                                        Balance Amount
                                     </th>
                                     <th class="text-center">
                                         Status
@@ -112,6 +118,8 @@
                                     <td>{{ order.mode }}</td>
                                     <td>{{ order.delivery_addr }}</td>
                                     <td>&#8377; {{ order.total_amount }}</td>
+                                    <td>&#8377; {{ order.amount_paid }}</td>
+                                    <td>&#8377; {{ order.balance }}</td>
                                     <td>{{ order.status }}<br>
                                         {% if order.status == "Rejected" or order.status == "Cancelled" %}
                                         Reason: {{ order.msgtocust }}<br>

@@ -2,10 +2,12 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.conf import settings
+import MainApp.models
 from datetime import date, datetime
 import re
-# from django.db.models import DateTimeField
 from django.core.validators import RegexValidator
+# from django.db.models import DateTimeField
+
 
 # used once to declare DateTimeField without TimeZone
 # class DateTimeWithoutTZField(DateTimeField):
@@ -74,7 +76,7 @@ class Kitchens(models.Model):
 	subscriptionExpiry = models.DateTimeField(blank=False)
 	subscriptionExpired = models.BooleanField(default=False, blank=False)
 	paytmLink = models.CharField(max_length=30, blank=False)
-	paytmNo = models.CharField(validators=[phone_regex], max_length=10, blank=False, unique=True)
+	paytmNo = models.CharField(max_length=10, blank=False, unique=True)
 	QRCode = models.ImageField(upload_to=get_upload_path, blank=False)
 
 	def __str__(self):
@@ -166,3 +168,25 @@ class PaymentHistory(models.Model):
 
 	def __str__(self):
 		return self.kit.kitName
+
+
+class ComplaintsAndRefunds(models.Model):
+	kit = models.ForeignKey(Kitchens, on_delete=models.CASCADE)
+	order = models.ForeignKey("MainApp.Order", on_delete=models.CASCADE)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+	request_date = models.DateTimeField(blank=False)
+	closing_date = models.DateTimeField(null=True)
+	subject = models.CharField(max_length=50, blank=True)
+	issue = models.CharField(max_length=400, blank=True)
+	ORDER_STATE_UNDERPROCESS    = "Under Process"
+	ORDER_STATE_CLOSED    		= "Closed"
+	COMPLAINT_STATUS = (
+		(ORDER_STATE_UNDERPROCESS,ORDER_STATE_UNDERPROCESS),
+		(ORDER_STATE_CLOSED,ORDER_STATE_CLOSED),
+	)
+	status = models.CharField(max_length=20,choices=COMPLAINT_STATUS,default=ORDER_STATE_UNDERPROCESS)
+	paytmNo = models.CharField(max_length=10, blank=True)
+	comments = models.CharField(max_length=200, blank=True)
+
+	def __str__(self):
+		return self.kit.kitName + ' - ' + self.user.first_name + '' + self.user.last_name

@@ -15,10 +15,10 @@
                     <input type="hidden" name="custid" id="custid" value="" />
                     <input type="hidden" name="orderid" id="orderid" value="" />
                     <input type="text" name="distance" id="distance" value="" />
+                    <input type="text" name="paymentOption" id="paymentOption" value="" />
                     <input type="text" name="scheduledDate" id="scheduledDate" value="" />
                     <input type="text" name="msgtocust" id="msgtocust" />
-                    <span id="deliveryadd">
-                    </span>
+                    <span id="deliveryadd"></span>
                     <br>
                     <div class="progress" style="height: 4px;">
                         <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
@@ -65,6 +65,7 @@
         $(".modal-body #deliveryadd").append(data.deliveryadd);
         $(".modal-body #custid").val(data.custid);
         $(".modal-body #distance").val(data.distance);
+        $(".modal-body #paymentOption").val(data.paymentOption);
         $(".modal-body #orderid").val(data.orderid);
         $(".modal-body #scheduledDate").val(data.scheduledDate);
         $("#kitnotification").modal("show");
@@ -76,12 +77,21 @@
     socket.onopen = function (e) {
         console.log("open", e)
         $(document).on("click", ".confirm", function (event) {
-            console.log(event)
-            var data = {
-                "msgtocust": $("#msgtocust").val(),
-                "custid": $("#custid").val(),
-                "status": "Placed",
-                "orderid": $("#orderid").val(),
+            if($("#paymentOption").val() == "Advance Payment"){
+                var data = {
+                    "msgtocust": $("#msgtocust").val(),
+                    "custid": $("#custid").val(),
+                    "status": "Accepted",
+                    "orderid": $("#orderid").val(),
+                }
+            }
+            else{
+                var data = {
+                    "msgtocust": $("#msgtocust").val(),
+                    "custid": $("#custid").val(),
+                    "status": "Placed",
+                    "orderid": $("#orderid").val(),
+                }
             }
             console.log(data)
             socket.send(JSON.stringify(data))
@@ -102,16 +112,18 @@
         $(document).on("click", ".setstatus", function (event) {
             console.log(event)
             var orderId = $(this).data('id');
+            var amountPaid = $("#amountpaid"+orderId).val();
             var status = document.getElementById('status'+orderId).value;
             var data = {
                 "msgtocust": $("#msgtocust"+orderId).val(),
                 "custid": $("#custid"+orderId).val(),
                 "status": status,
                 "orderid": orderId,
+                "amountPaid": amountPaid,
             }
             console.log(data)
             // $("#ftco-navbar").load(" #ftco-navbar > *");
-            socket.send(JSON.stringify(data))
+            socket.send(JSON.stringify(data));
             window.location.reload();
         })
     }

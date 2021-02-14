@@ -26,6 +26,17 @@
 <div>
     <button type="button" id="cancel" class="cancel btn btn-primary" data-id="{{order.id}}">Cancel Order</button>
 </div>
+{% elif order.status == "Accepted" %}
+<div class="meta">
+    <img id="gif" src="{% static 'gifs/oven.gif' %}" />
+</div>
+<div>
+    <button type="button" id="cancel" class="cancel btn btn-primary" data-id="{{order.id}}">Cancel Order</button>
+</div>
+{{order.kitchen.paytmNo}}
+<div class="meta">
+    <img id="barcode" src="{{order.kitchen.QRCode.url}}" />
+</div>
 {% elif order.status == "Preparing" %}
 <div class="meta">
     <img id="gif" src="{% static 'gifs/oven.gif' %}" />

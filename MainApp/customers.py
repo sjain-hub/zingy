@@ -4,12 +4,9 @@ from django.shortcuts import render
 from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
 from .models import User, Addresses, Order
-from kitchen.models import Kitchens
+from kitchen.models import Kitchens, ComplaintsAndRefunds
 from datetime import datetime, timedelta
 from django.utils import dateparse, timezone
-
-
-currentDate = datetime.now()
 
 
 class Customer(AsyncConsumer):
@@ -53,16 +50,41 @@ class Customer(AsyncConsumer):
     
     async def kitchenFunction(self, textdata):
         msgtocust = textdata.get('msgtocust')
-        custid = textdata.get('custid')
+        # custid = textdata.get('custid')
         status = textdata.get('status')
         orderid = textdata.get('orderid')
-        cust = User.objects.filter(id=custid)[0]
+        # cust = User.objects.filter(id=custid)[0]
+        order = Order.objects.filter(id=orderid)[0]
+        cust = order.customer
+        amountPaid = textdata.get('amountPaid')
+        balAmount = order.balance
+        totalAmount = order.total_amount
+
+        if status == "Rejected":
+            if amountPaid != None:
+                if int(amountPaid) > 0:
+                    refundStatus = "Under Process"
+                    comments = msgtocust
+                    issue = ""
+                    await self.raise_refund_request(order.kitchen, order, cust, comments, issue, refundStatus, cust.phone)
+        elif status == "Cancelled":
+            if order.amount_paid > 0:
+                refundStatus = "Under Process"
+                issue = msgtocust
+                comments = ""
+                await self.raise_refund_request(order.kitchen, order, cust, comments, issue, refundStatus, cust.phone)
+
+        if amountPaid == None:
+            amountPaid = order.amount_paid
+        else:
+            balAmount = totalAmount - int(amountPaid)
+        
         response = {
             "msgtocust": msgtocust,
             "status": status,
             "orderid": orderid,
         }
-        await self.update_order_status(status, msgtocust, orderid)
+        await self.update_order_status(status, msgtocust, orderid, amountPaid, balAmount)
         await self.channel_layer.group_send(
             f"notification_group_{cust}",
             {
@@ -91,12 +113,13 @@ class Customer(AsyncConsumer):
         distance = json.loads(context).get('distance')
         deliveryadd = json.loads(context).get('deliveryadd')
         scheduledDate = otherDetails.get('scheduledDate')
+        paymentOption = otherDetails.get('paymentOption')
         
 
         activeOrders = await self.check_active_orders(me.id)
         
         if activeOrders<2:
-            order = await self.create_order(otherDetails.get('total'), otherDetails.get('mode'), itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, me, kitchen)
+            order = await self.create_order(otherDetails.get('total'), otherDetails.get('mode'), itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, paymentOption, me, kitchen)
         else:
             response = {
                 "status": "Order can't be placed, Maximum 2 active orders are allowed."
@@ -106,28 +129,29 @@ class Customer(AsyncConsumer):
                 "text": json.dumps(response)
             })
 
-        response = {
+        responseforkit = {
             "items": items,
             "otherdetails": otherDetails,
             "custid": me.id,
             "scheduledDate": scheduledDate,
             "deliveryadd": deliveryadd,
             "distance": distance,
-            "orderid": order.id
+            "orderid": order.id,
+            "paymentOption": paymentOption,
         }
         await self.channel_layer.group_send(
             f"notification_group_{kituser}",
             {
                 "type": "send_notification",
-                "text": json.dumps(response)
+                "text": json.dumps(responseforkit)
             }
         )
-        response = {
+        responseforcust = {
             "orderId": order.id
         }
         await self.send({
             "type": "websocket.send",
-            "text": json.dumps(response)
+            "text": json.dumps(responseforcust)
         })
 
 
@@ -147,14 +171,21 @@ class Customer(AsyncConsumer):
         return Order.objects.filter(customer_id=custid, status="Placed").count() + Order.objects.filter(customer_id=custid, status="Packed").count() + Order.objects.filter(customer_id=custid, status="Preparing").count() + Order.objects.filter(customer_id=custid, status="Dispatched").count() + Order.objects.filter(customer_id=custid, status="Waiting").count()
 
     @database_sync_to_async
-    def create_order(self, total, mode, itemswithquantity, add, dist, msg, scheduledDate, cust, kit):
+    def create_order(self, total, mode, itemswithquantity, add, dist, msg, scheduledDate, paymentOption, cust, kit):
+        currentDate = datetime.now()
         if scheduledDate:
             var = dateparse.parse_datetime(scheduledDate)
             scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute)
-            return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, customer=cust, kitchen=kit, created_at=currentDate)
+            return Order.objects.create(total_amount=total, balance=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, paymentOption=paymentOption, customer=cust, kitchen=kit, created_at=currentDate)
         else:
-            return Order.objects.create(total_amount=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate, customer=cust, kitchen=kit, created_at=currentDate)
+            return Order.objects.create(total_amount=total, balance=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate + timedelta(minutes=kit.deliveryTime), paymentOption=paymentOption, customer=cust, kitchen=kit, created_at=currentDate)
 
     @database_sync_to_async
-    def update_order_status(self, status, msgtocust, orderid):
-        return Order.objects.filter(id=orderid).update(status=status, msgtocust=msgtocust, completed_at=currentDate)
+    def update_order_status(self, status, msgtocust, orderid, amount_paid, balAmount):
+        currentDate = datetime.now()
+        return Order.objects.filter(id=orderid).update(status=status, msgtocust=msgtocust, amount_paid=amount_paid, balance=balAmount, completed_at=currentDate)
+
+    @database_sync_to_async
+    def raise_refund_request(self, kitchen, order, cust, comments, issue, refundStatus, paytmNo):
+        currentDate = datetime.now()
+        ComplaintsAndRefunds.objects.create(kit=kitchen, order=order, user=cust, comments=comments, issue=issue, status=refundStatus, paytmNo=paytmNo, request_date=currentDate)

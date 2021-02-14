@@ -37,7 +37,7 @@
             var msg = data.msgtocust
             var orderid = data.orderid
 
-            if(status == "Placed"){
+            if(status == "Placed" || status == "Accepted"){
                 deleteAllCookies()
                 window.location.href = "/orderStatus/"+data.orderid;
             }
@@ -92,7 +92,8 @@
                         "scheduledDate" : $("#scheduledorder").val(),
                         "total": "{{total}}",
                         "address": $('input[name=address]:checked', '#checkoutform').val(),
-                        "mode": selectedmode
+                        "mode": selectedmode,
+                        "paymentOption": $('input[name=paymentOption]:checked', '#checkoutform').val(),
                         }
                 }
                 else {
@@ -104,7 +105,8 @@
                         "scheduledDate" : $("#scheduledorder").val(),
                         "total": "{{subtotal}}",
                         "address": $('input[name=address]:checked', '#checkoutform').val(),
-                        "mode": selectedmode
+                        "mode": selectedmode,
+                        "paymentOption": $('input[name=paymentOption]:checked', '#checkoutform').val(),
                         }
                     
                 }
@@ -117,7 +119,8 @@
                     "scheduledDate" : $("#scheduledorder").val(),
                     "total": "{{subtotal}}",
                     "address": $('input[name=address]:checked', '#checkoutform').val(),
-                    "mode": "Pick Up"
+                    "mode": "Pick Up",
+                    "paymentOption": $('input[name=paymentOption]:checked', '#checkoutform').val(),
                     }
             {% endif %}
             $('#loading').show();
