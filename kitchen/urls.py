@@ -14,6 +14,7 @@ urlpatterns = [
     path('orderHistory/', views.orderHistory, name='orderHistory'),
     path('subscription/', views.subscription, name='subscription'),
     path('paymentHistory/', views.paymentHistory, name='paymentHistory'),
+    path('userDiscountCoupons/', views.userDiscountCoupons, name='userDiscountCoupons'),
     path('complaintsAndRefunds/', views.complaintsAndRefunds, name='complaintsAndRefunds'),
     path('handlePaytmResponse/', views.handlePaytmResponse, name='handlePaytmResponse'),
     # path('addSubItems/', views.addSubItems, name='addSubItems'),

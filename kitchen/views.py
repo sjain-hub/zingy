@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import KitchenForm, CategoryForm, ItemForm, SubItemForm, MenuForm, KitchenSignUpForm, KitchenUserProfileForm
 from django.contrib.auth.decorators import login_required
-from .models import Kitchens, Items, SubItems, Categories, Menus, PaymentHistory, PlanList, ComplaintsAndRefunds
+from .models import Kitchens, Items, SubItems, Categories, Menus, PaymentHistory, PlanList, ComplaintsAndRefunds, UserDiscountCoupons
 from MainApp.models import Order, User
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
@@ -18,6 +18,8 @@ from django.conf import settings
 import calendar
 import requests
 import json
+import string
+import random
 from .PayTm import Checksum
 
 
@@ -511,6 +513,23 @@ def complaintsAndRefunds(request):
         'waitingorderscount': countWaitingOrders(request),
     }
     return render(request, 'complaintsAndRefunds.html', context)
+
+
+def code_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+def userDiscountCoupons(request):
+    currentDate = getCurrentDate()
+    code = code_generator()
+    if request.POST:
+        print(request.POST)
+        order = Order.objects.filter(id=request.POST['orderId'])[0]
+        UserDiscountCoupons.objects.create(kit=order.kitchen, user=order.customer, issueDate=currentDate, validTill=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=int(request.POST['validity'])), discount=request.POST['discount'], description=request.POST['desc'], code=request.POST['code'], maxDiscount=request.POST['max'])
+    context = {
+        'code': code,
+    }
+    return render(request, 'userCouponModal.html', context)
 
 
 #task called by celery

@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import CustomerSignUpForm, UserAddressesForm, CustomerUserProfileForm
 from django.contrib.auth.decorators import login_required
 from .models import User, Addresses, Order, FavouriteKitchens, Queries
-from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews, ComplaintsAndRefunds
+from kitchen.models import Kitchens, Categories, Menus, Items, SubItems, Reviews, ComplaintsAndRefunds, UserDiscountCoupons
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.http import HttpResponse, JsonResponse
@@ -170,7 +170,7 @@ def Menu(request, pk=None):
 			temp.append(content.price)
 			temp.append(content.image)
 			temp.append(content.itemDesc)
-			temp.append(i.offer)
+			temp.append(int(i.offer))
 			temp.append(content.id)
 			temp.append(i.out_of_stock)
 			temp.append(i.minOrder)
@@ -190,6 +190,8 @@ def Menu(request, pk=None):
 						temp1.append(0)
 				else:
 					temp1.append(0)
+				discRateOfSubItem = int(sub.price) - (int(i.offer)/100 * int(sub.price))
+				temp1.append(discRateOfSubItem)
 				subtemp.append(temp1)
 			temp.append(subtemp)
 
@@ -201,7 +203,8 @@ def Menu(request, pk=None):
 			else:
 				temp.append(totalquant)
 			temp.append(content.condition)
-
+			discRate = int(content.price) - (int(i.offer)/100 * int(content.price))
+			temp.append(discRate)
 			items.append(temp)
 
 	reviews = Reviews.objects.filter(kit_id=pk)
@@ -233,9 +236,11 @@ def Cart(request):
 	if request.user.is_authenticated:
 		if request.user.is_kitchen:
 			return redirect("kitchenHomePage")
+	currentDate = getCurrentDate()
 	cartitemcount = countCartItems(request)
 	addform = UserAddressesForm(request.POST or None)
 	
+	# for adding the addresses
 	if request.POST:
 		if addform.is_valid():
 			lon = addform.cleaned_data['longitude']
@@ -249,9 +254,12 @@ def Cart(request):
 	if 'kit' in request.COOKIES.keys():
 		addresses = Addresses.objects.filter(user_id=request.user.id)
 		kitchen = Kitchens.objects.filter(id=request.COOKIES['kit'])[0]
+		kitCoupons = UserDiscountCoupons.objects.filter(kit=kitchen, user=request.user, redeemed=False, validTill__gte=currentDate)
 		menu = Menus.objects.filter(kit_id=request.COOKIES['kit'])
 		items = []
 		subtotal = 0
+		discount = 0
+		kitDiscount = 0
 		total = 0
 		for i in menu:
 			itemid = str(i.item_id)
@@ -265,7 +273,17 @@ def Cart(request):
 					temp.append(item[0].itemDesc)
 					temp.append(item[0].price)
 					temp.append(quant)
-					total_price = item[0].price*int(quant)
+					# disc = int(i.offer)/100 * int(item[0].price)
+					# discRate = int(int(item[0].price) - disc)
+					# if int(i.offer) > 0:
+					# 	total_price = discRate * int(quant)
+					# 	kitDiscount = kitDiscount + (disc * int(quant))
+					# else:
+					# 	total_price = item[0].price * int(quant)
+					if int(i.offer) > 0:
+						disc = int(i.offer)/100 * int(item[0].price)
+						kitDiscount = kitDiscount + (disc * int(quant))
+					total_price = item[0].price * int(quant)	
 					subtotal = subtotal + total_price
 					temp.append(total_price)
 					temp.append(item[0].id)
@@ -285,26 +303,61 @@ def Cart(request):
 							temp.append(item[0].itemDesc)
 							temp.append(sub.price)
 							temp.append(quant)
-							total_price = sub.price*int(quant)
+							# disc = int(i.offer)/100 * int(sub.price)
+							# discRateOfSubItem = int(int(sub.price) - disc)
+							# if int(i.offer) > 0:
+							# 	total_price = discRateOfSubItem * int(quant)
+							# 	kitDiscount = kitDiscount + (disc * int(quant))
+							# else:
+							# 	total_price = sub.price * int(quant)
+							if int(i.offer) > 0:
+								disc = int(i.offer)/100 * int(sub.price)
+								kitDiscount = kitDiscount + (disc * int(quant))
+							total_price = sub.price * int(quant)	
 							subtotal = subtotal + total_price
 							temp.append(total_price)
 							temp.append(str(item[0].id)+"-"+str(sub.id))
 							temp.append(i.minOrder)
 							items.append(temp)
+
+		total = subtotal - kitDiscount
 		
-		modeSelected = kitchen.mode
+		
 		advanceOrder = False
-		if "modeSelected" in request.COOKIES.keys():
-			modeSelected = request.COOKIES['modeSelected']
-		
 		if "advanceOrder" in request.COOKIES.keys():
 			if request.COOKIES['advanceOrder'] == "true":
 				advanceOrder = True
 
+		coupon = ''
+		if 'couponId' in request.COOKIES.keys():
+			coupon = UserDiscountCoupons.objects.filter(id=request.COOKIES['couponId'])[0]
+			discount = int(coupon.discount/100 * total)
+			if discount > coupon.maxDiscount:
+				discount = coupon.maxDiscount
+			total = total - discount
+
+		modeSelected = kitchen.mode
+		if "modeSelected" in request.COOKIES.keys():
+			modeSelected = request.COOKIES['modeSelected']
+			if modeSelected == "Delivery":
+				total = total + kitchen.deliveryCharge
+
 		mindate = getCurrentDate().isoformat()[:16]
 		maxdate = (getCurrentDate().replace(hour=23, minute=59) + timedelta(days=2)).isoformat()[:16]
+
+		if request.method=="GET":
+			if 'websocket' in request.GET.keys():
+				items1 = []
+				for item in items:
+					temp = {}
+					temp['itemName'] = item[1]
+					temp['quantity'] = item[4]
+					items1.append(temp)
+				context = {
+					'items': items1,
+				}
+				return JsonResponse(context, status=200)
 			
-		total = subtotal + kitchen.deliveryCharge
 		context = {
 			'items': items,
 			'subtotal': subtotal,
@@ -317,6 +370,10 @@ def Cart(request):
 			'advanceOrder': advanceOrder,
 			'mindate': mindate,
 			'maxdate': maxdate,
+			'kitCoupons': kitCoupons,
+			'coupDiscount': discount,
+			'kitDiscount': kitDiscount,
+			'selectedCoupon': coupon,
 		}
 		return render(request, 'cart.html', context)
 	else:

@@ -128,7 +128,7 @@ class SubItems(models.Model):
 class Menus(models.Model):
 	item = models.OneToOneField(Items, on_delete=models.CASCADE)
 	kit = models.ForeignKey(Kitchens, on_delete=models.CASCADE)
-	offer = models.IntegerField(blank=True, default=0)
+	offer = models.IntegerField(blank=False, default=0)
 	out_of_stock = models.BooleanField(default=False)
 	minOrder = models.IntegerField(blank=False,default=0)
 
@@ -187,6 +187,21 @@ class ComplaintsAndRefunds(models.Model):
 	status = models.CharField(max_length=20,choices=COMPLAINT_STATUS,default=ORDER_STATE_UNDERPROCESS)
 	paytmNo = models.CharField(max_length=10, blank=True)
 	comments = models.CharField(max_length=200, blank=True)
+
+	def __str__(self):
+		return self.kit.kitName + ' - ' + self.user.first_name + '' + self.user.last_name
+
+
+class UserDiscountCoupons(models.Model):
+	kit = models.ForeignKey(Kitchens, on_delete=models.CASCADE)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+	issueDate = models.DateTimeField(blank=False)
+	validTill = models.DateTimeField(blank=False)
+	discount = models.IntegerField(blank=False)
+	redeemed = models.BooleanField(default=False)
+	description = models.CharField(max_length=100, blank=True)
+	code = models.CharField(max_length=6, blank=False)
+	maxDiscount = models.IntegerField(blank=True)
 
 	def __str__(self):
 		return self.kit.kitName + ' - ' + self.user.first_name + '' + self.user.last_name

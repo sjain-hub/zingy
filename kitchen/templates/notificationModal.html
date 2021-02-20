@@ -12,12 +12,13 @@
 
                     <span id="items">
                     </span>
-                    <input type="hidden" name="custid" id="custid" value="" />
-                    <input type="hidden" name="orderid" id="orderid" value="" />
-                    <input type="text" name="distance" id="distance" value="" />
-                    <input type="text" name="paymentOption" id="paymentOption" value="" />
-                    <input type="text" name="scheduledDate" id="scheduledDate" value="" />
+                    <input type="hidden" name="custid" id="custid" />
+                    <input type="hidden" name="orderid" id="orderid" />
+                    <input type="text" name="distance" id="distance" />
+                    <input type="text" name="paymentOption" id="paymentOption" />
+                    <input type="text" name="scheduledDate" id="scheduledDate" />
                     <input type="text" name="msgtocust" id="msgtocust" />
+                    <input type="text" name="total" id="total" />
                     <span id="deliveryadd"></span>
                     <br>
                     <div class="progress" style="height: 4px;">
@@ -68,6 +69,7 @@
         $(".modal-body #paymentOption").val(data.paymentOption);
         $(".modal-body #orderid").val(data.orderid);
         $(".modal-body #scheduledDate").val(data.scheduledDate);
+        $(".modal-body #total").val(data.total);
         $("#kitnotification").modal("show");
         setTimeout(function() {
             window.location.reload();

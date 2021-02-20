@@ -175,8 +175,10 @@
                                                 {% endif %}
                                             <td>
                                                 <input type="hidden" name="custid{{order.id}}" id="custid{{order.id}}" value="{{ order.customer.id }}" />
-                                                <button data-id="{{order.id}}" type="button" class="setstatus btn 
-                                                    {% if order.status == "Waiting" or order.status == "Accepted" %}btn-warning" {% elif order.status == "Rejected" %}btn-danger" {% elif order.status == "Delivered" or order.status == "Picked" %}btn-light" {% elif order.status == "Cancelled" %}btn-dark" disabled {% else %}btn-success" {% endif %}>Set Status</button>
+                                                <button data-id="{{order.id}}" type="button" class="setstatus btn btn-block btn-sm
+                                                    {% if order.status == "Waiting" or order.status == "Accepted" %}btn-warning" {% elif order.status == "Rejected" %}btn-danger" disabled {% elif order.status == "Delivered" or order.status == "Picked" %}btn-light" {% elif order.status == "Cancelled" %}btn-dark" disabled {% else %}btn-success" {% endif %}>Set Status</button>
+                                                <button type="button" class="couponModal btn btn-outline-primary btn-block btn-sm" data-id="{{order.id}}"
+                                                    data-toggle="modal">Generate Coupon</button>
                                             </td>
                                         </form>
                                     </tr>
@@ -198,7 +200,57 @@
         if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 57)) 
             return false; 
         return true; 
-    } 
+    }
+
+    $(document).on("click", ".couponModal", function () {
+        var orderId = $(this).data('id');
+        $.ajax({
+            url: '{% url 'userDiscountCoupons' %}',
+            type: 'GET',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+
+            success: function (data) {
+                console.log(data)
+                $("#couponModal #fields").html(data)
+            },
+        });
+        $("#couponModal #orderId").val(orderId);
+        $("#couponModal").modal("show");
+    })
+</script>
+
+
+<!-- coupon modal -->
+<div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form method="post" role="form" id="couponForm" enctype="multipart/form-data">
+                <input type="text" class="form-control" id="orderId" name="orderId" hidden>
+                <div id="fields">
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $(document).on("click", ".send-coupon", function (event) {
+            $.ajax({
+                url: '{% url 'userDiscountCoupons' %}',
+                type: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                data: $('#couponForm').serialize(),
+                
+                success: function (data) {
+                    if (data.success_message) {
+                        alert(data.success_message)
+                        $("#couponModal").modal("hide");
+                    }
+                },
+            });
+        });
+    });
 </script>
 
 

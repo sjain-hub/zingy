@@ -17,7 +17,7 @@
 <section>
     <div class="container">
         <div class="row">
-            <div class="card active" id="cart">
+            <div class="card active" id="details">
                 <div class="card-header bg-dark text-light">
                     <i class="fa fa-battery-half" aria-hidden="true"></i>
                     Active Subscription
@@ -69,7 +69,7 @@
                 }
             </style>
             
-            <div class="card shopping-cart" id="delivery">
+            <div class="card plans" id="plans">
                 <form id="subscriptionform" method="post" role="form" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="card-header bg-dark text-light">
@@ -109,7 +109,7 @@
         margin-right: 50px;
         width: 35%;
     }
-    .shopping-cart {
+    .plans {
         margin-top: 20px;
         margin-bottom: 20px;
         width: 55%;

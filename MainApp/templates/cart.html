@@ -35,11 +35,11 @@
 <script src="https://use.fontawesome.com/c560c025cf.js"></script>
 
 <form id="checkoutform" method="post" role="form" enctype="multipart/form-data">
-    
+    {% csrf_token %}
     <section id="cart">
         <div class="container">
             <h1>{{ kitchen.kitName }}</h1>
-            <div class="card shopping-cart">
+            <div class="card items">
                 <div class="card-header bg-dark text-light">
                     <i class="fa fa-shopping-cart" aria-hidden="true"></i>
                     Food Cart
@@ -60,7 +60,7 @@
                         </div>
                         <div class="col-12 col-sm-12 text-sm-center col-md-6 text-md-right row">
                             <div class="col-3 col-sm-3 col-md-3 text-md-right" style="padding-top: 5px">
-                                <h7>{{item.3}} &#8377; <span class="text-muted">x</span></h7>
+                                <h7>&#8377; {{item.3}} <span class="text-muted">x</span></h7>
                             </div>
                             <div class="col-4 col-sm-4 col-md-4">
                                 <div class="btn-group" role="group" aria-label="Basic example">
@@ -87,7 +87,7 @@
                                 </div>
                             </div>
                             <div class="col-3 col-sm-3 col-md-3 text-md-right" style="padding-top: 5px">
-                                <h6><strong><span class="text-muted">=</span> {{item.5}} &#8377;</strong></h6>
+                                <h6><strong><span class="text-muted">=  </span>&#8377; {{item.5}} </strong></h6>
                             </div>
                             <div class="col-2 col-sm-2 col-md-2 text-right">
                                 <button type="button" class="btn btn-outline-danger btn-xs"
@@ -115,45 +115,37 @@
                         </select>
                     </div>
                     {% endif %}
-                    
-                    <div class="pull-right" style="margin: 10px">
-                        {% if modeSelected == "Delivery" %}
-                        <div class="pull-right" style="margin: 5px" id="subtotal1">
-                            Subtotal: <b>{{subtotal}} &#8377; </b>
-                        </div>
-                        {% endif %}
-                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-    <script type="text/javascript">
-        function handlecounter(id, quant) {
-            document.getElementById('quantity' + id).innerHTML = quant;
-            document.cookie = id + "=" + quant + ";Path=/";
-            document.cookie = "kit={{kitchen.id}};Path=/";
-            $("#checkoutform").load(" #checkoutform > *");
-        }
-        function handledelete(id) {
-            document.cookie = id + "=" + 0 + ";Path=/";
-            document.cookie = "kit={{kitchen.id}};Path=/";
-            $("#checkoutform").load(" #checkoutform > *");
-        }
-        function modeChange(value) {
-            document.cookie = "modeSelected=" + value + ";Path=/";
-            $("#checkoutform").load(" #checkoutform > *");
-        }
-        function advOrderHandle(value) {
-            document.cookie = "advanceOrder=" + value.checked + ";Path=/";
-            $("#checkoutform").load(" #checkoutform > *");
-        }
-    </script>
-    
-    <section id="delivery">
-        {% if user.is_authenticated %}
-            {% csrf_token %}
-            <div class="container">
-                <div class="card shopping-cart">
+            <script type="text/javascript">
+                function handlecounter(id, quant) {
+                    document.getElementById('quantity' + id).innerHTML = quant;
+                    document.cookie = id + "=" + quant + ";Path=/";
+                    document.cookie = "kit={{kitchen.id}};Path=/";
+                    $("#checkoutform").load(" #checkoutform > *");
+                }
+                function handledelete(id) {
+                    document.cookie.split(";").forEach(function (c) {
+                        var key = c.replace(/^ +/, "").split("=")[0]
+                        if (key == id) {
+                            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                        }
+                    });
+                    $("#checkoutform").load(" #checkoutform > *");
+                }
+                function modeChange(value) {
+                    document.cookie = "modeSelected=" + value + ";Path=/";
+                    $("#checkoutform").load(" #checkoutform > *");
+                }
+                function advOrderHandle(value) {
+                    document.cookie = "advanceOrder=" + value.checked + ";Path=/";
+                    $("#checkoutform").load(" #checkoutform > *");
+                }
+            </script>
+        
+            <div class="row">
+                {% if user.is_authenticated %}
+                <div class="card address" id="address">
                     <div class="card-header bg-dark text-light">
                         <i class="fa fa-map-marker" aria-hidden="true"></i>
                         Choose your Address
@@ -183,15 +175,98 @@
                             Please add some Address before checkout.
                         {% endif %}
                         <hr>
-                        {% if modeSelected == "Delivery" %}
-                        <div class="row pull-right">
-                            <div class="col-md-12 pull-right" style="margin: 5px" id="deliverycharge">
-                                Delivery Charges: <b> {{kitchen.deliveryCharge}} &#8377; </b>
+                        
+                    </div>
+                    <div class="card-footer">
+                        <div class="pull-left" style="margin: 10px" id="payment">
+                            {% if kitchen.acceptAdvcOrders %}
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="advanceOrder" {% if advanceOrder %}checked{% endif %} onclick="advOrderHandle(this);">
+                                <label class="form-check-label" for="advanceOrder">Place Advance Order</label>
+                            </div>
+                            </br>
+                            {% if advanceOrder %}
+                            <div id="scheduledOrder">
+                                <label for="scheduledorder">Schedule your Order :</label>
+                                <input type="datetime-local" id="scheduledorder" name="scheduledorder" min="{{mindate}}" max="{{maxdate}}">
+                            </div>
+                            {% endif%}
+                            {% endif%}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card address">
+                    <div class="card-header bg-dark text-light">
+                        <i class="fa fa-map-marker" aria-hidden="true"></i>
+                        Choose Delivery Address
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="meta">
+                            <div><a style="font-size:30px;">Please Sign in first to Complete your Order.</a></div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card bill" id="bill">
+                    <div class="card-header bg-dark text-light">
+                        <i class="fa fa-credit-card" aria-hidden="true"></i>
+                         Billing Details
+                    </div>
+                    <div class="card-body">
+                        {% if coupDiscount > 0 %}
+                        <div class="row container">
+                            <input hidden id="couponId" name="couponId" value="{{selectedCoupon.id}}">
+                            Coupon Applied: &nbsp;<b>{{selectedCoupon.code}}</b>
+                            <div class="applybutton">
+                                <button type="button" class="btn btn-outline-success" onclick="removeCoupon()">Remove</button>
                             </div>
                         </div>
-                        {% endif%}
+                        {% else %}
+                        <a href="#couponModal" data-toggle="modal">Apply Coupons?</a>
+                        {% endif %}
+                        <hr>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless mb-0">
+                                <tbody>
+                                    <tr id="subtotal">
+                                        <td class="pl-0 w-90" scope="row">Sub Total:</td>
+                                        <td>&#8377;{{subtotal}}</td>
+                                    </tr>
+                                    {% if kitDiscount > 0 %}
+                                    <tr id="kitDiscount">
+                                        <td class="pl-0 w-90" scope="row">Kitchen Discount:</td>
+                                        <td>- &#8377;{{kitDiscount}}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if coupDiscount > 0 %}
+                                    <tr>
+                                        <input hidden id="coupDiscount" name="coupDiscount" value="{{coupDiscount}}">
+                                        <td class="pl-0 w-90" scope="row">Coupon Discount:</td>
+                                        <td>- &#8377;{{coupDiscount}}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if modeSelected == "Delivery" %}
+                                    <tr id="deliverycharge">
+                                        <td class="pl-0 w-90" scope="row">Delivery Charges:</td>
+                                        <td>&#8377;{{kitchen.deliveryCharge}}</td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <input hidden id="total" name="total" value="{{total}}">
+                                        <th class="pl-0 w-90" scope="row"><h5><b>Total Amount:</b></h5></th>
+                                        <td><h5><b>&#8377;{{total}}</b></h5></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr>
                         <div class="pull-left" style="margin: 10px" id="payment">
-                            <h5><b>Payment Options :</b></h5>
+                            <b>Payment Options :</b><br>
                             {% if kitchen.wantAdvancePayment %}
                             You need to pay the whole amount in advance for this Kitchen.
                             <input class="form-check-input" type="radio" name="paymentOption" id="payadvance" value="Advance Payment" checked hidden>
@@ -212,58 +287,97 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <div class="pull-left" style="margin: 10px" id="payment">
-                            {% if kitchen.acceptAdvcOrders %}
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="advanceOrder" {% if advanceOrder %}checked{% endif %} onclick="advOrderHandle(this);">
-                                <label class="form-check-label" for="advanceOrder">Place Advance Order</label>
-                            </div>
-                            </br>
-                            {% if advanceOrder %}
-                            <div id="scheduledOrder">
-                                <label for="scheduledorder">Schedule your Order :</label>
-                                <input type="datetime-local" id="scheduledorder" name="scheduledorder" min="{{mindate}}" max="{{maxdate}}">
-                            </div>
-                            {% endif%}
-                            {% endif%}
-                        </div>
-                        <div class="pull-right" style="margin: 10px">
-                            <button type="submit" value="deliveryorder" class="submit-form btn btn-success pull-right" {% if not addresses %} disabled {% endif %}>Place Order</button>
-                        </div>
-                        {% if modeSelected == "Delivery" %}
-                        <div class="pull-right" style="margin: 5px" id="total">
-                            Total Amount: <b>{{total}} &#8377; </b>
-                        </div>
-                        {% endif %}
-                        {% if modeSelected == "PickUp" %}
-                        <div class="pull-right" style="margin: 5px" id="subtotal2">
-                            Total Amount: <b>{{subtotal}} &#8377; </b>
-                        </div>
-                        {% endif %}
+                        <button type="submit" value="deliveryorder" class="submit-form btn btn-success btn-block" {% if not addresses %} disabled {% endif %}>Place Order</button>
                     </div>
-                </div>
-            </div>
-        {% else %}
-        <div class="container">
-            <div class="card shopping-cart">
-                <div class="card-header bg-dark text-light">
-                    <i class="fa fa-map-marker" aria-hidden="true"></i>
-                    Choose Delivery Address
-                    <div class="clearfix"></div>
-                </div>
-                <div class="card-body">
-                    <div class="meta">
-                        <div><a style="font-size:30px;">Please Sign in first to Complete your Order.</a></div>
-                    </div>
-                </div>
-                <div class="card-footer">
                 </div>
             </div>
         </div>
-        {% endif %}
     </section>
-    
 </form>
+<style>
+    .items{
+        width: 100%;
+    }
+    .address {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        margin-right: 40px;
+        margin-left: 14px;
+        width: 55%;
+    }
+    .bill {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        width: 39%;
+    }
+</style>
+
+
+<!-- coupon modal -->
+<div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" >Apply Coupons</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            {% for coupons in kitCoupons %}
+            <div class="container row">
+                <div class="card-bottom pt-3 px-3 mb-2">
+                    <div class="d-flex flex-row justify-content-center text-align-center">
+                        <p><span>{{coupons.code}}</span></p>
+                    </div>
+                </div>
+                <div class="discount">
+                    <b>{{coupons.discount}}% off</b><br>
+                    (Max : &#8377;{{coupons.maxDiscount}})
+                </div>
+                <div class="applybutton">
+                    <button type="button" class="btn btn-outline-success" onclick="addCoupon('{{coupons.id}}')">Apply</button>
+                </div>
+            </div>
+            <b>Valid Till : </b>{{coupons.validTill.date}}
+            <div class="text-muted">
+                <p>{{coupons.description}}</p>
+            </div>
+            <hr>
+            {% endfor %}
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+    function addCoupon(couponId) {
+        document.cookie = "couponId=" + couponId + ";Path=/";
+        $("#checkoutform").load(" #checkoutform > *");
+        $("#couponModal").modal("hide");
+    }
+    function removeCoupon(){
+        document.cookie.split(";").forEach(function (c) {
+            var key = c.replace(/^ +/, "").split("=")[0]
+            if (key == "couponId") {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            }
+        });
+        $("#checkoutform").load(" #checkoutform > *");
+    }
+    
+</script>
+<style>
+    .card-bottom {
+        background:palegoldenrod;
+        width: 30%;
+    }
+    .discount{
+        margin-left: 5%;
+    }
+    .applybutton{
+        margin-left: auto;
+    }
+</style>
 
 
 <div class="modal fade" id="addressmodal" tabindex="-1" role="dialog" aria-labelledby="addressmodalLabel"
@@ -416,7 +530,6 @@
 <div class="meta">
     <div><a style="font-size:30px;">Add Items to your Cart.</a></div>
 </div>
-
 {% endif %}
 
 <!-- LOADER -->

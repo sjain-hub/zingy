@@ -4,7 +4,7 @@ from django.shortcuts import render
 from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
 from .models import User, Addresses, Order
-from kitchen.models import Kitchens, ComplaintsAndRefunds
+from kitchen.models import Kitchens, ComplaintsAndRefunds, UserDiscountCoupons
 from datetime import datetime, timedelta
 from django.utils import dateparse, timezone
 
@@ -59,6 +59,10 @@ class Customer(AsyncConsumer):
         amountPaid = textdata.get('amountPaid')
         balAmount = order.balance
         totalAmount = order.total_amount
+        
+        if status == "Accepted" or status == "Placed":
+            if order.coupon_id != None:
+                UserDiscountCoupons.objects.filter(id=order.coupon_id).update(redeemed=True)
 
         if status == "Rejected":
             if amountPaid != None:
@@ -114,12 +118,16 @@ class Customer(AsyncConsumer):
         deliveryadd = json.loads(context).get('deliveryadd')
         scheduledDate = otherDetails.get('scheduledDate')
         paymentOption = otherDetails.get('paymentOption')
-        
+        total = otherDetails.get('total')
+        discount = otherDetails.get('discount')
+        if discount == None:
+            discount = 0
+        couponId = otherDetails.get('couponId')
 
         activeOrders = await self.check_active_orders(me.id)
         
         if activeOrders<2:
-            order = await self.create_order(otherDetails.get('total'), otherDetails.get('mode'), itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, paymentOption, me, kitchen)
+            order = await self.create_order(total, discount, couponId, otherDetails.get('mode'), itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, paymentOption, me, kitchen)
         else:
             response = {
                 "status": "Order can't be placed, Maximum 2 active orders are allowed."
@@ -138,6 +146,7 @@ class Customer(AsyncConsumer):
             "distance": distance,
             "orderid": order.id,
             "paymentOption": paymentOption,
+            "total": total,
         }
         await self.channel_layer.group_send(
             f"notification_group_{kituser}",
@@ -171,14 +180,14 @@ class Customer(AsyncConsumer):
         return Order.objects.filter(customer_id=custid, status="Placed").count() + Order.objects.filter(customer_id=custid, status="Packed").count() + Order.objects.filter(customer_id=custid, status="Preparing").count() + Order.objects.filter(customer_id=custid, status="Dispatched").count() + Order.objects.filter(customer_id=custid, status="Waiting").count()
 
     @database_sync_to_async
-    def create_order(self, total, mode, itemswithquantity, add, dist, msg, scheduledDate, paymentOption, cust, kit):
+    def create_order(self, total, discount, couponId, mode, itemswithquantity, add, dist, msg, scheduledDate, paymentOption, cust, kit):
         currentDate = datetime.now()
         if scheduledDate:
             var = dateparse.parse_datetime(scheduledDate)
             scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute)
-            return Order.objects.create(total_amount=total, balance=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, paymentOption=paymentOption, customer=cust, kitchen=kit, created_at=currentDate)
+            return Order.objects.create(total_amount=total, discount=discount, coupon_id=couponId, balance=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, paymentOption=paymentOption, customer=cust, kitchen=kit, created_at=currentDate)
         else:
-            return Order.objects.create(total_amount=total, balance=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate + timedelta(minutes=kit.deliveryTime), paymentOption=paymentOption, customer=cust, kitchen=kit, created_at=currentDate)
+            return Order.objects.create(total_amount=total, discount=discount, coupon_id=couponId, balance=total, mode=mode, itemswithquantity=itemswithquantity, delivery_addr=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate + timedelta(minutes=kit.deliveryTime), paymentOption=paymentOption, customer=cust, kitchen=kit, created_at=currentDate)
 
     @database_sync_to_async
     def update_order_status(self, status, msgtocust, orderid, amount_paid, balAmount):

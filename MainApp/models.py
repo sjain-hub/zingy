@@ -2,7 +2,7 @@
 from django.contrib.gis.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-from kitchen.models import Kitchens, Menus
+from kitchen.models import Kitchens, Menus, UserDiscountCoupons
 from django.contrib.gis.geos import Point
 from django.db.models import Q
 from django.core.validators import RegexValidator
@@ -32,7 +32,9 @@ class Addresses(models.Model):
 	
 class Order(models.Model):
 	id 				  = models.AutoField(primary_key=True)
-	total_amount      = models.IntegerField(default=0)
+	total_amount      = models.IntegerField(blank=False)
+	discount          = models.IntegerField(blank=False)
+	coupon            = models.ForeignKey(UserDiscountCoupons ,on_delete=models.CASCADE, null=True)
 	created_at        = models.DateTimeField(blank=False)
 	completed_at 	  = models.DateTimeField(null=True)
 	scheduled_order   = models.DateTimeField(null=True)

@@ -38,6 +38,7 @@
               Reviews)</a></span>{% if kitchen.pureVeg %}<span class="mr-2">/ Pure Veg
             <i class="fa fa-leaf" style='color: green; font-size: large;'></i></span>{% endif %}
         </p>
+        <!-- <a data-original-title="Save to Wishlist" title="" href="" class="btn btn-light" data-toggle="tooltip" data-abc="true"> <i class="fa fa-heart"></i></a> -->
         <input type="checkbox" {% if favourite %}checked{% endif %} class="form-check-input" id="favourite">
         <label class="form-check-label bread" for="favourite"><i class="fa fa-heart"
             style='color: red; font-size: x-large;'></i></label>
@@ -55,116 +56,119 @@
 
 
 <!-- Main Menu -->
-<section>
-  <div class="container">
-    <div class="row py-3">
-      <!-- <div class="col-2 w3-card w3-medium" id="sticky-sidebar">
-        <nav id="navbar-example3" class="navbar navbar-light bg-light">
-          <a class="navbar-brand" href="#">Navbar</a>
-          <nav class="nav nav-pills flex-column">
-            {% for cat in categories %}
-            <a class="nav-link" href="#{{ cat.id }}">{{ cat }}</a>
-            {% endfor %}
-          </nav>
+<div class="container">
+  <div class="row py-3">
+    <!-- <div class="col-2 w3-card w3-medium" id="sticky-sidebar">
+      <nav id="navbar-example3" class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <nav class="nav nav-pills flex-column">
+          {% for cat in categories %}
+          <a class="nav-link" href="#{{ cat.id }}">{{ cat }}</a>
+          {% endfor %}
         </nav>
-        <div class="sticky-top sidebar ftco-animate">
-          <div class="sidebar-box ftco-animate">
-            <br>
-            <br>
-            <br>
-            
+      </nav>
+      <div class="sticky-top sidebar ftco-animate">
+        <div class="sidebar-box ftco-animate">
+          <br>
+          <br>
+          <br>
+          
+        </div>
+      </div>
+    </div> -->
+
+    <div class="col-12 ftco-animate">
+      <div class="container py-3">
+        <div class="row justify-content-center mb-5 pb-2">
+          <div class="col-md-7 text-center heading-section ftco-animate">
+            <span class="subheading">Specialties</span>
+            <h2 class="mb-4">Our Menu</h2>
           </div>
         </div>
-      </div> -->
-
-      <div class="col-12 ftco-animate">
-        <div class="container py-3">
-          <div class="row justify-content-center mb-5 pb-2">
-            <div class="col-md-7 text-center heading-section ftco-animate">
-              <span class="subheading">Specialties</span>
-              <h2 class="mb-4">Our Menu</h2>
-            </div>
+        <div class="row">
+        {% for cat in categories %}
+        <div class="col-md-6 col-lg-12 menu-wrap">
+          <div id="{{cat.id}}" class="heading-menu text-center ftco-animate">
+            <h3>{{ cat }}</h3>
           </div>
-          <div class="row">
-            <div data-spy="scroll" data-target="#navbar-example3" data-offset="0">
-              {% for cat in categories %}
-              <div class="col-md-6 col-lg-12 menu-wrap">
-                <div id="{{cat.id}}" class="heading-menu text-center ftco-animate">
-                  <h3>{{ cat }}</h3>
+          {% for item in menuitems %}
+          {% if item.1 == cat %}
+          <div class="menus d-flex ftco-animate">
+            <div class="menu-img img" style="background-image: url({{ item.4.url }});">
+            </div>
+            <div class="text">
+              <div class="d-flex">
+                <div class="one-half">
+                  <h3>{{ item.0 }}</h3>
+                  {% if item.2 == 'veg' %}
+                  <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" />
+                  {% else %}
+                  <img src="https://img.icons8.com/color/20/000000/non-vegetarian-food-symbol.png" />
+                  {% endif %}
+                  <p style="color:tomato;"><span>{{ item.12 }}</span></p>
+                  <p><span>{{ item.5 }}</span></p>
+                  {% if item.9 != 0 %}
+                  <p><span>Minimum Order: {{ item.9 }}</span></p>
+                  {% endif %}
                 </div>
-                {% for item in menuitems %}
-                {% if item.1 == cat %}
-                <div class="menus d-flex ftco-animate">
-                  <div class="menu-img img" style="background-image: url({{ item.4.url }});">
-                  </div>
-                  <div class="text">
-                    <div class="d-flex">
-                      <div class="one-half">
-                        <h3>{{ item.0 }}</h3>
-                        {% if item.2 == 'veg' %}
-                        <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" />
-                        {% else %}
-                        <img src="https://img.icons8.com/color/20/000000/non-vegetarian-food-symbol.png" />
-                        {% endif %}
-                        <p style="color:tomato;"><span>{{ item.12 }}</span></p>
-                        <p><span>{{ item.5 }}</span></p>
-                        {% if item.9 != 0 %}
-                        <p><span>Minimum Order: {{ item.9 }}</span></p>
-                        {% endif %}
-                      </div>
-                      <div class="one-forth">
-                        <span class="price">&#8377; {{ item.3 }}</span>
-                        <br>
-                        <br>
-                        <br>
-                        <div class="btn-group" role="group" aria-label="Basic example">
-                          {% if item.10|length == 0 %}
-                          <button id="down" type="button" class="btn btn-outline-success" onclick="
-                          if(document.querySelector('#quantity{{item.7}}').innerHTML>0){
-                            if(document.querySelector('#quantity{{item.7}}').innerHTML=={{item.9}}){
-                              handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-{{item.9}});
-                            }
-                            else {
-                              handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-1);
-                            }
-                          }"><span class="icon-minus"></span></button>
-                          {% else %}
-                          <button id="down" type="button" class="btn btn-outline-success" data-toggle="modal"
-                            data-target="#id{{ item.7 }}"><span class="icon-minus"></span></button>
-                          {% endif %}
-                          <button type="button" class="btn btn-default" disabled><span id='quantity{{item.7}}'
-                              name='quantity{{item.7}}'> {{item.11}}
-                            </span></button>
-                          {% if item.10|length == 0 %}
-                          <button id="up" type="button" class="btn btn-outline-success" onclick="
-                          if(document.querySelector('#quantity{{item.7}}').innerHTML==0 && {{item.9}}>0){
-                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+{{item.9}});
-                          }
-                          else {
-                            handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+1);
-                          }"><span class="icon-plus"></span></button>
-                          {% else %}
-                          <button id="up" type="button" class="btn btn-outline-success" data-toggle="modal"
-                            data-target="#id{{ item.7 }}"><span class="icon-plus"></span></button>
-                          {% endif %}
-                        </div>
-                      </div>
-                    </div>
+                <div class="one-third">
+                  {% if item.6 > 0 %}
+                  <b><span class="price">Price: &#8377; {{ item.13 }}</span></b>
+                  <p><strike>Mrp: &#8377; {{ item.3 }}</strike>  {{ item.6 }}% Off</p>
+                  {% else %}
+                  <b><span class="price">Mrp: &#8377; {{ item.3 }}</span></b>
+                  <br>
+                  <br>
+                  <br>
+                  {% endif %}
+                  <br>
+                  <div class="btn-group" role="group" aria-label="Basic example">
+                    {% if item.10|length == 0 %}
+                    <button id="down" type="button" class="btn btn-outline-success" onclick="
+                    if(document.querySelector('#quantity{{item.7}}').innerHTML>0){
+                      if(document.querySelector('#quantity{{item.7}}').innerHTML=={{item.9}}){
+                        handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-{{item.9}});
+                      }
+                      else {
+                        handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)-1);
+                      }
+                    }"><span class="icon-minus"></span></button>
+                    {% else %}
+                    <button id="down" type="button" class="btn btn-outline-success" data-toggle="modal"
+                      data-target="#id{{ item.7 }}"><span class="icon-minus"></span></button>
+                    {% endif %}
+                    <button type="button" class="btn btn-default" disabled><span id='quantity{{item.7}}'
+                        name='quantity{{item.7}}'> {{item.11}}
+                      </span></button>
+                    {% if item.10|length == 0 %}
+                    <button id="up" type="button" class="btn btn-outline-success" onclick="
+                    if(document.querySelector('#quantity{{item.7}}').innerHTML==0 && {{item.9}}>0){
+                      handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+{{item.9}});
+                    }
+                    else {
+                      handlecounter({{item.7}}, parseInt(document.querySelector('#quantity{{item.7}}').innerHTML)+1);
+                    }"><span class="icon-plus"></span></button>
+                    {% else %}
+                    <button id="up" type="button" class="btn btn-outline-success" data-toggle="modal"
+                      data-target="#id{{ item.7 }}"><span class="icon-plus"></span></button>
+                    {% endif %}
                   </div>
                 </div>
-                {% endif %}
-                {% endfor %}
               </div>
-              <hr>
-              {% endfor %}
             </div>
           </div>
+          {% endif %}
+          {% endfor %}
         </div>
-      </div> <!-- .col-md-8 -->
+        <hr>
+        {% endfor %}
+        </div>
+      </div>
+    </div> <!-- .col-md-8 -->
 
-    </div>
   </div>
-</section>
+</div>
+
 
 <!-- SubItems Modal -->
 {% for item in menuitems %}
@@ -185,7 +189,12 @@
             <div class="d-flex">
               <div class="one-half">
                 <h3>{{ sub.1 }}</h3>
+                {% if item.6 > 0 %}
+                <span class="price">Price: &#8377; {{ sub.4 }}</span>
+                <p><strike>Mrp: &#8377; {{ sub.2 }}</strike>  {{ item.6 }}% Off</p>
+                {% else %}
                 <span class="price">&#8377; {{ sub.2 }}</span>
+                {% endif %}
               </div>
               <div class="one-forth">
                 <div class="btn-group" role="group" aria-label="Basic example">
