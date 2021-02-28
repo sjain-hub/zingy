@@ -144,7 +144,7 @@
                         <td>{{ order.mode }}</td>
                         <td>{{ order.delivery_addr }}</td>
                         <td>{{ order.total_amount }}</td>
-                        <td>{{ order.status }}<br><br>
+                        <td>{{ order.status }}<br>
                             {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
                             {{ order.completed_at }}
                             {% endif %}

@@ -3,19 +3,14 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
-<noscript>
-    <link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
-
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css" rel="stylesheet" />
 <style>
     #map {
-        position: absolute;
-        top: 24px;
-        bottom: 0;
-        width: 97%;
+        position: relative;
+        width: 100%;
+        height: 250px;
     }
 
     .mapboxgl-ctrl-logo {
@@ -23,397 +18,806 @@
     }
 </style>
 
-<!-- Wrapper-->
-<div id="wrapper">
-    <!-- Nav -->
-    <nav id="nav">
-        <!--        <a href="#" class="icon solid fa-smile"><span>Me</span></a>-->
-        <a href="#kitchen" class="icon solid fa-home"><span>My Kitchen</span></a>
-        <a href="#gallery" class="icon solid fa-image"><span>Gallery</span></a>
-        <a href="#certificates" class="icon solid fa-file-alt"><span>Documents</span></a>
-        <a href="#submit" class="icon solid fa-paper-plane"><span>Submit</span></a>
-    </nav>
-
-    {% if error_message %}
-    <div class="col-sm-offset-2 col-sm-12">
-        <span class="text-danger large">{{ error_message }}</span>
-    </div>
-    {% endif %}
-
-    <form role="form" method="post" enctype="multipart/form-data" novalidate>
-        {% csrf_token %}
-        <!-- Main -->
-        <div id="main">
-
-            <!-- My Kitchen -->
-            <article id="kitchen" class="panel"
-                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
-                <header>
-                    <h1>Enter Details of your Kitchen</h1>
-                </header>
-                <section>
-                    <div class="row">
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.kitName.errors }}</span>
-                            </div>
-                            <label class="col">Name of Kitchen :</label>
-                            {{ form.kitName }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.mode.errors }}</span>
-                            </div>
-                            <label class="col">What would you prefer:</label>
-                            {{ form.mode }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.acceptAdvcOrders.errors }}</span>
-                            </div>
-                            <label class="col">Accept advance orders (upto 2 days) ? :</label>
-                            {{ form.acceptAdvcOrders }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.wantAdvancePayment.errors }}</span>
-                            </div>
-                            <label class="col">Do you wish to always have Full payment in Advance ? :</label>
-                            {{ form.wantAdvancePayment }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.paytmLink.errors }}</span>
-                            </div>
-                            <label class="col">Provide the PayTm link for accepting online Payments :</label>
-                            {{ form.paytmLink }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.pureVeg.errors }}</span>
-                            </div>
-                            <label class="col">Pure Veg ? <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" /> :</label>
-                            {{ form.pureVeg }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.deliveryTime.errors }}</span>
-                            </div>
-                            <label class="col">How much time will you take to prepare and deliver the order in your range ? :</label>
-                            {{ form.deliveryTime }} min.
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.deliveryCharge.errors }}</span>
-                            </div>
-                            <label class="col">How much you want to charge for your delivery in your area ? :</label>
-                            {{ form.deliveryCharge }} &#8377;
-                            <small id="dpHelp" class="form-text text-muted">(You can always ask for the increased delivery amount if you want to deliver out of the area.)</small>
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.visibilityRadius.errors }}</span>
-                            </div>
-                            <label class="col">For how much Distance you want your Kitchen to visible? :</label>
-                            {{ form.visibilityRadius }}
-                            <small id="radiusHelp" class="form-text text-muted">(If you opt for "Delivery", then you should be able to Deliver to this much Distance.)</small>
-                        </div>
-                        <div class="col-12 ">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.paytmNo.errors }}</span>
-                            </div>
-                            <label class="col">Paytm no of your Kitchen :</label>
-                            {{ form.paytmNo }}
-                        </div>
-                        <div class="col-12 ">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.address.errors }}</span>
-                            </div>
-                            <label class="col">Full Address :</label>
-                            {{ form.address }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.city.errors }}</span>
-                            </div>
-                            <label class="col">City :</label>
-                            {{ form.city }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.landmark.errors }}</span>
-                            </div>
-                            <label class="col">Landmark :</label>
-                            {{ form.landmark }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.floorNo.errors }}</span>
-                            </div>
-                            <label class="col">Floor No. :</label>
-                            {{ form.floorNo }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.postalCode.errors }}</span>
-                            </div>
-                            <label class="col">Postal Code :</label>
-                            {{ form.postalCode }}
-                        </div>
-                        <div class="col-12">
-                            <div id="map"></div>
-                            <script>
-                                mapboxgl.accessToken = 'pk.eyJ1IjoiamFpbnNodWJoYW0iLCJhIjoiY2tkcG5lYzgyMjNteTMwbXIzYjkxaWtjayJ9.mV7uussgvFw4MXHVyMkIBg';
-
-                                {% if user.kitchens.approved %}
-
-                                    var map = new mapboxgl.Map({
-                                        container: 'map', // container id
-                                        style: 'mapbox://styles/mapbox/streets-v11',
-                                        center: [{{ form.longitude.value }}, {{ form.latitude.value }}], // starting position
-                                        zoom: 14, // starting zoom
-                                        attributionControl: false
-                                    });
-
-                                    // Full Screen
-                                    map.addControl(new mapboxgl.FullscreenControl());
-
-                                    new mapboxgl.Marker()
-                                    .setLngLat([{{ form.longitude.value }}, {{ form.latitude.value }}])
-                                    .addTo(map);
-
-                                    document.getElementById('lon').value = {{ form.longitude.value }};
-                                    document.getElementById('lat').value = {{ form.latitude.value }};
-
-                                {% else %}
-
-                                    var map = new mapboxgl.Map({
-                                        container: 'map', // container id
-                                        style: 'mapbox://styles/mapbox/streets-v11',
-                                        center: [77.2230, 28.5086], // starting position
-                                        zoom: 6, // starting zoom
-                                        attributionControl: false
-                                    });
-
-                                    // Full Screen
-                                    map.addControl(new mapboxgl.FullscreenControl());
-
-                                    // Add geolocate control to the map.
-                                    map.addControl(
-                                        new mapboxgl.GeolocateControl({
-                                            positionOptions: {
-                                                enableHighAccuracy: true
-                                            },
-                                            trackUserLocation: true,
-                                            showUserLocation: false
-                                        })
-                                    );
-
-                                    if (navigator.geolocation) {
-                                        console.log(navigator.geolocation.getCurrentPosition( x=> {
-                                            console.log(x, "working")
-                                        }))
-                                        navigator.geolocation.getCurrentPosition(position => {
-                                            console.log("reached")
-                                            document.getElementById('lon').value = position.coords.longitude;
-                                            document.getElementById('lat').value = position.coords.latitude;
-                                            var marker = new mapboxgl.Marker({draggable: true})
-                                            .setLngLat([position.coords.longitude, position.coords.latitude])
-                                            .addTo(map);
-                                    
-                                            function onDragEnd() {
-                                                var lngLat = marker.getLngLat();
-                                                document.getElementById('lon').value = lngLat.lng;
-                                                document.getElementById('lat').value = lngLat.lat;
-                                            }
-
-                                            marker.on('dragend', onDragEnd);
-                                        });
-                                    }
-
-                                {% endif %}
-                            </script>
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.longitude.errors }}</span>
-                            </div>
-                            <label class="col">Longitude :</label>
-                            {{ form.longitude }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.latitude.errors }}</span>
-                            </div>
-                            <label class="col">Latitude :</label>
-                            {{ form.latitude }}
-                        </div>
-                        <div class="col-12">
-                            <a href="#gallery" class="jumplink pic">
-                                <button type="button">Next</button>
-                            </a>
-                        </div>
-                    </div>
-                </section>
-            </article>
-
-            <!-- Kitchen Gallery -->
-            <article id="gallery" class="panel"
-                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
-                <header>
-                    <h2>Design your Kitchen</h2>
-                </header>
-                <section>
-                    <div class="row">
-                        <div class="col-12 row">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.dp.errors }}</span>
-                            </div>
-                            <label class="col">Upload DP(Display Picture) of your kitchen :</label>
-                            {{ form.dp }}
-                            <small id="dpHelp" class="form-text text-muted">(This Image will represent your Kitchen to
-                                the Customers)</small>
-                        </div>
-                        <div class="col-12 row">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.video.errors }}</span>
-                            </div>
-                            <label class="col">Upload a Video of your kitchen:</label>
-                            {{ form.video }}
-                            <small id="videoHelp" class="form-text text-muted ">(This video will be attached to your
-                                Kitchen's page to make your kitchen Transparent to the customers. You can also add a
-                                video message that you want to convey to your customers through this video. This will
-                                create a Trust factor within customers.)</small>
-                        </div>
-                        <div class="col-12 row">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.QRCode.errors }}</span>
-                            </div>
-                            <label class="col">Upload PayTm QRCode :</label>
-                            {{ form.QRCode }}
-                            <small id="qrHelp" class="form-text text-muted">(This QRCode will help customers to scan and pay their bills online.)</small>
-                        </div>
-                        <div class="col-12">
-                            <a href="#certificates" class="jumplink pic">
-                                <button type="button">Next</button>
-                            </a>
-                        </div>
-                    </div>
-                </section>
-            </article>
-
-            <!-- Certificates -->
-            <article id="certificates" class="panel"
-                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
-                <header>
-                    <h2>Upload Documents</h2>
-                </header>
-                <div>
-                    <div class="row">
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.fssaiLicNo.errors }}</span>
-                            </div>
-                            <label class="col">FSSAI License No. :</label>
-                            {{ form.fssaiLicNo }}
-                        </div>
-                        <div class="col-6 col-12-medium">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.fssaiName.errors }}</span>
-                            </div>
-                            <label class="col">FSSAI Registered name :</label>
-                            {{ form.fssaiName }}
-                        </div>
-                        <div class="col-12">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.fssaiAdd.errors }}</span>
-                            </div>
-                            <label class="col">Address on FSSAI Certificate :</label>
-                            {{ form.fssaiAdd }}
-                        </div>
-                        <div class="col-12 row">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.fssaiExpiry.errors }}</span>
-                            </div>
-                            <label class="col">FSSAI Expiry date:</label>
-                            <div class="col">
-                                {{ form.fssaiExpiry }}
-                            </div>
-                        </div>
-                        <div class="col-12 row">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.fssaiCerti.errors }}</span>
-                            </div>
-                            <label class="col">FSSAI certificate Upload:</label>
-                            <div class="col">
-                                {{ form.fssaiCerti }}
-                            </div>
-                        </div>
-                        <div class="col-12 row">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.kyc.errors }}</span>
-                            </div>
-                            <label class="col">Upload KYC (Aadhar card/ Passport/ Driving License/ Voter ID):</label>
-                            <div class="col">
-                                {{ form.kyc }}
-                            </div>
-                            <small id="kycHelp" class="form-text text-muted">(Please upload ["png", "jpg", "jpeg"]
-                                Images)</small>
-                        </div>
-                        <div class="col-12 row">
-                            <div class="col-sm-offset-2 col-sm-12">
-                                <span class="text-danger small">{{ form.degree.errors }}</span>
-                            </div>
-                            <label class="col">If you have any degree or specialisation in Food, then upload your
-                                Certificate:</label>
-                            <div class="col">
-                                {{ form.degree }}
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <a href="#submit" class="jumplink pic">
-                                <button type="button">Next</button>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Submit details -->
-            <article id="submit" class="panel"
-                style="background-image: url({% static 'images/backgroundimage.jpeg' %});">
-                <header>
-                    <h2>Submit your details</h2>
-                </header>
-                <div>
-                    <div class="row">
-                        <div class="col-12">
-                            <input type="submit" value="Submit" />
-                        </div>
-                    </div>
-                </div>
-            </article>
-
+<section class="hero-wrap hero-wrap-2" style="background-image: url({% static 'images/bg_4.jpg' %});" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Your Kitchen</h1>
+            </div>
         </div>
-    </form>
+    </div>
+</section>
 
+<div class="container-fluid" id="grad1">
+    <div class="row justify-content-center mt-0">
+        <div class="col-11 col-sm-9 col-md-7 col-lg-6 text-center p-0 mt-3 mb-2">
+            <div class="card px-0 pt-4 pb-0 mt-3 mb-3">
+                <h2><strong>Create Your Kitchen</strong></h2>
+                <div class="row">
+                    <div class="col-md-12 mx-0">
+                        {% if error_message %}
+                        <div class="col-sm-offset-2 col-sm-12">
+                            <span class="text-danger large">{{ error_message }}</span>
+                        </div>
+                        {% endif %}
+                        <form id="msform" role="form" method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            <!-- progressbar -->
+                            <ul id="progressbar">
+                                <li class="active" id="account"><strong>My Kitchen</strong></li>
+                                <li id="personal"><strong>Gallery</strong></li>
+                                <li id="payment"><strong>Documents</strong></li>
+                                <li id="confirm"><strong>Submit</strong></li>
+                            </ul> 
+                            <!-- fieldsets -->
+                            <fieldset>
+                                <div class="form-card">
+                                    <h2 class="fs-title">Kitchen Information</h2>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                        </div>
+                                        <label>Name of Kitchen :</label>
+                                        {{ form.kitName }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.mode.errors }}</span>
+                                        </div>
+                                        <label>What would you prefer:</label>
+                                        {{ form.mode }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.acceptAdvcOrders.errors }}</span>
+                                        </div>
+                                        <label>Accept advance orders (upto 2 days) ? :</label>
+                                        {{ form.acceptAdvcOrders }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.wantAdvancePayment.errors }}</span>
+                                        </div>
+                                        <label>Do you wish to always have Full payment in Advance ? :</label>
+                                        {{ form.wantAdvancePayment }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.paytmLink.errors }}</span>
+                                        </div>
+                                        <label>Provide the PayTm link for accepting online Payments :</label>
+                                        {{ form.paytmLink }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.pureVeg.errors }}</span>
+                                        </div>
+                                        <label>Pure Veg ? <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" /> :</label>
+                                        {{ form.pureVeg }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.deliveryTime.errors }}</span>
+                                        </div>
+                                        <label>How much time will you take to prepare and deliver the order in your range ? :</label>
+                                        {{ form.deliveryTime }} min.
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.deliveryCharge.errors }}</span>
+                                        </div>
+                                        <label>How much you want to charge for your delivery in your area ? :</label>
+                                        {{ form.deliveryCharge }} &#8377;
+                                        <small id="dpHelp" class="form-text text-muted">(You can always ask for the increased delivery amount if you want to deliver out of the area.)</small>
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.visibilityRadius.errors }}</span>
+                                        </div>
+                                        <label>For how much Distance you want your Kitchen to visible? :</label>
+                                        {{ form.visibilityRadius }}
+                                        <small id="radiusHelp" class="form-text text-muted">(If you opt for "Delivery", then you should be able to Deliver to this much Distance.)</small>
+                                    </div>
+                                    <div class="col-12 ">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.paytmNo.errors }}</span>
+                                        </div>
+                                        <label>Paytm no of your Kitchen :</label>
+                                        {{ form.paytmNo }}
+                                    </div>
+                                    <div class="col-12 ">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.address.errors }}</span>
+                                        </div>
+                                        <label>Full Address :</label>
+                                        {{ form.address }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.city.errors }}</span>
+                                        </div>
+                                        <label>City :</label>
+                                        {{ form.city }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.landmark.errors }}</span>
+                                        </div>
+                                        <label>Landmark :</label>
+                                        {{ form.landmark }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.floorNo.errors }}</span>
+                                        </div>
+                                        <label>Floor No. :</label>
+                                        {{ form.floorNo }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.postalCode.errors }}</span>
+                                        </div>
+                                        <label>Postal Code :</label>
+                                        {{ form.postalCode }}
+                                    </div>
+                                    <div >
+                                        <label>Your Location :</label>
+                                        <div id="map"></div>
+                                        <script>
+                                            mapboxgl.accessToken = 'pk.eyJ1IjoiamFpbnNodWJoYW0iLCJhIjoiY2tkcG5lYzgyMjNteTMwbXIzYjkxaWtjayJ9.mV7uussgvFw4MXHVyMkIBg';
+            
+                                            {% if user.kitchens.approved %}
+            
+                                                var map = new mapboxgl.Map({
+                                                    container: 'map', // container id
+                                                    style: 'mapbox://styles/mapbox/streets-v11',
+                                                    center: [{{ form.longitude.value }}, {{ form.latitude.value }}], // starting position
+                                                    zoom: 14, // starting zoom
+                                                    attributionControl: false
+                                                });
+            
+                                                // Full Screen
+                                                map.addControl(new mapboxgl.FullscreenControl());
+            
+                                                new mapboxgl.Marker()
+                                                .setLngLat([{{ form.longitude.value }}, {{ form.latitude.value }}])
+                                                .addTo(map);
+            
+                                                document.getElementById('lon').value = {{ form.longitude.value }};
+                                                document.getElementById('lat').value = {{ form.latitude.value }};
+            
+                                            {% else %}
+            
+                                                var map = new mapboxgl.Map({
+                                                    container: 'map', // container id
+                                                    style: 'mapbox://styles/mapbox/streets-v11',
+                                                    center: [77.2230, 28.5086], // starting position
+                                                    zoom: 6, // starting zoom
+                                                    attributionControl: false
+                                                });
+            
+                                                // Full Screen
+                                                map.addControl(new mapboxgl.FullscreenControl());
+            
+                                                // Add geolocate control to the map.
+                                                map.addControl(
+                                                    new mapboxgl.GeolocateControl({
+                                                        positionOptions: {
+                                                            enableHighAccuracy: true
+                                                        },
+                                                        trackUserLocation: true,
+                                                        showUserLocation: false
+                                                    })
+                                                );
+            
+                                                if (navigator.geolocation) {
+                                                    console.log(navigator.geolocation.getCurrentPosition( x=> {
+                                                        console.log(x, "working")
+                                                    }))
+                                                    navigator.geolocation.getCurrentPosition(position => {
+                                                        console.log("reached")
+                                                        document.getElementById('lon').value = position.coords.longitude;
+                                                        document.getElementById('lat').value = position.coords.latitude;
+                                                        var marker = new mapboxgl.Marker({draggable: true})
+                                                        .setLngLat([position.coords.longitude, position.coords.latitude])
+                                                        .addTo(map);
+                                                
+                                                        function onDragEnd() {
+                                                            var lngLat = marker.getLngLat();
+                                                            document.getElementById('lon').value = lngLat.lng;
+                                                            document.getElementById('lat').value = lngLat.lat;
+                                                        }
+            
+                                                        marker.on('dragend', onDragEnd);
+                                                    });
+                                                }
+            
+                                            {% endif %}
+                                        </script>
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.longitude.errors }}</span>
+                                        </div>
+                                        <label>Longitude :</label>
+                                        {{ form.longitude }}
+                                    </div>
+                                    <div>
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.latitude.errors }}</span>
+                                        </div>
+                                        <label>Latitude :</label>
+                                        {{ form.latitude }}
+                                    </div>
+                                    <!-- <div class="table-responsive">
+                                        <table class="table table-sm table-borderless mb-0">
+                                          <tbody>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Name of Kitchen</th>
+                                                <td>{{form.kitName}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">What would you prefer</th>
+                                                <td>{{form.mode}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.mode.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Accept advance orders (upto 2 days) ?</th>
+                                                <td>{{form.acceptAdvcOrders}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.acceptAdvcOrders.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Do you wish to always have Full payment in Advance ?</th>
+                                                <td>{{form.wantAdvancePayment}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.wantAdvancePayment.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Provide the PayTm link for accepting online Payments</th>
+                                                <td>{{form.paytmLink}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.paytmLink.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Pure Veg ? <img src="https://img.icons8.com/color/20/000000/vegetarian-food-symbol.png" /></th>
+                                                <td>{{form.pureVeg}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.pureVeg.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">How much time will you take to prepare and deliver the order in your range ?</th>
+                                                <td>{{form.deliveryTime}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.deliveryTime.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">How much you want to charge for your delivery in your area ?
+                                                    <small id="dpHelp" class="form-text text-muted">(You can always ask for the increased delivery amount if you want to deliver out of the area.)</small>
+                                                </th>
+                                                <td>{{form.deliveryCharge}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.deliveryCharge.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">For how much Distance you want your Kitchen to visible?
+                                                    <small id="radiusHelp" class="form-text text-muted">(If you opt for "Delivery", then you should be able to Deliver to this much Distance.)</small>
+                                                </th>
+                                                <td>{{form.visibilityRadius}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.visibilityRadius.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Paytm no of your Kitchen</th>
+                                                <td>{{form.paytmNo}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.paytmNo.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Full Address</th>
+                                                <td>{{form.address}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.address.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">City</th>
+                                                <td>{{form.city}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.city.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Name of Kitchen</th>
+                                                <td>{{form.kitName}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Name of Kitchen</th>
+                                                <td>{{form.kitName}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Name of Kitchen</th>
+                                                <td>{{form.kitName}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Name of Kitchen</th>
+                                                <td>{{form.kitName}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Name of Kitchen</th>
+                                                <td>{{form.kitName}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                                </div>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0 w-50" scope="row">Name of Kitchen</th>
+                                                <td>{{form.kitName}}</td>
+                                                <div class="col-sm-offset-2 col-sm-12">
+                                                    <span class="text-danger small">{{ form.kitName.errors }}</span>
+                                                </div>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                    </div> -->
+                                </div> 
+                                <input type="button" name="next" class="next action-button" value="Next Step" />
+                            </fieldset>
+                            <fieldset>
+                                <div class="form-card">
+                                    <h2 class="fs-title">Design your Kitchen</h2>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.dp.errors }}</span>
+                                        </div>
+                                        <label class="col">Upload DP(Display Picture) of your kitchen :</label>
+                                        {{ form.dp }}
+                                        <small id="dpHelp" class="form-text text-muted">(This Image will represent your Kitchen to
+                                            the Customers)</small>
+                                    </div>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.video.errors }}</span>
+                                        </div>
+                                        <label class="col">Upload a Video of your kitchen:</label>
+                                        {{ form.video }}
+                                        <small id="videoHelp" class="form-text text-muted ">(This video will be attached to your
+                                            Kitchen's page to make your kitchen Transparent to the customers. You can also add a
+                                            video message that you want to convey to your customers through this video. This will
+                                            create a Trust factor within customers.)</small>
+                                    </div>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.QRCode.errors }}</span>
+                                        </div>
+                                        <label class="col">Upload PayTm QRCode :</label>
+                                        {{ form.QRCode }}
+                                        <small id="qrHelp" class="form-text text-muted">(This QRCode will help customers to scan and pay their bills online.)</small>
+                                    </div>
+                                </div> 
+                                <input type="button" name="previous" class="previous action-button-previous"
+                                    value="Previous" /> 
+                                <input type="button" name="next" class="next action-button"
+                                    value="Next Step" />
+                            </fieldset>
+                            <fieldset>
+                                <div class="form-card">
+                                    <h2 class="fs-title">Upload Documents</h2>
+                                    <div class="col-6 col-12-medium">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.fssaiLicNo.errors }}</span>
+                                        </div>
+                                        <label class="col">FSSAI License No. :</label>
+                                        {{ form.fssaiLicNo }}
+                                    </div>
+                                    <div class="col-6 col-12-medium">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.fssaiName.errors }}</span>
+                                        </div>
+                                        <label class="col">FSSAI Registered name :</label>
+                                        {{ form.fssaiName }}
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.fssaiAdd.errors }}</span>
+                                        </div>
+                                        <label class="col">Address on FSSAI Certificate :</label>
+                                        {{ form.fssaiAdd }}
+                                    </div>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.fssaiExpiry.errors }}</span>
+                                        </div>
+                                        <label class="col">FSSAI Expiry date:</label>
+                                        <div class="col">
+                                            {{ form.fssaiExpiry }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.fssaiCerti.errors }}</span>
+                                        </div>
+                                        <label class="col">FSSAI certificate Upload:</label>
+                                        <div class="col">
+                                            {{ form.fssaiCerti }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.kyc.errors }}</span>
+                                        </div>
+                                        <label class="col">Upload KYC (Aadhar card/ Passport/ Driving License/ Voter ID):</label>
+                                        <div class="col">
+                                            {{ form.kyc }}
+                                        </div>
+                                        <small id="kycHelp" class="form-text text-muted">(Please upload ["png", "jpg", "jpeg"]
+                                            Images)</small>
+                                    </div>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.degree.errors }}</span>
+                                        </div>
+                                        <label class="col">If you have any degree or specialisation in Food, then upload your
+                                            Certificate:</label>
+                                        <div class="col">
+                                            {{ form.degree }}
+                                        </div>
+                                    </div>
+                                </div> <input type="button" name="previous" class="previous action-button-previous"
+                                    value="Previous" /> <input type="button" name="make_payment"
+                                    class="next action-button" value="Confirm" />
+                            </fieldset>
+                            <fieldset>
+                                <div class="form-card">
+                                    <h2 class="fs-title text-center">Success !</h2> <br><br>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <input type="submit" value="Submit" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<style>
+    * {
+        margin: 0;
+        padding: 0
+    }
+
+    html {
+        height: 100%
+    }
+
+    #grad1 {
+        background-color: : #9C27B0;
+        background-image: linear-gradient(120deg, #FF4081, #81D4FA)
+    }
+
+    #msform {
+        text-align: center;
+        position: relative;
+        margin-top: 20px
+    }
+
+    #msform fieldset .form-card {
+        background: white;
+        border: 0 none;
+        border-radius: 0px;
+        box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.2);
+        padding: 20px 40px 30px 40px;
+        box-sizing: border-box;
+        width: 94%;
+        margin: 0 3% 20px 3%;
+        position: relative
+    }
+
+    #msform fieldset {
+        background: white;
+        border: 0 none;
+        border-radius: 0.5rem;
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0;
+        padding-bottom: 20px;
+        position: relative
+    }
+
+    #msform fieldset:not(:first-of-type) {
+        display: none
+    }
+
+    #msform fieldset .form-card {
+        text-align: left;
+        color: #9E9E9E
+    }
+
+    #msform input,
+    #msform textarea {
+        padding: 0px 8px 4px 8px;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        border-radius: 0px;
+        margin-bottom: 25px;
+        margin-top: 2px;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: montserrat;
+        color: #2C3E50;
+        font-size: 16px;
+        letter-spacing: 1px
+    }
+
+    #msform input:focus,
+    #msform textarea:focus {
+        -moz-box-shadow: none !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        border: none;
+        font-weight: bold;
+        border-bottom: 2px solid skyblue;
+        outline-width: 0
+    }
+
+    #msform .action-button {
+        width: 100px;
+        background: skyblue;
+        font-weight: bold;
+        color: white;
+        border: 0 none;
+        border-radius: 0px;
+        cursor: pointer;
+        padding: 10px 5px;
+        margin: 10px 5px
+    }
+
+    #msform .action-button:hover,
+    #msform .action-button:focus {
+        box-shadow: 0 0 0 2px white, 0 0 0 3px skyblue
+    }
+
+    #msform .action-button-previous {
+        width: 100px;
+        background: #616161;
+        font-weight: bold;
+        color: white;
+        border: 0 none;
+        border-radius: 0px;
+        cursor: pointer;
+        padding: 10px 5px;
+        margin: 10px 5px
+    }
+
+    #msform .action-button-previous:hover,
+    #msform .action-button-previous:focus {
+        box-shadow: 0 0 0 2px white, 0 0 0 3px #616161
+    }
+
+    select.list-dt {
+        border: none;
+        outline: 0;
+        border-bottom: 1px solid #ccc;
+        padding: 2px 5px 3px 5px;
+        margin: 2px
+    }
+
+    select.list-dt:focus {
+        border-bottom: 2px solid skyblue
+    }
+
+    .card {
+        z-index: 0;
+        border: none;
+        border-radius: 0.5rem;
+        position: relative
+    }
+
+    .fs-title {
+        font-size: 25px;
+        color: #2C3E50;
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-align: left
+    }
+
+    #progressbar {
+        margin-bottom: 30px;
+        overflow: hidden;
+        color: lightgrey
+    }
+
+    #progressbar .active {
+        color: #000000
+    }
+
+    #progressbar li {
+        list-style-type: none;
+        font-size: 12px;
+        width: 25%;
+        float: left;
+        position: relative
+    }
+
+    #progressbar #account:before {
+        font-family: FontAwesome;
+        content: "\f015"
+    }
+
+    #progressbar #personal:before {
+        font-family: FontAwesome;
+        content: "\f007"
+    }
+
+    #progressbar #payment:before {
+        font-family: FontAwesome;
+        content: "\f09d"
+    }
+
+    #progressbar #confirm:before {
+        font-family: FontAwesome;
+        content: "\f00c"
+    }
+
+    #progressbar li:before {
+        width: 50px;
+        height: 50px;
+        line-height: 45px;
+        display: block;
+        font-size: 18px;
+        color: #ffffff;
+        background: lightgray;
+        border-radius: 50%;
+        margin: 0 auto 10px auto;
+        padding: 2px
+    }
+
+    #progressbar li:after {
+        content: '';
+        width: 100%;
+        height: 2px;
+        background: lightgray;
+        position: absolute;
+        left: 0;
+        top: 25px;
+        z-index: -1
+    }
+
+    #progressbar li.active:before,
+    #progressbar li.active:after {
+        background: skyblue
+    }
+
+    .radio-group {
+        position: relative;
+        margin-bottom: 25px
+    }
+
+    .radio {
+        display: inline-block;
+        width: 204;
+        height: 104;
+        border-radius: 0;
+        background: lightblue;
+        box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.2);
+        box-sizing: border-box;
+        cursor: pointer;
+        margin: 8px 2px
+    }
+
+    .radio:hover {
+        box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.3)
+    }
+
+    .radio.selected {
+        box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.1)
+    }
+
+    .fit-image {
+        width: 100%;
+        object-fit: cover
+    }
+</style>
 <script>
-    function onlyNumberKey(evt) { 
-        var ASCIICode = (evt.which) ? evt.which : evt.keyCode 
-        if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 57)) 
-            return false; 
-        return true; 
-    } 
+    $(document).ready(function () {
+
+        var current_fs, next_fs, previous_fs; //fieldsets
+        var opacity;
+
+        $(".next").click(function () {
+
+            current_fs = $(this).parent();
+            next_fs = $(this).parent().next();
+
+            //Add Class Active
+            $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+            //show the next fieldset
+            next_fs.show();
+            //hide the current fieldset with style
+            current_fs.animate({ opacity: 0 }, {
+                step: function (now) {
+                    // for making fielset appear animation
+                    opacity = 1 - now;
+
+                    current_fs.css({
+                        'display': 'none',
+                        'position': 'relative'
+                    });
+                    next_fs.css({ 'opacity': opacity });
+                },
+                duration: 600
+            });
+        });
+
+        $(".previous").click(function () {
+
+            current_fs = $(this).parent();
+            previous_fs = $(this).parent().prev();
+
+            //Remove class active
+            $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+            //show the previous fieldset
+            previous_fs.show();
+
+            //hide the current fieldset with style
+            current_fs.animate({ opacity: 0 }, {
+                step: function (now) {
+                    // for making fielset appear animation
+                    opacity = 1 - now;
+
+                    current_fs.css({
+                        'display': 'none',
+                        'position': 'relative'
+                    });
+                    previous_fs.css({ 'opacity': opacity });
+                },
+                duration: 600
+            });
+        });
+
+        $('.radio-group .radio').click(function () {
+            $(this).parent().find('.radio').removeClass('selected');
+            $(this).addClass('selected');
+        });
+
+        $(".submit").click(function () {
+            return false;
+        })
+
+    });
 </script>
-
-<!-- Scripts -->
-<script src="{% static 'assets/js/jquery.min.js' %}"></script>
-<script src="{% static 'assets/js/browser.min.js' %}"></script>
-<script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
-<script src="{% static 'assets/js/util.js' %}"></script>
-<script src="{% static 'assets/js/main.js' %}"></script>
-
 
 {% include "notificationModal.html" %}
 {% endblock %}

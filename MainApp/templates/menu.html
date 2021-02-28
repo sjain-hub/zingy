@@ -102,7 +102,7 @@
           </div>
           {% for item in menuitems %}
           {% if item.1 == cat %}
-          <div class="menus d-flex ftco-animate">
+          <div class="menus d-flex ftco-animate {% if item.8 %}outofstock{% endif %}">
             <div class="menu-img img" style="background-image: url({{ item.4.url }});">
             </div>
             <div class="text">
@@ -119,18 +119,21 @@
                   {% if item.9 != 0 %}
                   <p><span>Minimum Order: {{ item.9 }}</span></p>
                   {% endif %}
+                  {% if item.8 %}
+                  <p><span class="oosstyle">OUT OF STOCK</span></p>
+                  {% endif %}
                 </div>
                 <div class="one-third">
                   {% if item.6 > 0 %}
                   <b><span class="price">Price: &#8377; {{ item.13 }}</span></b>
-                  <p><strike>Mrp: &#8377; {{ item.3 }}</strike>  {{ item.6 }}% Off</p>
+                  <p><strike>Mrp: &#8377; {{ item.3 }}</strike><br>  {{ item.6 }}% Off</p>
                   {% else %}
                   <b><span class="price">Mrp: &#8377; {{ item.3 }}</span></b>
                   <br>
                   <br>
                   <br>
                   {% endif %}
-                  <br>
+                  
                   <div class="btn-group" role="group" aria-label="Basic example">
                     {% if item.10|length == 0 %}
                     <button id="down" type="button" class="btn btn-outline-success" onclick="
@@ -177,6 +180,15 @@
 	</div>
 </div>
 <style>
+  .outofstock {
+    pointer-events: none;
+    opacity: 0.4;
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+  }
+  .oosstyle{
+    color: red;
+  }
 	.wrapper {
 		display: flex;
 		justify-content: space-between;

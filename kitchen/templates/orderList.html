@@ -160,7 +160,7 @@
                                                     {% endif %}
                                                 </select>
                                                 {% endif %}
-                                                <br><br>
+                                                <br>
                                                 {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
                                                 {{ order.completed_at }}
                                                 {% endif %}
@@ -169,7 +169,7 @@
                                                 {% if order.status == "Cancelled" or order.status == "Rejected" %}
                                                 {{ order.msgtocust }}
                                                 {% else %}
-                                                <textarea id="msgtocust{{order.id}}" name="msgtocust{{order.id}}" rows="2" cols="20">{{ order.msgtocust }}</textarea></td>
+                                                <textarea id="msgtocust{{order.id}}" name="msgtocust{{order.id}}" rows="3" cols="20">{{ order.msgtocust }}</textarea></td>
                                                 {% endif %}
                                             <td>
                                                 <input type="hidden" name="custid{{order.id}}" id="custid{{order.id}}" value="{{ order.customer.id }}" />

@@ -71,7 +71,7 @@ class KitchenForm(forms.ModelForm):
 	longitude = forms.FloatField(widget=forms.TextInput(
 		attrs={'id': 'lon', 'readonly': 'true'}))
 	paytmNo = forms.CharField(widget=forms.TextInput(
-		attrs={'class': 'form-control', 'placeholder': 'PayTm No.', 'maxlength':'10', 'onkeypress':'return onlyNumberKey(event)'}))
+		attrs={'placeholder': 'PayTm No.', 'maxlength':'10', 'onkeypress':'return onlyNumberKey(event)'}))
 
 	def __init__(self, *args, **kwargs):
 		self.user = kwargs.pop('user',None)

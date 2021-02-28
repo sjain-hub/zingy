@@ -49,17 +49,19 @@
 			{% for kit in kit_object %}
 			<div class="col-md-4 ftco-animate">
 				<div class="blog-entry">
-					<a href="{% url 'menu' kit.0.id %}" class="block-20"
+					<a href="{% url 'menu' kit.0.id %}" class="block-20 imgcont"
 						{% if kit.0.status == "Closed" %}
-						style="background-image: url({{kit.0.dp.url}});-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
-						filter: grayscale(100%);pointer-events: none;cursor: default;"
+						style="background-image: url({{kit.0.dp.url}});-webkit-filter: grayscale(100%);
+						filter: grayscale(100%);pointer-events: none;cursor: default; opacity: 0.5;">
+						<div class="centered">Kitchen Closed</div>
 						{% else %}
-						style="background-image: url({{kit.0.dp.url}});"
-						{% endif %}>
+						style="background-image: url({{kit.0.dp.url}});">
+						{% endif %}
 					</a>
 					<div class="text px-4 pt-3 pb-4">
-						<h3 class="heading"><a href="#">{{kit.0.kitName}}</a></h3>
+						<h3 class="heading">{{kit.0.kitName}}</h3>
 						{{kit.2}} km
+						<span class="float-right read">{{kit.0.mode}} ({{kit.0.deliveryTime}} mins.)</span>
 						<div class="meta">
 							<div><a>{{kit.1}}</a></div>
 						</div>
@@ -67,7 +69,6 @@
 							{% if kit.3.ratings__avg != None %}
 							<span class="icon-star {% if kit.3.ratings__avg >= 4.0 %}text-success{% elif kit.3.ratings__avg >= 3.0 %}text-warning{% else %}text-danger{% endif %}"> {{kit.3.ratings__avg}}</span>
 							{% endif %}
-							<span class="float-right read">{{kit.0.mode}} ({{kit.0.deliveryTime}} mins.)</span>
 						</p>
 						{% if kit.0.acceptAdvcOrders %}
 						<hr>
@@ -89,6 +90,20 @@
 <br>
 
 <style>
+	.imgcont {
+		position: relative;
+		text-align: center;
+		color: black;
+		font-size: larger;
+	}
+	.centered {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background-color: white;
+		width: 100%;
+	}
 	.wrapper {
 		display: flex;
 		justify-content: space-between;
