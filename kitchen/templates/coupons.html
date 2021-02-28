@@ -1,0 +1,141 @@
+{% extends 'baseKit.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <h1 class="mb-2 bread">Coupons</h1>
+            </div>
+        </div>
+    </div>
+</section>
+<br>
+
+<section class="container-fluid" id="coupons">
+    <button type="button" class="couponModal btn btn-outline-danger btn-sm"
+        data-toggle="modal">Generate Coupon for all users</button>
+    <br>
+    <br>
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Coupon ID</th>
+                <th scope="col">code</th>
+                <th scope="col">User</th>
+                <th scope="col">Issue Date</th>
+                <th scope="col">Valid Till</th>
+                <th scope="col">Discount</th>
+                <th scope="col">Description</th>
+                <th scope="col">Maximum Discount</th>
+                <th scope="col">Redeemed</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coupon in coupons %}
+            <tr {% if coupon.redeemed %}class="table-light"{% elif coupon.user == None %}class="table-danger"{% else %}class="table-warning"{% endif %}>
+                <th scope="row">{{coupon.id}}</th>
+                <th scope="row">{{coupon.code}}</th>
+                <td>
+                    {% if coupon.user == None %}
+                    For All Users
+                    {% else %}
+                    {{coupon.user.first_name}} {{coupon.user.last_name}}
+                    {% endif %}
+                </td>
+                <td>{{coupon.issueDate}}</td>
+                <td>{{coupon.validTill}}</td>
+                <td>{{coupon.discount}}</td>
+                <td><textarea rows="3" cols="20" readonly>{{ coupon.description }}</textarea></td>
+                <td>{{coupon.maxDiscount}}</td>
+                <td>{{coupon.redeemed}}</td>
+                <th>
+                    {% if coupon.user == None and coupon.redeemed != True %}
+                    <button type="button" class="btn btn-outline-dark btn-sm"
+                        onclick="handledelete('{{coupon.id}}');">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                    {% endif %}
+                </th>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+<script>
+    $(document).on("click", ".couponModal", function () {
+        $.ajax({
+            url: '{% url 'createCoupon' %}',
+            type: 'GET',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+
+            success: function (data) {
+                console.log(data)
+                $("#couponModal #fields").html(data)
+            },
+        });
+        $("#couponModal").modal("show");
+    })
+
+    function handledelete(couponId){
+        $.ajax({
+            url: '{% url 'coupons' %}',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            data: {'couponId':couponId},
+            
+            success: function (data) {
+                $("#coupons").load(" #coupons > *");
+            },
+        });
+    }
+</script>
+
+
+<!-- coupon modal -->
+<div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form method="post" role="form" id="couponForm" enctype="multipart/form-data">
+                <div id="fields">
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function onlyNumberKey(evt) { 
+        var ASCIICode = (evt.which) ? evt.which : evt.keyCode 
+        if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 57)) 
+            return false; 
+        return true; 
+    }
+
+    $(document).ready(function () {
+        $(document).on("click", ".send-coupon", function (event) {
+            $.ajax({
+                url: '{% url 'createCoupon' %}',
+                type: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                data: $('#couponForm').serialize(),
+                
+                success: function (data) {
+                    if (data.success_message) {
+                        alert(data.success_message)
+                        $("#couponModal").modal("hide");
+                    }
+                },
+            });
+        });
+    });
+</script>
+
+
+{% include "notificationModal.html" %}
+{% endblock %}

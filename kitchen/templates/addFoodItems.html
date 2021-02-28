@@ -47,7 +47,7 @@
             <br />
 
             <table class="table table-bordered table-hover table-sortable" id="tab_logic">
-                <thead>
+                <thead class="table-info">
                     <tr>
                         <th class="text-center">
                             Category
@@ -87,8 +87,8 @@
                 <tbody>
                     {% for category in cat.forms %}
                     <div id="scroll{{ form.category.value }}">
-                        <tr>
-                            <td colspan="10" class="text-center">
+                        <tr class="table-active">
+                            <td colspan="11" class="text-center">
                                 {% if category.category.value != None %}
                                 <h3>{{ category.category.value }}</h3>
                                 {% else %}
@@ -167,7 +167,7 @@
                 <div class="modal-body">
                     <form action="" method="POST" enctype="multipart/form-data">
                         <table class="table table-bordered table-hover table-sortable" id="tab_logic">
-                            <thead>
+                            <thead class="table-dark">
                                 <tr>
                                     <th class="text-center">
                                         Category
@@ -223,7 +223,7 @@
                 <div class="modal-body">
                     <form action="" method="POST" enctype="multipart/form-data" id="subItemsForm">
                         <table class="table table-bordered table-hover table-sortable" id="tab_logic">
-                            <thead>
+                            <thead class="table-dark">
                                 <tr>
                                     <th class="text-center">
                                         SubItem

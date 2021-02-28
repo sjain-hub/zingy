@@ -58,7 +58,7 @@
                     {% if var.status == "Closed" %}
                     <textarea id="comments{{var.id}}" name="comments{{var.id}}" rows="4" cols="40" readonly>{{ var.comments }}</textarea>
                     {% else %}
-                    <textarea id="comments{{var.id}}" name="comments{{var.id}}" rows="4" cols="40">{{ var.comments }}</textarea>
+                    <textarea id="comments{{var.id}}" name="comments{{var.id}}" rows="4" cols="40" maxlength="200">{{ var.comments }}</textarea>
                     {% endif %}
                 </td>
                 <td>

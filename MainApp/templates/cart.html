@@ -174,8 +174,6 @@
                         {% else %}
                             Please add some Address before checkout.
                         {% endif %}
-                        <hr>
-                        
                     </div>
                     <div class="card-footer">
                         <div class="pull-left" style="margin: 10px" id="payment">
@@ -223,7 +221,7 @@
                             <input hidden id="couponId" name="couponId" value="{{selectedCoupon.id}}">
                             Coupon Applied: &nbsp;<b>{{selectedCoupon.code}}</b>
                             <div class="applybutton">
-                                <button type="button" class="btn btn-outline-success" onclick="removeCoupon()">Remove</button>
+                                <button type="button" class="btn btn-outline-dark" onclick="removeCoupon()">Remove</button>
                             </div>
                         </div>
                         {% else %}
@@ -324,27 +322,39 @@
           </button>
         </div>
         <div class="modal-body">
-            {% for coupons in kitCoupons %}
+            {% if kitCoupons %}
+            {% for coupon in kitCoupons %}
             <div class="container row">
-                <div class="card-bottom pt-3 px-3 mb-2">
+                {% if coupon.user == None %}
+                <div class="red pt-3 px-3 mb-2">
                     <div class="d-flex flex-row justify-content-center text-align-center">
-                        <p><span>{{coupons.code}}</span></p>
+                        <p><span>{{coupon.code}}</span></p>
                     </div>
                 </div>
+                {% else %}
+                <div class="yellow pt-3 px-3 mb-2">
+                    <div class="d-flex flex-row justify-content-center text-align-center">
+                        <p><span>{{coupon.code}}</span></p>
+                    </div>
+                </div>
+                {% endif %}
                 <div class="discount">
-                    <b>{{coupons.discount}}% off</b><br>
-                    (Max : &#8377;{{coupons.maxDiscount}})
+                    <b>{{coupon.discount}}% off</b><br>
+                    (Max : &#8377;{{coupon.maxDiscount}})
                 </div>
                 <div class="applybutton">
-                    <button type="button" class="btn btn-outline-success" onclick="addCoupon('{{coupons.id}}')">Apply</button>
+                    <button type="button" class="btn btn-outline-success" onclick="addCoupon('{{coupon.id}}')">Apply</button>
                 </div>
             </div>
-            <b>Valid Till : </b>{{coupons.validTill.date}}
+            <b>Valid Till : </b>{{coupon.validTill.date}}
             <div class="text-muted">
-                <p>{{coupons.description}}</p>
+                <p>{{coupon.description}}</p>
             </div>
             <hr>
             {% endfor %}
+            {% else %}
+            (No Coupons Available)
+            {% endif %}
         </div>
       </div>
     </div>
@@ -367,8 +377,12 @@
     
 </script>
 <style>
-    .card-bottom {
-        background:palegoldenrod;
+    .yellow {
+        background:rgb(255, 245, 129);
+        width: 30%;
+    }
+    .red {
+        background:rgb(238, 101, 67);
         width: 30%;
     }
     .discount{

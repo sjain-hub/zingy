@@ -137,8 +137,10 @@ def add_to_favourite(request, pk=None):
 	fav = FavouriteKitchens.objects.filter(customer_id=request.user.id, kitchen_id=pk).first()
 	if fav == None:
 		FavouriteKitchens.objects.create(kitchen_id=pk, customer=request.user)
+		return JsonResponse({"success_message": 'Marked as Favourite.'}, status=200)
 	else:
 		FavouriteKitchens.objects.filter(id=fav.id).delete()
+		return JsonResponse({"success_message": 'Deleted as Favourite.'}, status=200)
 
 
 def Menu(request, pk=None):
@@ -156,9 +158,18 @@ def Menu(request, pk=None):
 
 	cartitemcount = countCartItems(request)
 	
+	vegSelected = False
 	items = []
+	item = ''
 	for i in menu:
-		item = Items.objects.filter(id=i.item_id)
+		if 'veg' in request.COOKIES:
+			if request.COOKIES['veg'] == 'true':
+				vegSelected = True
+				item = Items.objects.filter(id=i.item_id, itemType='veg')
+			else:
+				item = Items.objects.filter(id=i.item_id)
+		else:
+			item = Items.objects.filter(id=i.item_id)
 		subitems = SubItems.objects.filter(item_id=i.item_id)
 		for content in item:
 			menuitemid = str(content.id)
@@ -203,7 +214,7 @@ def Menu(request, pk=None):
 			else:
 				temp.append(totalquant)
 			temp.append(content.condition)
-			discRate = int(content.price) - (int(i.offer)/100 * int(content.price))
+			discRate = int(content.price) - int(int(i.offer)/100 * int(content.price))
 			temp.append(discRate)
 			items.append(temp)
 
@@ -218,6 +229,7 @@ def Menu(request, pk=None):
 		'avgrating': avgrating,
 		'cartitemcount': cartitemcount,
 		'favourite': favourite,
+		'vegSelected': vegSelected,
 	}
 	return render(request, 'menu.html', context)
 
@@ -254,7 +266,7 @@ def Cart(request):
 	if 'kit' in request.COOKIES.keys():
 		addresses = Addresses.objects.filter(user_id=request.user.id)
 		kitchen = Kitchens.objects.filter(id=request.COOKIES['kit'])[0]
-		kitCoupons = UserDiscountCoupons.objects.filter(kit=kitchen, user=request.user, redeemed=False, validTill__gte=currentDate)
+		kitCoupons = UserDiscountCoupons.objects.filter(Q(user=request.user) | Q(user=None), kit=kitchen, redeemed=False, validTill__gte=currentDate)
 		menu = Menus.objects.filter(kit_id=request.COOKIES['kit'])
 		items = []
 		subtotal = 0
@@ -273,16 +285,9 @@ def Cart(request):
 					temp.append(item[0].itemDesc)
 					temp.append(item[0].price)
 					temp.append(quant)
-					# disc = int(i.offer)/100 * int(item[0].price)
-					# discRate = int(int(item[0].price) - disc)
-					# if int(i.offer) > 0:
-					# 	total_price = discRate * int(quant)
-					# 	kitDiscount = kitDiscount + (disc * int(quant))
-					# else:
-					# 	total_price = item[0].price * int(quant)
 					if int(i.offer) > 0:
 						disc = int(i.offer)/100 * int(item[0].price)
-						kitDiscount = kitDiscount + (disc * int(quant))
+						kitDiscount = kitDiscount + int(disc * int(quant))
 					total_price = item[0].price * int(quant)	
 					subtotal = subtotal + total_price
 					temp.append(total_price)
@@ -303,16 +308,9 @@ def Cart(request):
 							temp.append(item[0].itemDesc)
 							temp.append(sub.price)
 							temp.append(quant)
-							# disc = int(i.offer)/100 * int(sub.price)
-							# discRateOfSubItem = int(int(sub.price) - disc)
-							# if int(i.offer) > 0:
-							# 	total_price = discRateOfSubItem * int(quant)
-							# 	kitDiscount = kitDiscount + (disc * int(quant))
-							# else:
-							# 	total_price = sub.price * int(quant)
 							if int(i.offer) > 0:
 								disc = int(i.offer)/100 * int(sub.price)
-								kitDiscount = kitDiscount + (disc * int(quant))
+								kitDiscount = kitDiscount + int(disc * int(quant))
 							total_price = sub.price * int(quant)	
 							subtotal = subtotal + total_price
 							temp.append(total_price)
@@ -335,10 +333,13 @@ def Cart(request):
 			if discount > coupon.maxDiscount:
 				discount = coupon.maxDiscount
 			total = total - discount
-
+		
 		modeSelected = kitchen.mode
 		if "modeSelected" in request.COOKIES.keys():
 			modeSelected = request.COOKIES['modeSelected']
+			if modeSelected == "Delivery":
+				total = total + kitchen.deliveryCharge
+		else:
 			if modeSelected == "Delivery":
 				total = total + kitchen.deliveryCharge
 
@@ -556,6 +557,10 @@ def contactUs(request):
 		'formSubmitted': submitted,
 	}
 	return render(request, 'contact.html', context)
+
+
+def updates(request):
+	return render(request, 'updates.html')
 
 
 # def sendOTP(request):

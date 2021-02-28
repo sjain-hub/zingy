@@ -7,6 +7,7 @@ from .models import User, Addresses, Order
 from kitchen.models import Kitchens, ComplaintsAndRefunds, UserDiscountCoupons
 from datetime import datetime, timedelta
 from django.utils import dateparse, timezone
+from django.db.models import Q
 
 
 class Customer(AsyncConsumer):
@@ -50,10 +51,8 @@ class Customer(AsyncConsumer):
     
     async def kitchenFunction(self, textdata):
         msgtocust = textdata.get('msgtocust')
-        # custid = textdata.get('custid')
         status = textdata.get('status')
         orderid = textdata.get('orderid')
-        # cust = User.objects.filter(id=custid)[0]
         order = Order.objects.filter(id=orderid)[0]
         cust = order.customer
         amountPaid = textdata.get('amountPaid')
@@ -61,22 +60,28 @@ class Customer(AsyncConsumer):
         totalAmount = order.total_amount
         
         if status == "Accepted" or status == "Placed":
-            if order.coupon_id != None:
-                UserDiscountCoupons.objects.filter(id=order.coupon_id).update(redeemed=True)
+            if order.coupon_id != None and order.coupon.user != None:
+                await self.update_coupon(order.coupon_id, True)
 
         if status == "Rejected":
+            if order.coupon_id != None and order.coupon.user != None:
+                await self.update_coupon(order.coupon_id, False)
             if amountPaid != None:
                 if int(amountPaid) > 0:
                     refundStatus = "Under Process"
                     comments = msgtocust
-                    issue = ""
-                    await self.raise_refund_request(order.kitchen, order, cust, comments, issue, refundStatus, cust.phone)
+                    issue = "Order Rejected by Kitchen."
+                    subject = "Refund"
+                    await self.raise_refund_request(order.kitchen, order, cust, comments, issue, refundStatus, cust.phone, subject)
         elif status == "Cancelled":
+            if order.coupon_id != None and order.coupon.user != None:
+                await self.update_coupon(order.coupon_id, False)
             if order.amount_paid > 0:
                 refundStatus = "Under Process"
                 issue = msgtocust
                 comments = ""
-                await self.raise_refund_request(order.kitchen, order, cust, comments, issue, refundStatus, cust.phone)
+                subject = "Refund"
+                await self.raise_refund_request(order.kitchen, order, cust, comments, issue, refundStatus, cust.phone, subject)
 
         if amountPaid == None:
             amountPaid = order.amount_paid
@@ -177,7 +182,7 @@ class Customer(AsyncConsumer):
 
     @database_sync_to_async
     def check_active_orders(self, custid):
-        return Order.objects.filter(customer_id=custid, status="Placed").count() + Order.objects.filter(customer_id=custid, status="Packed").count() + Order.objects.filter(customer_id=custid, status="Preparing").count() + Order.objects.filter(customer_id=custid, status="Dispatched").count() + Order.objects.filter(customer_id=custid, status="Waiting").count()
+        return Order.objects.filter(Q(status="Placed") | Q(status="Packed") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Accepted"), customer_id=custid).count()
 
     @database_sync_to_async
     def create_order(self, total, discount, couponId, mode, itemswithquantity, add, dist, msg, scheduledDate, paymentOption, cust, kit):
@@ -195,6 +200,11 @@ class Customer(AsyncConsumer):
         return Order.objects.filter(id=orderid).update(status=status, msgtocust=msgtocust, amount_paid=amount_paid, balance=balAmount, completed_at=currentDate)
 
     @database_sync_to_async
-    def raise_refund_request(self, kitchen, order, cust, comments, issue, refundStatus, paytmNo):
+    def raise_refund_request(self, kitchen, order, cust, comments, issue, refundStatus, paytmNo, subject):
         currentDate = datetime.now()
-        ComplaintsAndRefunds.objects.create(kit=kitchen, order=order, user=cust, comments=comments, issue=issue, status=refundStatus, paytmNo=paytmNo, request_date=currentDate)
+        ComplaintsAndRefunds.objects.create(kit=kitchen, order=order, user=cust, comments=comments, issue=issue, status=refundStatus, paytmNo=paytmNo, request_date=currentDate, subject=subject)
+
+    @database_sync_to_async
+    def update_coupon(self, couponId, redeemed):
+        print(couponId, redeemed)
+        UserDiscountCoupons.objects.filter(id=couponId).update(redeemed=redeemed)

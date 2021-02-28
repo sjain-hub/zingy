@@ -194,14 +194,14 @@ class ComplaintsAndRefunds(models.Model):
 
 class UserDiscountCoupons(models.Model):
 	kit = models.ForeignKey(Kitchens, on_delete=models.CASCADE)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 	issueDate = models.DateTimeField(blank=False)
 	validTill = models.DateTimeField(blank=False)
 	discount = models.IntegerField(blank=False)
 	redeemed = models.BooleanField(default=False)
 	description = models.CharField(max_length=100, blank=True)
-	code = models.CharField(max_length=6, blank=False)
+	code = models.CharField(max_length=15, blank=False)
 	maxDiscount = models.IntegerField(blank=True)
 
 	def __str__(self):
-		return self.kit.kitName + ' - ' + self.user.first_name + '' + self.user.last_name
+		return self.kit.kitName

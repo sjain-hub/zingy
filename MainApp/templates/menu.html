@@ -23,7 +23,7 @@
 
 
 <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/bg_4.jpg' %}');"
-  data-stellar-background-ratio="0.5">
+  data-stellar-background-ratio="0.5" id="header-section">
   <div class="overlay"></div>
   <div class="container">
     <div class="row no-gutters slider-text align-items-center justify-content-center">
@@ -34,61 +34,70 @@
           <span>{{ kitchen.kitName }}</span>
         </p>
         <p class="breadcrumbs"><span class="mr-2"><a href="#reviews"><span class="icon-star text-warning"
-                style='font-size: large;'></span>{{ avgrating.ratings__avg }} ({{ reviews|length }}
-              Reviews)</a></span>{% if kitchen.pureVeg %}<span class="mr-2">/ Pure Veg
-            <i class="fa fa-leaf" style='color: green; font-size: large;'></i></span>{% endif %}
+                style='font-size: large;'></span> {{ avgrating.ratings__avg }} ({{ reviews|length }}
+              Reviews)</a></span>
         </p>
-        <!-- <a data-original-title="Save to Wishlist" title="" href="" class="btn btn-light" data-toggle="tooltip" data-abc="true"> <i class="fa fa-heart"></i></a> -->
-        <input type="checkbox" {% if favourite %}checked{% endif %} class="form-check-input" id="favourite">
+        <a class="add-fav btn bread">Favourite <i style='{% if favourite %}color: red;{% else %}color: white;{% endif %}'  class="fa fa-heart"></i></a>
+        <p class="breadcrumbs">
+          {% if kitchen.pureVeg %}
+          <span class="mr-2">Pure Veg <i class="fa fa-leaf" style='color: green; font-size: large;'></i></span>
+          {% else %}
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" class="veg" name="veg" id="veg" {% if vegSelected %}checked{% endif %} onclick="selectVeg(this);">
+            <label class="form-check-label bread" for="veg">Veg</label>
+          </div>
+          {% endif %}
+        </p>
+        <!-- <input type="checkbox" {% if favourite %}checked{% endif %} class="form-check-input" id="favourite">
         <label class="form-check-label bread" for="favourite"><i class="fa fa-heart"
-            style='color: red; font-size: x-large;'></i></label>
+            style='color: red; font-size: x-large;'></i></label> -->
       </div>
     </div>
   </div>
 </section>
 <script>
-  $('#favourite').on('change', function () {
+  function selectVeg(value) {
+    document.cookie = "veg=" + value.checked + ";Path=/";
+    // $("#main").load(" #main > *");
+    window.location.reload();
+  }
+  $(document).on("click", ".add-fav", function (event) {
     $.ajax({
       url: "{% url 'add_to_favourite' kitchen.id %}",
-    })
+
+      success: function (data) {
+        // $("#header-section").load(" #header-section > *");
+        window.location.reload();
+      },
+    });
   });
 </script>
-
+<br>
 
 <!-- Main Menu -->
-<div class="container">
-  <div class="row py-3">
-    <!-- <div class="col-2 w3-card w3-medium" id="sticky-sidebar">
-      <nav id="navbar-example3" class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="#">Navbar</a>
-        <nav class="nav nav-pills flex-column">
-          {% for cat in categories %}
-          <a class="nav-link" href="#{{ cat.id }}">{{ cat }}</a>
-          {% endfor %}
-        </nav>
-      </nav>
-      <div class="sticky-top sidebar ftco-animate">
-        <div class="sidebar-box ftco-animate">
-          <br>
-          <br>
-          <br>
-          
-        </div>
-      </div>
-    </div> -->
-
-    <div class="col-12 ftco-animate">
+<div class="row justify-content-center mb-1 pb-2">
+  <div class="col-md-7 text-center heading-section ftco-animate">
+    <span class="subheading">Specialties</span>
+    <h2 class="mb-4">Our Menu</h2>
+  </div>
+</div>
+<div class="wrapper container" id="main">
+  <div class="sidebar w3-card w3-medium">
+      <h3>Categories</h3>
+      <br>
+      <ul class="categories">
+        {% for cat in categories %}
+        <li><a href="#{{ cat.id }}">{{ cat }}</a></li>
+        {% endfor %}
+      </ul>
+  </div>
+	<div class="main w3-card">
+		<div class="col-12 ftco-animate">
       <div class="container py-3">
-        <div class="row justify-content-center mb-5 pb-2">
-          <div class="col-md-7 text-center heading-section ftco-animate">
-            <span class="subheading">Specialties</span>
-            <h2 class="mb-4">Our Menu</h2>
-          </div>
-        </div>
         <div class="row">
         {% for cat in categories %}
-        <div class="col-md-6 col-lg-12 menu-wrap">
-          <div id="{{cat.id}}" class="heading-menu text-center ftco-animate">
+        <div class="col-md-6 col-lg-12 menu-wrap" id="{{cat.id}}" style="padding-top: 8%;">
+          <div class="heading-menu text-center ftco-animate">
             <h3>{{ cat }}</h3>
           </div>
           {% for item in menuitems %}
@@ -164,10 +173,29 @@
         {% endfor %}
         </div>
       </div>
-    </div> <!-- .col-md-8 -->
-
-  </div>
+    </div>
+	</div>
 </div>
+<style>
+	.wrapper {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.main {
+		width: 75%;
+	}
+
+	.sidebar {
+		width: 20%;
+		height: 20%;
+		position: -webkit-sticky;
+		position: sticky;
+		top: 8%;
+		padding: 15px;
+	}
+</style>
+<br>
 
 
 <!-- SubItems Modal -->

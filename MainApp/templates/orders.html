@@ -149,7 +149,7 @@
                             {{ order.completed_at }}
                             {% endif %}
                         </td>
-                        <td>{{ order.msgtocust }}</td>
+                        <td><textarea rows="4" cols="30" readonly>{{ order.msgtocust }}</textarea></td>
                         <td>
                             {% if order.status == "Delivered" or order.status == "Picked" or order.status == "Rejected" %}
                             <!-- <button type="button" class="btn btn-success">Repeat Order</button><br><br> -->

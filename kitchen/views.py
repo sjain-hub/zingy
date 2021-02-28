@@ -506,7 +506,10 @@ def complaintsAndRefunds(request):
         requestId = request.POST['requestid']
         status = request.POST['status'+requestId]
         comments = request.POST['comments'+requestId]
-        ComplaintsAndRefunds.objects.filter(id=requestId).update(status=status, comments=comments, closing_date=getCurrentDate())
+        complaintObject = ComplaintsAndRefunds.objects.filter(id=requestId)
+        complaintObject.update(status=status, comments=comments, closing_date=getCurrentDate())
+        Order.objects.filter(id=complaintObject[0].order_id).update(msgtocust=comments)
+
     requests = ComplaintsAndRefunds.objects.filter(kit_id=request.user.kitchens).order_by("-id")
     context = {
         'requests': requests,
@@ -519,17 +522,35 @@ def code_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def userDiscountCoupons(request):
+def createCoupon(request):
     currentDate = getCurrentDate()
     code = code_generator()
     if request.POST:
-        print(request.POST)
-        order = Order.objects.filter(id=request.POST['orderId'])[0]
-        UserDiscountCoupons.objects.create(kit=order.kitchen, user=order.customer, issueDate=currentDate, validTill=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(days=int(request.POST['validity'])), discount=request.POST['discount'], description=request.POST['desc'], code=request.POST['code'], maxDiscount=request.POST['max'])
+        if 'orderId' in request.POST.keys():
+            order = Order.objects.filter(id=request.POST['orderId'])[0]
+            UserDiscountCoupons.objects.create(kit=request.user.kitchens, user=order.customer, issueDate=currentDate, validTill=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(
+            	days=int(request.POST['validity'])), discount=request.POST['discount'], description=request.POST['desc'], code=request.POST['code'], maxDiscount=request.POST['max'])
+            return JsonResponse({"success_message": 'Coupon sent.'}, status=200)
+        else:
+            UserDiscountCoupons.objects.create(kit=request.user.kitchens, user=None, issueDate=currentDate, validTill=currentDate.replace(hour=23, minute=59, microsecond=0) + timedelta(
+            	days=int(request.POST['validity'])), discount=request.POST['discount'], description=request.POST['desc'], code=request.POST['code'], maxDiscount=request.POST['max'])
+            return JsonResponse({"success_message": 'Coupon Generated.'}, status=200)
     context = {
         'code': code,
     }
-    return render(request, 'userCouponModal.html', context)
+    return render(request, 'couponModal.html', context)
+
+
+def coupons(request):
+    if request.POST:
+        if 'couponId' in request.POST.keys():
+            UserDiscountCoupons.objects.filter(id=request.POST['couponId']).update(redeemed=True)
+    coupons = UserDiscountCoupons.objects.filter(kit=request.user.kitchens).order_by("-id")
+    context = {
+        'coupons': coupons,
+        'waitingorderscount': countWaitingOrders(request),
+    }
+    return render(request, 'coupons.html', context)
 
 
 #task called by celery

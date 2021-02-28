@@ -1,13 +1,15 @@
 {% csrf_token %}
 <div class="modal-header">
-    <h5 class="modal-title">Coupon Code - <b>{{code}}</b></h5>
-    <input type="text" class="form-control" id="code" name="code" value="{{code}}" hidden>
+    <h5 class="modal-title">Generate Coupon</h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
 </div>
 <div class="modal-body">
-    
+    <div class="form-group">
+        <label for="code" class="col-form-label">Coupon Code* (You can edit this code)</label>
+        <input type="text" class="form-control" style="font-weight: bold; font-size: large;" id="code" name="code" value="{{code}}" maxlength="15" required>
+    </div>
     <div class="form-group">
         <label for="discount" class="col-form-label">Enter Discount* ( % )</label>
         <input type="text" class="form-control" id="discount" name="discount" maxlength="2"
