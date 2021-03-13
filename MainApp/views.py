@@ -266,7 +266,7 @@ def Cart(request):
 	if 'kit' in request.COOKIES.keys():
 		addresses = Addresses.objects.filter(user_id=request.user.id)
 		kitchen = Kitchens.objects.filter(id=request.COOKIES['kit'])[0]
-		kitCoupons = UserDiscountCoupons.objects.filter(Q(user=request.user) | Q(user=None), kit=kitchen, redeemed=False, validTill__gte=currentDate)
+		kitCoupons = UserDiscountCoupons.objects.filter(Q(user_id=request.user.id) | Q(user=None), kit=kitchen, redeemed=False, validTill__gte=currentDate)
 		menu = Menus.objects.filter(kit_id=request.COOKIES['kit'])
 		items = []
 		subtotal = 0

@@ -17,8 +17,12 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.conf.timezone = 'Asia/Kolkata'
 
 app.conf.beat_schedule = {
-    'every-midnight': {
+    'every-midnight-checkKitchensValidity': {
         'task': 'kitchen.views.checkKitchensValidity',
+        'schedule': crontab(minute=1, hour=0)
+    },
+    'every-midnight-removeExpiredCoupons': {
+        'task': 'kitchen.views.removeExpiredCoupons',
         'schedule': crontab(minute=1, hour=0)
     }
 }

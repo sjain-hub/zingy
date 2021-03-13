@@ -561,3 +561,12 @@ def checkKitchensValidity():
     for kitchen in kitchens:
         if currentDate >= kitchen.subscriptionExpiry:
             Kitchens.objects.filter(id=kitchen.id).update(subscriptionExpired=True, status="Closed")
+
+
+@shared_task
+def removeExpiredCoupons():
+    currentDate = getCurrentDate()
+    coupons = UserDiscountCoupons.objects.filter()
+    for coupon in coupons:
+        if currentDate >= coupon.validTill:
+            UserDiscountCoupons.objects.filter(id=coupon.id).update(redeemed=True)
