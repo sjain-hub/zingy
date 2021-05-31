@@ -80,6 +80,8 @@ class KitchenForm(forms.ModelForm):
 			if self.user.kitchens.approved:
 				self.fields['kitName'].widget.attrs['readonly'] = True
 				self.fields['address'].widget.attrs['readonly'] = True
+				self.fields['youTubeReview'].widget.attrs['readonly'] = True
+				self.fields['youTubeLink'].widget.attrs['readonly'] = True
 				self.fields['city'].widget.attrs['disabled'] = True
 				self.fields['city'].required = False
 				self.fields['landmark'].widget.attrs['readonly'] = True
@@ -102,7 +104,7 @@ class KitchenForm(forms.ModelForm):
 	class Meta:
 		model = Kitchens
 		fields = ['kitName', 'mode', 'acceptAdvcOrders', 'wantAdvancePayment', 'deliveryTime', 'deliveryCharge', 'visibilityRadius', 'pureVeg', 'paytmLink', 'paytmNo', 'address', 'city', 'landmark', 'postalCode', 'floorNo', 'latitude',
-					'longitude', 'dp', 'video', 'QRCode', 'fssaiLicNo', 'fssaiName', 'fssaiAdd', 'fssaiExpiry', 'fssaiCerti', 'kyc', 'degree']
+					'longitude', 'dp', 'chefDp', 'video', 'QRCode', 'fssaiLicNo', 'fssaiName', 'fssaiAdd', 'fssaiExpiry', 'fssaiCerti', 'kyc', 'degree', 'youTubeReview', 'youTubeLink']
 
 
 class CategoryForm(forms.ModelForm):

@@ -21,4 +21,5 @@ urlpatterns = [
     path('contactUs/', views.contactUs, name='contactUs'),
     path('updates/', views.updates, name='updates'),
     path('kitchen/', include('kitchen.urls')),
+    path('userapi/', include('MainApp.api.urls')),
 ]

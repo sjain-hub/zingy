@@ -6,6 +6,9 @@ from kitchen.models import Kitchens, Menus, UserDiscountCoupons
 from django.contrib.gis.geos import Point
 from django.db.models import Q
 from django.core.validators import RegexValidator
+from rest_framework.authtoken.models import Token
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 phone_regex = RegexValidator(regex=r'^[6-9]\d{9}$', message="Please Enter a Valid Phone Number.")
@@ -100,3 +103,9 @@ class Queries(models.Model):
 
 	def __str__(self):
 		return self.name + "+>" + self.subject
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+	if created:
+		Token.objects.create(user=instance)

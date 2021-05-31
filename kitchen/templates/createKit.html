@@ -403,6 +403,14 @@
                                     </div>
                                     <div class="col-12 row">
                                         <div class="col-sm-offset-2 col-sm-12">
+                                            <span class="text-danger small">{{ form.chefDp.errors }}</span>
+                                        </div>
+                                        <label class="col">Upload your own DP(Display Picture) :</label>
+                                        {{ form.chefDp }}
+                                        <small id="chefDpHelp" class="form-text text-muted">(Picture in Chef cap will give you a Professional look, so its more preferable.)</small>
+                                    </div>
+                                    <div class="col-12 row">
+                                        <div class="col-sm-offset-2 col-sm-12">
                                             <span class="text-danger small">{{ form.video.errors }}</span>
                                         </div>
                                         <label class="col">Upload a Video of your kitchen:</label>

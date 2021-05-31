@@ -56,6 +56,7 @@ class Kitchens(models.Model):
 	longitude = models.FloatField(blank=False)
 	location = models.PointField(default=Point(0.0, 0.0))
 	dp = models.ImageField(upload_to=get_upload_path, blank=False)
+	chefDp = models.ImageField(upload_to=get_upload_path, blank=False)
 	video = models.FileField(upload_to=get_upload_path, blank=False)
 	fssaiLicNo = models.CharField(blank=False, unique=True, max_length=14)
 	fssaiName = models.CharField(max_length=50, blank=False)
@@ -78,6 +79,8 @@ class Kitchens(models.Model):
 	paytmLink = models.CharField(max_length=30, blank=False)
 	paytmNo = models.CharField(max_length=10, blank=False, unique=True)
 	QRCode = models.ImageField(upload_to=get_upload_path, blank=False)
+	youTubeReview = models.TextField(max_length=500, blank=True)
+	youTubeLink = models.CharField(max_length=100, blank=True)
 
 	def __str__(self):
 		return self.kitName + ", by : " + self.user.username

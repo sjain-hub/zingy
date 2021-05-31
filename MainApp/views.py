@@ -343,7 +343,7 @@ def Cart(request):
 			if modeSelected == "Delivery":
 				total = total + kitchen.deliveryCharge
 
-		mindate = getCurrentDate().isoformat()[:16]
+		mindate = getCurrentDate().isoformat()
 		maxdate = (getCurrentDate().replace(hour=23, minute=59) + timedelta(days=2)).isoformat()[:16]
 
 		if request.method=="GET":
@@ -391,7 +391,6 @@ def Login(request):
 		user     = authenticate(username=username,password=password)
 		if user is not None and not user.is_kitchen:
 			if user.is_active:
-				print(user.is_active)
 				login(request,user)
 				return JsonResponse({"success_message": 'Login Successful.'}, status=200)
 			else:
@@ -522,7 +521,6 @@ def addReview(request):
 
 
 def sendQueries(request):
-	print(request.POST)
 	currentDate = datetime.now()
 	order = Order.objects.filter(id=request.POST['orderId'])[0]
 	paytmNo = request.POST['phone']

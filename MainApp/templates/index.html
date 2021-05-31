@@ -121,7 +121,7 @@
 
 						function onDragEnd() {
 							var lngLat = marker3.getLngLat();
-							document.cookie = "lon=" + ev.coords.longitude + ";Path=/";
+							document.cookie = "lon=" + lngLat.lng + ";Path=/";
 							document.cookie = "lat=" + lngLat.lat + ";Path=/";
 						}
 
