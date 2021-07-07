@@ -50,7 +50,6 @@
         wsStart = "wss://"
     }
     var endpoint = wsStart + loc.host + '/notify/{{user.username}}/'
-
     var socket = new ReconnectingWebSocket(endpoint)
 
     socket.onmessage = function (e) {

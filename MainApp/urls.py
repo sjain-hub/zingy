@@ -20,6 +20,7 @@ urlpatterns = [
     path('orderStatus/<int:pk>/', views.orderStatus, name='orderStatus'),
     path('contactUs/', views.contactUs, name='contactUs'),
     path('updates/', views.updates, name='updates'),
+    path('firebase-messaging-sw.js', views.getServiceWorker, name='firebase-messaging-sw.js'),
     path('kitchen/', include('kitchen.urls')),
     path('userapi/', include('MainApp.api.urls')),
 ]

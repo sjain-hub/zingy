@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from kitchen.models import Reviews, Kitchens, Categories, Reviews, UserDiscountCoupons
-from MainApp.models import User, Addresses
+from MainApp.models import User, Addresses, Order
 
 class KitchensSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,10 +30,16 @@ class ReviewSerializer(serializers.ModelSerializer):
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Addresses
-        fields = '__all__'
+        fields = ['id', 'place', 'latitude', 'longitude', 'address', 'floorNo']
 
 
 class CouponsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDiscountCoupons
+        fields = '__all__'
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
         fields = '__all__'

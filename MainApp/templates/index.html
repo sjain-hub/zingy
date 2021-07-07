@@ -225,6 +225,62 @@
 	</div>
 </section>
 
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-messaging.js"></script>
+
+<script>
+	// Your web app's Firebase configuration
+	// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+	var firebaseConfig = {
+		apiKey: "AIzaSyAfENGprdd5Lc3VWzgdz1414M4SovPK08o",
+		authDomain: "foodfall.firebaseapp.com",
+		projectId: "foodfall",
+		storageBucket: "foodfall.appspot.com",
+		messagingSenderId: "996053764178",
+		appId: "1:996053764178:web:a0bb76984848ea60ea778b",
+		measurementId: "G-7CFHLSW4LJ"
+	};
+	// Initialize Firebase
+	firebase.initializeApp(firebaseConfig);
+
+	const messaging = firebase.messaging();
+
+	messaging
+		.requestPermission()
+		.then(function () {
+			// MsgElem.innerHTML = 'Notification permission granted.';
+			console.log('Notification permission granted.');
+
+			// get the token in the form of promise
+			return messaging.getToken();
+		})
+		.then(function (token) {
+			// TokenElem.innerHTML = 'Device token is : <br>' + token;
+			console.log('Device token is : ' + token);
+		})
+		.catch(function (err) {
+			// ErrElem.innerHTML = ErrElem.innerHTML + '; ' + err;
+			console.log('Unable to get permission to notify.', err);
+		});
+
+	let enableForegroundNotification = true;
+	messaging.onMessage(function (payload) {
+		console.log('Message received. ', payload);
+		alert("abcd")
+		// NotisElem.innerHTML =
+		// 	NotisElem.innerHTML + JSON.stringify(payload);
+
+		if (enableForegroundNotification) {
+			let notification = payload.notification;
+			navigator.serviceWorker
+				.getRegistrations()
+				.then((registration) => {
+					registration[0].showNotification(notification.title);
+				});
+		}
+	});
+</script>
+
 <!-- <section class="home-slider js-fullheight owl-carousel bg-white">
 	<div class="slider-item js-fullheight">
 		<div class="overlay"></div>

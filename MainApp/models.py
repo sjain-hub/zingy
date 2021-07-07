@@ -31,12 +31,16 @@ class Addresses(models.Model):
 	floorNo = models.CharField(max_length=2, blank=False)
 
 	def __str__(self):
-		return self.user.username + "  " + self.place
+		return self.user.username + " - " + self.place
+		
 	
 class Order(models.Model):
 	id 				  = models.AutoField(primary_key=True)
 	total_amount      = models.IntegerField(blank=False)
-	discount          = models.IntegerField(blank=False)
+	sub_total      	  = models.IntegerField(blank=False)
+	delivery_charge   = models.IntegerField(blank=True)
+	kit_discount      = models.IntegerField(blank=True)
+	coup_discount     = models.IntegerField(blank=True)
 	coupon            = models.ForeignKey(UserDiscountCoupons ,on_delete=models.SET_NULL, null=True)
 	created_at        = models.DateTimeField(blank=False)
 	completed_at 	  = models.DateTimeField(null=True)

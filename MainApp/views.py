@@ -12,6 +12,17 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils import timezone
 import http.client
+from . import FCMManager as fcm
+
+
+tokens = ["dDNsYEH3T6-Swao2uFmft5:APA91bFBoLeTBLy5q0B5d-V3lX9Ye-bNn2M3LCh7_Ia2vvBd6CKDK-PkfrLFQ6Qt7l5A5__otYBH1uBXfuGK3x1zDHyB8mQRmYj0RQSv8gz7SKiAPpoBXqPuF6-ow1L8vDlsSHphcc-b", "dDSUrXzROcFD5ICjWZbC48:APA91bEaGRE9tqViTnCclZ_-Crro7HsqMi6StB4hOClckBV8noDVVwlDtaugUL71uwH61e5IxCFhGUS25gqXZL7zxHT5LM37E53IPwpzsAvpwKmZF2a1kK1ti3Mns4BhbHwP8PDo1wcC"]
+
+def sendNotification():
+	fcm.sendPush("Hi", "This is my next msg", tokens)
+
+
+def getServiceWorker(request):
+	return render(request, 'firebase-messaging-sw.js', content_type="application/x-javascript")
 
 
 def getCurrentDate():
@@ -559,24 +570,3 @@ def contactUs(request):
 
 def updates(request):
 	return render(request, 'updates.html')
-
-
-# def sendOTP(request):
-
-# 	conn = http.client.HTTPSConnection("d7sms.p.rapidapi.com")
-
-# 	payload = "{\n    \"coding\": \"8\",\n    \"from\": \"SMSInfo\",\n    \"hex-content\": \"00480065006c006c006f\",\n    \"to\": 9582270031\n}"
-
-# 	headers = {
-# 		'content-type': "application/json",
-# 		'authorization': "Basic c2phaW5odWI6c2phaW5odWIxOTk1",
-# 		'x-rapidapi-key': "801da32802msh5a6b81ed8c0336cp125b90jsncd7649e27e3d",
-# 		'x-rapidapi-host': "d7sms.p.rapidapi.com"
-# 		}
-
-# 	conn.request("POST", "/secure/send", payload, headers)
-
-# 	res = conn.getresponse()
-# 	data = res.read()
-
-# 	print(data.decode("utf-8"))

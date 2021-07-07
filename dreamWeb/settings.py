@@ -158,6 +158,8 @@ LONGITUDE = 77.2872738625539
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 MAPBOX_KEY = "pk.eyJ1IjoiamFpbnNodWJoYW0iLCJhIjoiY2tkcG5lYzgyMjNteTMwbXIzYjkxaWtjayJ9.mV7uussgvFw4MXHVyMkIBg"
 
+FIREBASE_SERVICE_KEY = "/home/shubham/Projects/zingy/firebase_service_acc_key.json"
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",

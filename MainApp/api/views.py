@@ -2,8 +2,8 @@ from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons
-from MainApp.models import FavouriteKitchens, Addresses, User
-from .serializers import KitchensSerializer, CategorySerializer, ReviewSerializer, AddressSerializer, CouponsSerializer, UserSerializer
+from MainApp.models import FavouriteKitchens, Addresses, User, FavouriteKitchens, Order
+from .serializers import KitchensSerializer, CategorySerializer, ReviewSerializer, AddressSerializer, CouponsSerializer, UserSerializer, OrderSerializer
 from django.contrib.gis.geos import Point
 from django.db.models import Avg, Q
 from datetime import datetime, timedelta
@@ -14,9 +14,17 @@ from rest_framework.exceptions import APIException
 from django.contrib.auth.models import update_last_login
 import json
 import re
+from MainApp import FCMManager as fcm
+
+
+tokens = ["dDNsYEH3T6-Swao2uFmft5:APA91bFBoLeTBLy5q0B5d-V3lX9Ye-bNn2M3LCh7_Ia2vvBd6CKDK-PkfrLFQ6Qt7l5A5__otYBH1uBXfuGK3x1zDHyB8mQRmYj0RQSv8gz7SKiAPpoBXqPuF6-ow1L8vDlsSHphcc-b", "dDSUrXzROcFD5ICjWZbC48:APA91bEaGRE9tqViTnCclZ_-Crro7HsqMi6StB4hOClckBV8noDVVwlDtaugUL71uwH61e5IxCFhGUS25gqXZL7zxHT5LM37E53IPwpzsAvpwKmZF2a1kK1ti3Mns4BhbHwP8PDo1wcC"]
 
 
 regex = '^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$'
+
+
+def sendNotification():
+	fcm.sendPush("Hi", "This is my next msg", tokens)
 
 
 def getCurrentDate():
@@ -61,6 +69,55 @@ def nearbyKitchens(request):
 	context = {
  		'kit_object': kit_object,
 	}
+	return Response(context)
+
+
+@api_view(['POST'])
+def getKitchen(request):
+	longitude = request.data['lon']
+	latitude = request.data['lat']
+	user_location = Point(float(longitude), float(latitude), srid=4326)
+	if 'kitId' in request.data.keys():
+		kitId = request.data['kitId']
+		kitchen = Kitchens.objects.get(id=kitId)
+		dist = user_location.distance(kitchen.location) * 100
+		kitjson = KitchensSerializer(kitchen).data
+		catdesc = ""
+		categories = Categories.objects.filter(kit_id=kitchen.id)
+		for cat in categories:
+			catdesc = catdesc + cat.category + ", "
+		kitjson['catdesc'] = catdesc
+		kitjson['dist'] = round(dist, 1)
+		reviews = Reviews.objects.filter(kit_id=kitchen.id)
+		avgrating = reviews.aggregate(Avg('ratings'))
+		kitjson['avgrating'] = avgrating
+		fav = FavouriteKitchens.objects.filter(customer_id=request.user.id, kitchen_id=kitchen.id).first()
+		if fav:
+			kitjson.update({'favourite': True})
+		else:
+			kitjson.update({'favourite': False})
+		context = {
+			'kit_object': kitjson,
+		}
+	else :
+		kitchens = Kitchens.objects.filter(approved=True)
+		kit_object = []
+		for i in kitchens:
+			dist = user_location.distance(i.location) * 100
+			kitjson = KitchensSerializer(i).data
+			catdesc = ""
+			categories = Categories.objects.filter(kit_id=i.id)
+			for cat in categories:
+				catdesc = catdesc + cat.category + ", "
+			kitjson.update({'catdesc': catdesc})
+			kitjson.update({'dist': round(dist, 1)})
+			reviews = Reviews.objects.filter(kit_id=i.id)
+			avgrating = reviews.aggregate(Avg('ratings'))
+			kitjson.update(avgrating)
+			kit_object.append(kitjson)
+		context = {
+			'kit_object': kit_object,
+		}
 	return Response(context)
 
 
@@ -121,8 +178,6 @@ def menu(request):
 
 
 @api_view(['POST'])
-# @authentication_classes([TokenAuthentication])
-# @permission_classes([IsAuthenticated])
 def cart(request):
 	kit = request.data['kitId']
 	cartItems = request.data['cartItems']
@@ -240,15 +295,31 @@ def register(request):
 
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def updateProfile(request):
 	context = {}
+	valid = True
+
 	phone = request.data['phone']
+	user = User.objects.filter(phone=phone)
+	if user.count() != 0 and phone != request.user.phone:
+		context['phone'] = "Phone no already exists"
+		valid = False
+
 	email = request.data['email']
 	if checkEmail(email):
+		user = User.objects.filter(email=email)
+		if user.count() != 0 and email != request.user.email:
+			context['email'] = "Email already exists"
+			valid = False
+	else:
+		context['email'] = "Entered Email is Invalid"
+		valid = False
+		
+	if valid:
 		User.objects.filter(id=request.user.id).update(email=email, phone=phone)
 		context['response'] = "Details Updated Successfully"
-	else:
-		raise APIException("Enter Valid Email")
 	return Response(context)
 
 
@@ -261,4 +332,133 @@ def fetchUser(request):
 	context = {
 		'user': userjson,
 	}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAddresses(request):
+	addresses = Addresses.objects.filter(user_id=request.user.id)
+	addjson = AddressSerializer(addresses, many=True).data
+	context = {
+		'addresses': addjson,
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def saveAddress(request):
+	context = {}
+	if request.data['action'] == "add":
+		addform = AddressSerializer(data=request.data)
+		if addform.is_valid():
+			lon = request.data['longitude']
+			lat = request.data['latitude']
+			addinstance = addform.save(user=request.user)
+			addinstance.location = Point(lon, lat, srid=4326)
+			addinstance.save()
+			context['response'] = "Address Added Successfully"
+		else:
+			context = addform.errors
+	elif request.data['action'] == "update":
+		addid = request.data['addid']
+		lon = request.data['longitude']
+		lat = request.data['latitude']
+		Addresses.objects.filter(id=addid).update(place=request.data['place'],latitude=lat,longitude=lon,location=Point(lon, lat, srid=4326),address=request.data['address'],floorNo=request.data['floorNo'])
+		context['response'] = "Address Updated Successfully"
+	elif request.data['action'] == "delete":
+		addid = request.data['addid']
+		Addresses.objects.filter(id=addid).delete()
+		context['response'] = "Address Deleted Successfully"
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def favouriteKitchens(request):
+	longitude = request.data['lon']
+	latitude = request.data['lat']
+	user_location = Point(float(longitude), float(latitude), srid=4326)
+	kitchen_ids = FavouriteKitchens.objects.filter(customer=request.user)
+	kit_object = []
+	for i in kitchen_ids:
+		dist = user_location.distance(i.kitchen.location) * 100
+		kitjson = KitchensSerializer(i.kitchen).data
+		catdesc = ""
+		categories = Categories.objects.filter(kit_id=i.kitchen.id)
+		for cat in categories:
+			catdesc = catdesc + cat.category + ", "
+		kitjson.update({'catdesc': catdesc})
+		kitjson.update({'dist': round(dist, 1)})
+		reviews = Reviews.objects.filter(kit_id=i.kitchen.id)
+		avgrating = reviews.aggregate(Avg('ratings'))
+		kitjson.update(avgrating)
+		kit_object.append(kitjson)
+	context = {
+		'kit_object': kit_object,
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_to_favourite(request):
+	kitId = request.data['kitId']
+	fav = FavouriteKitchens.objects.filter(customer_id=request.user.id, kitchen_id=kitId).first()
+	if fav:
+		FavouriteKitchens.objects.filter(id=fav.id).delete()
+		context = {
+			'response': "Deleted",
+		}
+	else:
+		print(kitId, request.user)
+		FavouriteKitchens.objects.create(kitchen_id=kitId, customer=request.user)
+		context = {
+			'response': "Added",
+		}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def orders(request):
+	orders = Order.objects.filter(customer_id=request.user.id).order_by("-created_at")
+	orders_object = []
+	for i in orders:
+		# i.itemswithquantity = i.itemswithquantity.split(",")
+		ordersjson = OrderSerializer(i).data
+		ordersjson.update({'kitchen': KitchensSerializer(i.kitchen).data})
+		orders_object.append(ordersjson)
+	context = {
+		'orders': orders_object,
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAndAddReviews(request):
+	context = {}
+	kitId = request.data['kitId']
+	userid = request.user.id
+	reviews = Reviews.objects.filter(user_id=userid, kit_id=kitId)
+	if request.data['action'] == "get":
+		if reviews.count() == 0:
+			reviewsjson = {"kit" : kitId}
+		else:
+			reviewsjson = ReviewSerializer(reviews[0]).data
+		context['reviews'] = reviewsjson
+	else :
+		if reviews.count() == 0:
+			Reviews.objects.create(ratings=request.data['rating'], reviews=request.data['comment'], kit_id=kitId, user_id=userid)
+		else:
+			Reviews.objects.filter(user_id=userid, kit_id=kitId).update(ratings=request.data['rating'], reviews=request.data['comment'])
+		context['response'] = "Reviews updated Successfully"
 	return Response(context)

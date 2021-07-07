@@ -231,12 +231,14 @@
                         <div class="table-responsive">
                             <table class="table table-sm table-borderless mb-0">
                                 <tbody>
-                                    <tr id="subtotal">
+                                    <tr>
+                                        <input hidden id="subtotal" name="subtotal" value="{{subtotal}}">
                                         <td class="pl-0 w-90" scope="row">Sub Total:</td>
                                         <td>&#8377;{{subtotal}}</td>
                                     </tr>
                                     {% if kitDiscount > 0 %}
-                                    <tr id="kitDiscount">
+                                    <tr>
+                                        <input hidden id="kitDiscount" name="kitDiscount" value="{{kitDiscount}}">
                                         <td class="pl-0 w-90" scope="row">Kitchen Discount:</td>
                                         <td>- &#8377;{{kitDiscount}}</td>
                                     </tr>
@@ -249,7 +251,8 @@
                                     </tr>
                                     {% endif %}
                                     {% if modeSelected == "Delivery" %}
-                                    <tr id="deliverycharge">
+                                    <tr>
+                                        <input hidden id="deliverycharge" name="deliverycharge" value="{{kitchen.deliveryCharge}}">
                                         <td class="pl-0 w-90" scope="row">Delivery Charges:</td>
                                         <td>&#8377;{{kitchen.deliveryCharge}}</td>
                                     </tr>
