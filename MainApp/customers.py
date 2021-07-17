@@ -59,7 +59,7 @@ class Customer(AsyncConsumer):
         balAmount = order.balance
         totalAmount = order.total_amount
         
-        if status == "Accepted" or status == "Placed":
+        if status == "Payment" or status == "Placed":
             if order.coupon_id != None and order.coupon.user != None:
                 await self.update_coupon(order.coupon_id, True)
 
@@ -192,7 +192,7 @@ class Customer(AsyncConsumer):
 
     @database_sync_to_async
     def check_active_orders(self, custid):
-        return Order.objects.filter(Q(status="Placed") | Q(status="Packed") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Accepted"), customer_id=custid).count()
+        return Order.objects.filter(Q(status="Placed") | Q(status="Packed") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Payment"), customer_id=custid).count()
 
     @database_sync_to_async
     def create_order(self, subTotal, total, coupDiscount, kitDiscount, couponId, mode, deliveryCharge, itemswithquantity, add, dist, msg, scheduledDate, paymentOption, cust, kit):

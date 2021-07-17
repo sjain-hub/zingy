@@ -127,7 +127,7 @@
                                                         <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
                                                         </option>
                                                         {% if order.paymentOption == "Advance Payment" %}
-                                                        <option value="Accepted" {% if order.status == "Accepted" %} selected {% endif %}>Accepted
+                                                        <option value="Payment" {% if order.status == "Payment" %} selected {% endif %}>Payment
                                                         </option>
                                                         {% endif %}
                                                         <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
@@ -145,7 +145,7 @@
                                                         <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
                                                         </option>
                                                         {% if order.paymentOption == "Advance Payment" %}
-                                                        <option value="Accepted" {% if order.status == "Accepted" %} selected {% endif %}>Accepted
+                                                        <option value="Payment" {% if order.status == "Payment" %} selected {% endif %}>Payment
                                                         </option>
                                                         {% endif %}
                                                         <option value="Placed" {% if order.status == "Placed" %} selected {% endif %}>Placed
@@ -174,7 +174,7 @@
                                             <td>
                                                 <input type="hidden" name="custid{{order.id}}" id="custid{{order.id}}" value="{{ order.customer.id }}" />
                                                 <button data-id="{{order.id}}" type="button" class="setstatus btn btn-block btn-sm
-                                                    {% if order.status == "Waiting" or order.status == "Accepted" %}btn-warning" {% elif order.status == "Rejected" %}btn-danger" disabled {% elif order.status == "Delivered" or order.status == "Picked" %}btn-light" {% elif order.status == "Cancelled" %}btn-dark" disabled {% else %}btn-success" {% endif %}>Set Status</button>
+                                                    {% if order.status == "Waiting" or order.status == "Payment" %}btn-warning" {% elif order.status == "Rejected" %}btn-danger" disabled {% elif order.status == "Delivered" or order.status == "Picked" %}btn-light" {% elif order.status == "Cancelled" %}btn-dark" disabled {% else %}btn-success" {% endif %}>Set Status</button>
                                                 <button type="button" class="couponModal btn btn-outline-warning btn-block btn-sm" data-id="{{order.id}}"
                                                     data-toggle="modal">Generate Coupon</button>
                                             </td>

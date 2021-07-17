@@ -37,7 +37,7 @@
             var msg = data.msgtocust
             var orderid = data.orderid
 
-            if(status == "Placed" || status == "Accepted"){
+            if(status == "Placed" || status == "Payment"){
                 deleteAllCookies()
                 window.location.href = "/orderStatus/"+data.orderid;
             }

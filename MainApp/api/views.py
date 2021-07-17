@@ -1,3 +1,4 @@
+from django.db.models.fields import NullBooleanField
 from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -47,6 +48,7 @@ def index(request):
 
 @api_view(['POST'])
 def nearbyKitchens(request):
+	currentDate = getCurrentDate()
 	longitude = request.data['lon']
 	latitude = request.data['lat']
 	user_location = Point(float(longitude), float(latitude), srid=4326)
@@ -56,6 +58,11 @@ def nearbyKitchens(request):
 		dist = user_location.distance(i.location) * 100
 		if dist <= i.visibilityRadius:
 			kitjson = KitchensSerializer(i).data
+			kitCoupons = UserDiscountCoupons.objects.filter(Q(user=None), kit=i, redeemed=False, validTill__gte=currentDate)
+			maxDiscount = 0
+			if kitCoupons:
+				maxDiscount = max(coup.discount for coup in kitCoupons)
+			kitjson.update({'maxDiscount': maxDiscount})
 			catdesc = ""
 			categories = Categories.objects.filter(kit_id=i.id)
 			for cat in categories:
@@ -63,8 +70,11 @@ def nearbyKitchens(request):
 			kitjson.update({'catdesc': catdesc})
 			kitjson.update({'dist': round(dist, 1)})
 			reviews = Reviews.objects.filter(kit_id=i.id)
-			avgrating = reviews.aggregate(Avg('ratings'))
-			kitjson.update(avgrating)
+			if reviews:
+				avgrating = round(reviews.aggregate(Avg('ratings'))['ratings__avg'], 1)
+				kitjson.update({'avgrating': avgrating})
+			else :
+				kitjson.update({'avgrating': None})
 			kit_object.append(kitjson)
 	context = {
  		'kit_object': kit_object,
@@ -89,8 +99,11 @@ def getKitchen(request):
 		kitjson['catdesc'] = catdesc
 		kitjson['dist'] = round(dist, 1)
 		reviews = Reviews.objects.filter(kit_id=kitchen.id)
-		avgrating = reviews.aggregate(Avg('ratings'))
-		kitjson['avgrating'] = avgrating
+		if reviews:
+			avgrating = round(reviews.aggregate(Avg('ratings'))['ratings__avg'], 1)
+			kitjson['avgrating'] = avgrating
+		else :
+			kitjson['avgrating'] = None
 		fav = FavouriteKitchens.objects.filter(customer_id=request.user.id, kitchen_id=kitchen.id).first()
 		if fav:
 			kitjson.update({'favourite': True})
@@ -112,8 +125,11 @@ def getKitchen(request):
 			kitjson.update({'catdesc': catdesc})
 			kitjson.update({'dist': round(dist, 1)})
 			reviews = Reviews.objects.filter(kit_id=i.id)
-			avgrating = reviews.aggregate(Avg('ratings'))
-			kitjson.update(avgrating)
+			if reviews:
+				avgrating = round(reviews.aggregate(Avg('ratings'))['ratings__avg'], 1)
+				kitjson.update({'avgrating': avgrating})
+			else :
+				kitjson.update({'avgrating': None})
 			kit_object.append(kitjson)
 		context = {
 			'kit_object': kit_object,
@@ -395,8 +411,11 @@ def favouriteKitchens(request):
 		kitjson.update({'catdesc': catdesc})
 		kitjson.update({'dist': round(dist, 1)})
 		reviews = Reviews.objects.filter(kit_id=i.kitchen.id)
-		avgrating = reviews.aggregate(Avg('ratings'))
-		kitjson.update(avgrating)
+		if reviews:
+			avgrating = round(reviews.aggregate(Avg('ratings'))['ratings__avg'], 1)
+			kitjson.update({'avgrating': avgrating})
+		else :
+			kitjson.update({'avgrating': None})
 		kit_object.append(kitjson)
 	context = {
 		'kit_object': kit_object,
@@ -428,10 +447,12 @@ def add_to_favourite(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def orders(request):
-	orders = Order.objects.filter(customer_id=request.user.id).order_by("-created_at")
+	if request.data:
+		orders = Order.objects.filter(Q(status="Placed") | Q(status="Packed") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Payment"), customer_id=request.user.id).order_by("-created_at")
+	else:	
+		orders = Order.objects.filter(customer_id=request.user.id).order_by("-created_at")
 	orders_object = []
 	for i in orders:
-		# i.itemswithquantity = i.itemswithquantity.split(",")
 		ordersjson = OrderSerializer(i).data
 		ordersjson.update({'kitchen': KitchensSerializer(i.kitchen).data})
 		orders_object.append(ordersjson)

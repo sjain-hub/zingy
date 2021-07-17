@@ -26,7 +26,7 @@
 <div>
     <button type="button" id="cancel" class="cancel btn btn-primary" data-id="{{order.id}}">Cancel Order</button>
 </div>
-{% elif order.status == "Accepted" %}
+{% elif order.status == "Payment" %}
 <div class="meta">
     <img id="gif" src="{% static 'gifs/oven.gif' %}" />
 </div>
