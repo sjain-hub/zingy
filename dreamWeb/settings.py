@@ -92,10 +92,10 @@ ASGI_APPLICATION = "dreamWeb.routing.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'yoZingy',
-        'USER': 'sjain',
+        'NAME': 'BakeOnAir',
+        'USER': 'shubham',
         'PASSWORD': 'shubham9582270031',
-        'HOST': 'localhost',
+        'HOST': 'aws-db.cmhwrkhtldav.ap-south-1.rds.amazonaws.com',
         'PORT': '5432',
     }
 }

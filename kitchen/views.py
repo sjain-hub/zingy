@@ -11,7 +11,6 @@ from django.forms import inlineformset_factory
 from django.db.models import Q, DateTimeField
 from datetime import datetime, timedelta, date
 from django.utils import timezone
-from dateutil.relativedelta import relativedelta
 from celery import shared_task
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
