@@ -41,7 +41,7 @@
                 deleteAllCookies()
                 window.location.href = "/orderStatus/"+data.orderid;
             }
-            else if(status == "Packed" || status == "Preparing" || status == "Dispatched"){
+            else if(status == "Ready" || status == "Preparing" || status == "Dispatched"){
                 window.location.href = "/orderStatus/"+data.orderid;
             }
             else{

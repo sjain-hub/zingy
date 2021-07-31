@@ -192,7 +192,7 @@ class Customer(AsyncConsumer):
 
     @database_sync_to_async
     def check_active_orders(self, custid):
-        return Order.objects.filter(Q(status="Placed") | Q(status="Packed") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Payment"), customer_id=custid).count()
+        return Order.objects.filter(Q(status="Placed") | Q(status="Ready") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Payment"), customer_id=custid).count()
 
     @database_sync_to_async
     def create_order(self, subTotal, total, coupDiscount, kitDiscount, couponId, mode, deliveryCharge, itemswithquantity, add, dist, msg, scheduledDate, paymentOption, cust, kit):

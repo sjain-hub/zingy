@@ -56,7 +56,7 @@ def nearbyKitchens(request):
 	kit_object = []
 	for i in kitchens:
 		dist = user_location.distance(i.location) * 100
-		if dist <= i.visibilityRadius:
+		if dist <= i.visibilityRadius and dist <= 10:
 			kitjson = KitchensSerializer(i).data
 			kitCoupons = UserDiscountCoupons.objects.filter(Q(user=None), kit=i, redeemed=False, validTill__gte=currentDate)
 			maxDiscount = 0
@@ -448,7 +448,7 @@ def add_to_favourite(request):
 @permission_classes([IsAuthenticated])
 def orders(request):
 	if request.data:
-		orders = Order.objects.filter(Q(status="Placed") | Q(status="Packed") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Payment"), customer_id=request.user.id).order_by("-created_at")
+		orders = Order.objects.filter(Q(status="Placed") | Q(status="Ready") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Payment"), customer_id=request.user.id).order_by("-created_at")
 	else:	
 		orders = Order.objects.filter(customer_id=request.user.id).order_by("-created_at")
 	orders_object = []
