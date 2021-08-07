@@ -87,7 +87,7 @@ def nearbyKitchens(request):
 		kit_object = []
 		for i in kitchens:
 			dist = user_location.distance(i.location) * 100
-			if dist <= i.visibilityRadius:
+			if dist <= i.deliveryRadius:
 				temp = []
 				temp.append(i)
 				catdesc = ""

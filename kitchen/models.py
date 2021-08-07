@@ -71,7 +71,7 @@ class Kitchens(models.Model):
 	acceptAdvcOrders = models.BooleanField(default=False)
 	deliveryTime = models.IntegerField(blank=False, default=45)
 	deliveryCharge = models.IntegerField(blank=False, default=25)
-	visibilityRadius = models.FloatField(blank=False, default=2.0)
+	deliveryRadius = models.FloatField(blank=False, default=2.0)
 	pureVeg = models.BooleanField(default=False)
 	registrationDate = models.DateTimeField(blank=False)
 	subscriptionExpiry = models.DateTimeField(blank=False)

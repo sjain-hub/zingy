@@ -56,7 +56,7 @@ def nearbyKitchens(request):
 	kit_object = []
 	for i in kitchens:
 		dist = user_location.distance(i.location) * 100
-		if dist <= i.visibilityRadius and dist <= 10:
+		if dist <= 10:
 			kitjson = KitchensSerializer(i).data
 			kitCoupons = UserDiscountCoupons.objects.filter(Q(user=None), kit=i, redeemed=False, validTill__gte=currentDate)
 			maxDiscount = 0
@@ -76,6 +76,7 @@ def nearbyKitchens(request):
 			else :
 				kitjson.update({'avgrating': None})
 			kit_object.append(kitjson)
+	kit_object.sort(key=lambda x: x['dist'])
 	context = {
  		'kit_object': kit_object,
 	}

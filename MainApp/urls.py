@@ -23,4 +23,5 @@ urlpatterns = [
     path('firebase-messaging-sw.js', views.getServiceWorker, name='firebase-messaging-sw.js'),
     path('kitchen/', include('kitchen.urls')),
     path('userapi/', include('MainApp.api.urls')),
+    path('kitapi/', include('kitchen.api.urls')),
 ]

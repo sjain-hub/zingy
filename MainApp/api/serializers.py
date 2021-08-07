@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from kitchen.models import Reviews, Kitchens, Categories, Reviews, UserDiscountCoupons
+from kitchen.models import Reviews, Kitchens, Categories, UserDiscountCoupons
 from MainApp.models import User, Addresses, Order
 
 class KitchensSerializer(serializers.ModelSerializer):
