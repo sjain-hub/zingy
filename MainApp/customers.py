@@ -142,7 +142,7 @@ class Customer(AsyncConsumer):
         activeOrders = await self.check_active_orders(me.id)
         
         if activeOrders<2:
-            order = await self.create_order(subTotal, total, coupDiscount, kitDiscount, couponId, mode, deliveryCharge, itemswithquantity, deliveryadd, distance, otherDetails.get('message'), scheduledDate, paymentOption, me, kitchen)
+            order = await self.create_order(subTotal, total, coupDiscount, kitDiscount, couponId, mode, deliveryCharge, itemswithquantity, addid, distance, otherDetails.get('message'), scheduledDate, paymentOption, me, kitchen)
         else:
             response = {
                 "status": "Order can't be placed, Maximum 2 active orders are allowed."

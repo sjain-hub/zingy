@@ -45,10 +45,25 @@ def login(request):
 @permission_classes([IsAuthenticated])
 def orderList(request):
 	context = {}
-	todaysDate = getCurrentDate().date()
 	day = request.data['day']
 	if day == "today":
-		orders = Order.objects.filter(kitchen_id=request.user.kitchens.id, scheduled_order=todaysDate).order_by("scheduled_order")
+		date = getCurrentDate()
+		minDate = date.replace(hour=0, minute=0)
+		maxDate = date.replace(hour=23, minute=59)
+		orders = Order.objects.filter(kitchen_id=request.user.kitchens.id, scheduled_order__gte=minDate, scheduled_order__lte=maxDate).order_by("scheduled_order")
+	elif day == "tomorrow":
+		date = getCurrentDate() + timedelta(days=1)
+		minDate = date.replace(hour=0, minute=0)
+		maxDate = date.replace(hour=23, minute=59)
+		orders = Order.objects.filter(kitchen_id=request.user.kitchens.id, scheduled_order__gte=minDate, scheduled_order__lte=maxDate).order_by("scheduled_order")
+	elif day == "day-after-tomorrow":
+		date = getCurrentDate() + timedelta(days=2)
+		minDate = date.replace(hour=0, minute=0)
+		maxDate = date.replace(hour=23, minute=59)
+		orders = Order.objects.filter(kitchen_id=request.user.kitchens.id, scheduled_order__gte=minDate, scheduled_order__lte=maxDate).order_by("scheduled_order")
+	elif day == "all":
+		orders = Order.objects.filter(kitchen_id=request.user.kitchens.id, status="Waiting").order_by("scheduled_order")
+
 	orders_object = []
 	for i in orders:
 		ordersjson = OrderSerializer(i).data
@@ -57,4 +72,32 @@ def orderList(request):
 	context = {
 		'orders': orders_object
 	}
+	return Response(context)
+
+
+@api_view(['POST'])
+def changeOrderStatus(request):
+	context = {}
+	currentDate = getCurrentDate()
+	orderid = request.data['orderid']
+	status = request.data['status']
+	res = Order.objects.filter(id=orderid).update(status=status, completed_at=currentDate)
+	if res == 1:
+		context['response'] = "Status updated Successfully"
+	else:
+		context['response'] = "Order status not updated. Try again."
+	return Response(context)
+
+
+@api_view(['POST'])
+def updatePayment(request):
+	context = {}
+	orderid = request.data['orderid']
+	amountPaid = request.data['amountpaid']
+	balAmount = request.data['balamount']
+	res = Order.objects.filter(id=orderid).update(amount_paid=amountPaid, balance=balAmount)
+	if res == 1:
+		context['response'] = "Payment updated Successfully"
+	else:
+		context['response'] = "Payment status not updated. Try again."
 	return Response(context)
