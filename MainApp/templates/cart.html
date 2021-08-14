@@ -270,7 +270,10 @@
                             <b>Payment Options :</b><br>
                             {% if kitchen.wantAdvancePayment %}
                             You need to pay the whole amount in advance for this Kitchen.
-                            <!-- <input class="form-check-input" type="radio" name="paymentOption" id="payadvance" value="Advance Payment" checked hidden>
+                            {% endif %}
+                            <!-- {% if kitchen.wantAdvancePayment %}
+                            You need to pay the whole amount in advance for this Kitchen.
+                            <input class="form-check-input" type="radio" name="paymentOption" id="payadvance" value="Advance Payment" checked hidden>
                             {% else %}
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="paymentOption" id="payadvance" value="Advance Payment" checked>
@@ -283,8 +286,8 @@
                                 <label class="form-check-label" for="cod">
                                     Cash On Delivery
                                 </label>
-                            </div> -->
-                            {% endif %}
+                            </div>
+                            {% endif %} -->
                         </div>
                     </div>
                     <div class="card-footer">

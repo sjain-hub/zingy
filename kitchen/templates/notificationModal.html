@@ -78,7 +78,7 @@
     socket.onopen = function (e) {
         console.log("open", e)
         $(document).on("click", ".confirm", function (event) {
-            if({{user.kitchens.wantAdvancePayment}}){
+            if("{{user.kitchens.wantAdvancePayment}}"){
                 var data = {
                     "msgtocust": $("#msgtocust").val(),
                     "custid": $("#custid").val(),
