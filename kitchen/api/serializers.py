@@ -11,4 +11,9 @@ class OrderSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['phone', 'email', 'first_name', 'last_name', 'username']
+        fields = ['id', 'phone', 'email', 'first_name', 'last_name', 'username']
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Addresses
+        fields = ['id', 'place', 'latitude', 'longitude', 'address', 'floorNo']

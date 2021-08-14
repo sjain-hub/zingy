@@ -126,7 +126,7 @@
                                                     {% if order.mode == "Delivery" %}
                                                         <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
                                                         </option>
-                                                        {% if order.paymentOption == "Advance Payment" %}
+                                                        {% if user.kitchens.wantAdvancePayment %}
                                                         <option value="Payment" {% if order.status == "Payment" %} selected {% endif %}>Payment
                                                         </option>
                                                         {% endif %}
@@ -144,7 +144,7 @@
                                                     {% else %}
                                                         <option value="Waiting" {% if order.status == "Waiting" %} selected {% endif %}>Waiting
                                                         </option>
-                                                        {% if order.paymentOption == "Advance Payment" %}
+                                                        {% if user.kitchens.wantAdvancePayment %}
                                                         <option value="Payment" {% if order.status == "Payment" %} selected {% endif %}>Payment
                                                         </option>
                                                         {% endif %}

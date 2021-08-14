@@ -456,6 +456,7 @@ def orders(request):
 	for i in orders:
 		ordersjson = OrderSerializer(i).data
 		ordersjson.update({'kitchen': KitchensSerializer(i.kitchen).data})
+		ordersjson.update({'delivery_addr': AddressSerializer(i.delivery_addr).data})
 		orders_object.append(ordersjson)
 	context = {
 		'orders': orders_object,
@@ -484,3 +485,16 @@ def getAndAddReviews(request):
 			Reviews.objects.filter(user_id=userid, kit_id=kitId).update(ratings=request.data['rating'], reviews=request.data['comment'])
 		context['response'] = "Reviews updated Successfully"
 	return Response(context)
+
+
+# @api_view(['POST'])
+# @authentication_classes([TokenAuthentication])
+# @permission_classes([IsAuthenticated])
+# def placeOrder(request):
+# 	currentDate = getCurrentDate()
+# 	if scheduledDate:
+# 		var = dateparse.parse_datetime(scheduledDate)
+# 		scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute)
+# 		return Order.objects.create(sub_total=subTotal, total_amount=total, coup_discount=coupDiscount, kit_discount=kitDiscount, coupon_id=couponId, balance=total, mode=mode, delivery_charge=deliveryCharge, itemswithquantity=itemswithquantity, delivery_addr_id=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, customer=cust, kitchen=kit, created_at=currentDate)
+# 	else:
+# 		return Order.objects.create(sub_total=subTotal, total_amount=total, coup_discount=coupDiscount, kit_discount=kitDiscount, coupon_id=couponId, balance=total, mode=mode, delivery_charge=deliveryCharge, itemswithquantity=itemswithquantity, delivery_addr_id=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate + timedelta(minutes=kit.deliveryTime), customer=cust, kitchen=kit, created_at=currentDate)

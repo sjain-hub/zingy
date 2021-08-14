@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout, authenticate
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons
 from MainApp.models import FavouriteKitchens, Addresses, User, FavouriteKitchens, Order
-from .serializers import OrderSerializer, UserSerializer
+from .serializers import AddressSerializer, OrderSerializer, UserSerializer
 from django.contrib.gis.geos import Point
 from django.db.models import Avg, Q
 from datetime import datetime, timedelta
@@ -67,7 +67,8 @@ def orderList(request):
 	orders_object = []
 	for i in orders:
 		ordersjson = OrderSerializer(i).data
-		ordersjson.update({'cust': UserSerializer(i.customer).data})
+		ordersjson.update({'customer': UserSerializer(i.customer).data})
+		ordersjson.update({'delivery_addr': AddressSerializer(i.delivery_addr).data})
 		orders_object.append(ordersjson)
 	context = {
 		'orders': orders_object

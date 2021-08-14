@@ -15,7 +15,7 @@
                     <input type="hidden" name="custid" id="custid" />
                     <input type="hidden" name="orderid" id="orderid" />
                     <input type="text" name="distance" id="distance" />
-                    <input type="text" name="paymentOption" id="paymentOption" />
+                    <!-- <input type="text" name="paymentOption" id="paymentOption" /> -->
                     <input type="text" name="scheduledDate" id="scheduledDate" />
                     <input type="text" name="msgtocust" id="msgtocust" />
                     <input type="text" name="total" id="total" />
@@ -65,7 +65,7 @@
         $(".modal-body #deliveryadd").append(data.deliveryadd);
         $(".modal-body #custid").val(data.custid);
         $(".modal-body #distance").val(data.distance);
-        $(".modal-body #paymentOption").val(data.paymentOption);
+        // $(".modal-body #paymentOption").val(data.paymentOption);
         $(".modal-body #orderid").val(data.orderid);
         $(".modal-body #scheduledDate").val(data.scheduledDate);
         $(".modal-body #total").val(data.total);
@@ -78,7 +78,7 @@
     socket.onopen = function (e) {
         console.log("open", e)
         $(document).on("click", ".confirm", function (event) {
-            if($("#paymentOption").val() == "Advance Payment"){
+            if({{user.kitchens.wantAdvancePayment}}){
                 var data = {
                     "msgtocust": $("#msgtocust").val(),
                     "custid": $("#custid").val(),
