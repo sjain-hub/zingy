@@ -17,3 +17,8 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Addresses
         fields = ['id', 'place', 'latitude', 'longitude', 'address', 'floorNo']
+
+class KitchensSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Kitchens
+        fields = '__all__'

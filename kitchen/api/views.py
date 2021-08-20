@@ -2,9 +2,9 @@ from django.db.models.fields import NullBooleanField
 from rest_framework.response import Response
 from django.contrib.auth import login, logout, authenticate
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons
+from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons, ComplaintsAndRefunds
 from MainApp.models import FavouriteKitchens, Addresses, User, FavouriteKitchens, Order
-from .serializers import AddressSerializer, OrderSerializer, UserSerializer
+from .serializers import AddressSerializer, OrderSerializer, UserSerializer, KitchensSerializer
 from django.contrib.gis.geos import Point
 from django.db.models import Avg, Q
 from datetime import datetime, timedelta
@@ -82,7 +82,25 @@ def changeOrderStatus(request):
 	currentDate = getCurrentDate()
 	orderid = request.data['orderid']
 	status = request.data['status']
-	res = Order.objects.filter(id=orderid).update(status=status, completed_at=currentDate)
+	if "msgtocust" in request.data.keys():
+		msgtocust = request.data['msgtocust']
+	order = Order.objects.filter(id=orderid)
+
+	if status == "Cancelled":
+		if order[0].coupon_id != None and order[0].coupon.user != None:
+			update_coupon(order[0].coupon_id, False)
+		if order[0].amount_paid > 0:
+			refundStatus = "Under Process"
+			issue = "The Order was Cancelled by Kitchen."
+			comments = msgtocust
+			subject = "Refund"
+			raise_refund_request(order[0].kitchen, order[0], order[0].customer, comments, issue, refundStatus, order[0].customer.phone, subject)
+
+	if "msgtocust" in request.data.keys():
+		res = order.update(status=status, completed_at=currentDate, msgtocust=msgtocust)
+	else:
+		res = order.update(status=status, completed_at=currentDate)
+
 	if res == 1:
 		context['response'] = "Status updated Successfully"
 	else:
@@ -101,4 +119,90 @@ def updatePayment(request):
 		context['response'] = "Payment updated Successfully"
 	else:
 		context['response'] = "Payment status not updated. Try again."
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def handleNewOrder(request):
+	context = {}
+	currentDate = getCurrentDate()
+	orderid = request.data['orderid']
+	action = request.data['action']
+	msgtocust = request.data['msgtocust']
+	order = Order.objects.filter(id=orderid)[0]
+	if action == "Accept":
+		if request.user.kitchens.wantAdvancePayment:
+			status = "Payment"
+		else:
+			status = "Placed"
+	else:
+		status = "Rejected"
+
+	if status == "Payment" or status == "Placed":
+		if order.coupon_id != None and order.coupon.user != None:
+			update_coupon(order.coupon_id, True)
+
+	if status == "Rejected":
+		if order.coupon_id != None and order.coupon.user != None:
+			update_coupon(order.coupon_id, False)
+	
+	Order.objects.filter(id=orderid).update(status=status, completed_at=currentDate, msgtocust=msgtocust)
+	context['response'] = "Order " + status
+	
+	return Response(context)
+
+
+def update_coupon(couponId, redeemed):
+	UserDiscountCoupons.objects.filter(id=couponId).update(redeemed=redeemed)
+
+
+def raise_refund_request(kitchen, order, cust, comments, issue, refundStatus, paytmNo, subject):
+	currentDate = getCurrentDate()
+	ComplaintsAndRefunds.objects.create(kit=kitchen, order=order, user=cust, comments=comments, issue=issue, status=refundStatus, paytmNo=paytmNo, request_date=currentDate, subject=subject)
+
+
+@api_view(['POST'])
+def getOrder(request):
+	context = {}
+	orderid = request.data['orderid']
+	order = Order.objects.filter(id=orderid)[0]
+	orderjson = OrderSerializer(order).data
+	orderjson.update({'customer': UserSerializer(order.customer).data})
+	orderjson.update({'delivery_addr': AddressSerializer(order.delivery_addr).data})
+	context = {
+		'order': orderjson
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
+def updateMessageToCustomer(request):
+	context = {}
+	orderid = request.data['orderid']
+	msgtocust = request.data['msgtocust']
+	res = Order.objects.filter(id=orderid).update(msgtocust=msgtocust)
+	if res == 1:
+		context['response'] = "Message updated Successfully"
+	else:
+		context['response'] = "Message not updated. Try again."
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def handleKitchenStatus(request):
+	context = {}
+	action = request.data['action']
+	if action == "changeStatus":
+		if request.user.kitchens.status == "Open":
+			status = "Closed"
+		else:
+			status = "Open"
+		Kitchens.objects.filter(id=request.user.kitchens.id).update(status=status)
+	kitchen = Kitchens.objects.filter(id=request.user.kitchens.id)[0]
+	kitjson = KitchensSerializer(kitchen).data
+	context['kitchen'] = kitjson
 	return Response(context)

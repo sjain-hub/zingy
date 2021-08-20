@@ -49,11 +49,10 @@ class Order(models.Model):
 	itemswithquantity = models.CharField(max_length=300,blank=True)
 	delivery_addr     = models.ForeignKey(Addresses ,on_delete=models.CASCADE)
 	dist_from_kit     = models.FloatField(default=0.0)
-	message			  = models.CharField(max_length=100,blank=True)
+	message			  = models.CharField(max_length=200,blank=True)
 	msgtocust		  = models.CharField(max_length=200,blank=True)
 	amount_paid 	  = models.IntegerField(default=0)
 	balance		      = models.IntegerField(blank=False)
-	# paymentOption     = models.CharField(max_length=20,blank=False)
 	customer          = models.ForeignKey(User ,on_delete=models.CASCADE)
 	kitchen			  = models.ForeignKey(Kitchens ,on_delete=models.CASCADE)
 	

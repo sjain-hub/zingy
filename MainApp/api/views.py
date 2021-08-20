@@ -2,7 +2,7 @@ from django.db.models.fields import NullBooleanField
 from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons
+from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons, ComplaintsAndRefunds
 from MainApp.models import FavouriteKitchens, Addresses, User, FavouriteKitchens, Order
 from .serializers import KitchensSerializer, CategorySerializer, ReviewSerializer, AddressSerializer, CouponsSerializer, UserSerializer, OrderSerializer
 from django.contrib.gis.geos import Point
@@ -16,6 +16,7 @@ from django.contrib.auth.models import update_last_login
 import json
 import re
 from MainApp import FCMManager as fcm
+from django.utils import dateparse
 
 
 tokens = ["dDNsYEH3T6-Swao2uFmft5:APA91bFBoLeTBLy5q0B5d-V3lX9Ye-bNn2M3LCh7_Ia2vvBd6CKDK-PkfrLFQ6Qt7l5A5__otYBH1uBXfuGK3x1zDHyB8mQRmYj0RQSv8gz7SKiAPpoBXqPuF6-ow1L8vDlsSHphcc-b", "dDSUrXzROcFD5ICjWZbC48:APA91bEaGRE9tqViTnCclZ_-Crro7HsqMi6StB4hOClckBV8noDVVwlDtaugUL71uwH61e5IxCFhGUS25gqXZL7zxHT5LM37E53IPwpzsAvpwKmZF2a1kK1ti3Mns4BhbHwP8PDo1wcC"]
@@ -465,6 +466,20 @@ def orders(request):
 
 
 @api_view(['POST'])
+def fetchOrder(request):
+	context = {}
+	orderid = request.data['orderid']
+	order = Order.objects.filter(id=orderid)[0]
+	ordersjson = OrderSerializer(order).data
+	ordersjson.update({'kitchen': KitchensSerializer(order.kitchen).data})
+	ordersjson.update({'delivery_addr': AddressSerializer(order.delivery_addr).data})
+	context = {
+		'order': ordersjson,
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAndAddReviews(request):
@@ -487,14 +502,106 @@ def getAndAddReviews(request):
 	return Response(context)
 
 
-# @api_view(['POST'])
-# @authentication_classes([TokenAuthentication])
-# @permission_classes([IsAuthenticated])
-# def placeOrder(request):
-# 	currentDate = getCurrentDate()
-# 	if scheduledDate:
-# 		var = dateparse.parse_datetime(scheduledDate)
-# 		scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute)
-# 		return Order.objects.create(sub_total=subTotal, total_amount=total, coup_discount=coupDiscount, kit_discount=kitDiscount, coupon_id=couponId, balance=total, mode=mode, delivery_charge=deliveryCharge, itemswithquantity=itemswithquantity, delivery_addr_id=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, customer=cust, kitchen=kit, created_at=currentDate)
-# 	else:
-# 		return Order.objects.create(sub_total=subTotal, total_amount=total, coup_discount=coupDiscount, kit_discount=kitDiscount, coupon_id=couponId, balance=total, mode=mode, delivery_charge=deliveryCharge, itemswithquantity=itemswithquantity, delivery_addr_id=add, dist_from_kit=dist, message=msg, scheduled_order=currentDate + timedelta(minutes=kit.deliveryTime), customer=cust, kitchen=kit, created_at=currentDate)
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def placeOrder(request):
+	context = {}
+	currentDate = getCurrentDate()
+	subTotal = request.data['subTotal']
+	total = request.data['total']
+	coupDiscount = request.data['coupDiscount']
+	kitDiscount = request.data['kitDiscount']
+	couponId = request.data['couponId']
+	mode = request.data['mode']
+	deliveryCharge = request.data['deliveryCharge']
+	cartItems = request.data['cartItems']
+	add = request.data['add']
+	msg = request.data['msg']
+	scheduledDate = request.data['scheduledDate']
+	kit = request.data['kit']
+
+	itemswithquantity = ""
+	for i in cartItems:
+		itemswithquantity = itemswithquantity + \
+			i.get('name') + "  X  " + str(i.get('qty')) + ", "
+
+	res = calc_distance(kit, add)
+	dist = res['distance']
+
+	cust = request.user
+
+	var = dateparse.parse_datetime(scheduledDate)
+	scheduledDate = currentDate.replace(var.year, var.month, var.day, var.hour, var.minute)
+
+	activeOrders = check_active_orders(request.user.id)
+	if activeOrders < 2:
+		order = Order.objects.create(sub_total=subTotal, total_amount=total, coup_discount=coupDiscount, kit_discount=kitDiscount, coupon_id=couponId, balance=total, mode=mode, delivery_charge=deliveryCharge, itemswithquantity=itemswithquantity, delivery_addr_id=add, dist_from_kit=dist, message=msg, scheduled_order=scheduledDate, customer=cust, kitchen_id=kit, created_at=currentDate)
+		context = {
+			'orderid': order.id,
+			'response': "Order placed Successfully"
+		}
+	else:
+		context['response'] = "Order can't be placed, Maximum 2 active orders are allowed"
+
+	return Response(context)
+
+
+def calc_distance(kitchenid, addid):
+	deliveryaddress = Addresses.objects.filter(id=addid)[0]
+	kitchen = Kitchens.objects.filter(id=kitchenid)[0]
+	distance = deliveryaddress.location.distance(kitchen.location) * 100
+	context = {
+		"distance": round(distance,1),
+		"deliveryadd": deliveryaddress.address + ", Floor No.- " + deliveryaddress.floorNo,
+	}
+	return context
+
+
+def check_active_orders(custid):
+    return Order.objects.filter(Q(status="Placed") | Q(status="Ready") | Q(status="Preparing") | Q(status="Dispatched") | Q(status="Waiting") | Q(status="Payment"), customer_id=custid).count()
+
+
+@api_view(['POST'])
+def cancelOrder(request):
+	context = {}
+	currentDate = getCurrentDate()
+	orderid = request.data['orderid']
+	action = request.data['action']
+	order = Order.objects.filter(id=orderid)
+	message = request.data['message']
+	if len(message) == 0:
+		message = "Customer Cancelled the Order"
+	status = "Cancelled"
+	
+	if action == "cancelFromKitSide":
+		msgtocust = "Kitchen Not Responding"
+		if order[0].coupon_id != None and order[0].coupon.user != None:
+			update_coupon(order[0].coupon_id, False)
+		res = order.update(status=status, completed_at=currentDate, msgtocust=msgtocust)
+	elif action == "cancelFromCustSide":
+		msg = message
+		if order[0].coupon_id != None and order[0].coupon.user != None:
+			update_coupon(order[0].coupon_id, False)
+		if order[0].amount_paid > 0:
+			refundStatus = "Under Process"
+			issue = message
+			comments = ""
+			subject = "Refund"
+			raise_refund_request(order[0].kitchen, order[0], order[0].customer, comments, issue, refundStatus, order[0].customer.phone, subject)
+		res = order.update(status=status, completed_at=currentDate, message=msg)
+
+	if res == 1:
+		context['response'] = "Order cancelled Successfully"
+	else:
+		context['response'] = "Problem Occured. Try again."
+	return Response(context)
+
+
+def update_coupon(couponId, redeemed):
+	UserDiscountCoupons.objects.filter(id=couponId).update(redeemed=redeemed)
+
+
+def raise_refund_request(kitchen, order, cust, comments, issue, refundStatus, paytmNo, subject):
+	currentDate = getCurrentDate()
+	ComplaintsAndRefunds.objects.create(kit=kitchen, order=order, user=cust, comments=comments, issue=issue, status=refundStatus, paytmNo=paytmNo, request_date=currentDate, subject=subject)

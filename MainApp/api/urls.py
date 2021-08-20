@@ -17,5 +17,8 @@ urlpatterns = [
     path('appfavouriteKitchens', views.favouriteKitchens, name='appfavouriteKitchens'),
     path('appaddToFavourite', views.add_to_favourite, name='appaddToFavourite'),
     path('apporders', views.orders, name='apporders'),
+    path('appfetchOrder', views.fetchOrder, name='appfetchOrder'),
     path('appgetAndAddReviews', views.getAndAddReviews, name='appgetAndAddReviews'),
+    path('appplaceOrder', views.placeOrder, name='appplaceOrder'),
+    path('appcancelOrder', views.cancelOrder, name='appcancelOrder'),
 ]
