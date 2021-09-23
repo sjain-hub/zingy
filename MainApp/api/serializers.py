@@ -1,10 +1,28 @@
 from rest_framework import serializers
-from kitchen.models import Reviews, Kitchens, Categories, UserDiscountCoupons
+from kitchen.models import Reviews, Kitchens, Categories, UserDiscountCoupons, Items, Menus, SubItems
 from MainApp.models import User, Addresses, Order
 
 class KitchensSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kitchens
+        fields = '__all__'
+
+
+class ItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Items
+        fields = '__all__'
+
+class MenuSerializer(serializers.ModelSerializer):
+    item = ItemsSerializer(read_only=True)
+    class Meta:
+        model = Menus
+        fields = '__all__'
+
+
+class SubItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubItems
         fields = '__all__'
 
 

@@ -10,4 +10,9 @@ urlpatterns = [
     path('appgetOrder', views.getOrder, name='appgetOrder'),
     path('appupdateMessageToCustomer', views.updateMessageToCustomer, name='appupdateMessageToCustomer'),
     path('apphandleKitchenStatus', views.handleKitchenStatus, name='apphandleKitchenStatus'),
+    path('apphandleMenu', views.handleMenu, name='apphandleMenu'),
+    path('appaddMenuItems', views.addMenuItems, name='appaddMenuItems'),
+    path('apphandleAllItems', views.handleAllItems, name='apphandleAllItems'),
+    path('appaddNewItem', views.addNewItem, name='appaddNewItem'),
+    path('appfetchItem', views.fetchItem, name='appfetchItem'),
 ]

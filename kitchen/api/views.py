@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout, authenticate
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons, ComplaintsAndRefunds
 from MainApp.models import FavouriteKitchens, Addresses, User, FavouriteKitchens, Order
-from .serializers import AddressSerializer, OrderSerializer, UserSerializer, KitchensSerializer
+from .serializers import AddressSerializer, ItemsSerializer, OrderSerializer, UserSerializer, KitchensSerializer, MenuSerializer, CategorySerializer
 from django.contrib.gis.geos import Point
 from django.db.models import Avg, Q
 from datetime import datetime, timedelta
@@ -205,4 +205,137 @@ def handleKitchenStatus(request):
 	kitchen = Kitchens.objects.filter(id=request.user.kitchens.id)[0]
 	kitjson = KitchensSerializer(kitchen).data
 	context['kitchen'] = kitjson
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def handleMenu(request):
+	context = {}
+	action = request.data['action']
+
+	if action == "updateitem":
+		itemid = request.data['itemid']
+		itemstatus = request.data['itemstatus']
+		offer = request.data['offer']
+		minOrder = request.data['minOrder']
+		Menus.objects.filter(id=itemid).update(out_of_stock=itemstatus, offer=offer, minOrder=minOrder)
+	elif action == "removeitem":
+		itemid = request.data['itemid']
+		Menus.objects.filter(id=itemid).delete()
+
+	categories = Categories.objects.filter(kit=request.user.kitchens)
+	categoryjson = CategorySerializer(categories, many=True).data
+	menu = Menus.objects.filter(kit=request.user.kitchens)
+	menujson = MenuSerializer(menu, many=True).data
+	context = {
+		'menu': menujson,
+		'categories': categoryjson
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def addMenuItems(request):
+	context = {}
+	action = request.data['action']
+	if action == "fetch":
+		allItems = Items.objects.filter(kit=request.user.kitchens)
+		allItemsJson = ItemsSerializer(allItems, many=True).data
+		menu = Menus.objects.filter(kit=request.user.kitchens)
+		menujson = MenuSerializer(menu, many=True).data
+		categories = Categories.objects.filter(kit=request.user.kitchens)
+		categoryjson = CategorySerializer(categories, many=True).data
+		context = {
+			'allItems': allItemsJson,
+			'menuItems': menujson,
+			'categories': categoryjson
+		}
+	elif action == "add":
+		itemsIds = request.data['itemsIds']
+		for id in itemsIds:
+			Menus.objects.create(item_id=id, kit=request.user.kitchens)
+		context['response'] = "Successfully added"
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def fetchUser(request):
+	user = request.user
+	userjson = UserSerializer(user).data
+	context = {
+		'user': userjson,
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def handleAllItems(request):
+	context = {}
+	action = request.data['action']
+	if action == "deleteItem":
+		itemid = request.data['itemid']
+		Items.objects.filter(id=itemid).delete()
+	allItems = Items.objects.filter(kit=request.user.kitchens)
+	allItemsJson = ItemsSerializer(allItems, many=True).data
+	categories = Categories.objects.filter(kit=request.user.kitchens)
+	categoryjson = CategorySerializer(categories, many=True).data
+	context = {
+		'allItems': allItemsJson,
+		'categories': categoryjson
+	}
+	return Response(context)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def addNewItem(request):
+	context = {}
+	action = request.data['action']
+
+	if action == "addNewCategory":
+		newCategory = request.data['newCategory']
+		Categories.objects.create(category=newCategory, kit=request.user.kitchens)
+		action = "fetchCategories"
+	elif action == "deleteCategory":
+		categoryid = request.data['selectedCategory']
+		Categories.objects.filter(id=categoryid).delete()
+		action = "fetchCategories"
+
+	if action == "fetchCategories":
+		categories = Categories.objects.filter(kit=request.user.kitchens)
+		categoryjson = CategorySerializer(categories, many=True).data
+		context = {
+			'categories': categoryjson
+		}
+
+	if action == "addNewItem":
+		form = ItemsSerializer(data=request.data)
+		if form.is_valid():
+			iteminstance = form.save(kit=request.user.kitchens)
+			iteminstance.save()
+			context = {
+				'itemid': iteminstance.id,
+				'response': "Item Added Successfully"
+			}
+		else:
+			context = form.errors
+	return Response(context)
+
+
+@api_view(['POST'])
+def fetchItem(request):
+	context = {}
+	itemid = request.data['itemid']
+	item = Items.objects.filter(id=itemid)[0]
+	itemjson = ItemsSerializer(item).data
+	context['item'] = itemjson
 	return Response(context)

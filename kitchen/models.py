@@ -111,9 +111,9 @@ class Items(models.Model):
 	)
 	itemType = models.CharField(max_length=50, choices=TYPE_CHOICES, default=Veg, blank=False)
 	price = models.IntegerField(blank=False)
-	image = models.ImageField(upload_to=get_upload_path_food, blank=False)
+	image = models.ImageField(upload_to=get_upload_path_food, blank=True)
 	condition = models.TextField(max_length=50, blank=True)
-	itemDesc = models.TextField(max_length=50, blank=True)
+	itemDesc = models.TextField(max_length=100, blank=True)
 
 	def __str__(self):
 		return self.itemName

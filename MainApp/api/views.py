@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from kitchen.models import Kitchens, Reviews, Categories, Menus, Items, SubItems, Reviews, UserDiscountCoupons, ComplaintsAndRefunds
 from MainApp.models import FavouriteKitchens, Addresses, User, FavouriteKitchens, Order
-from .serializers import KitchensSerializer, CategorySerializer, ReviewSerializer, AddressSerializer, CouponsSerializer, UserSerializer, OrderSerializer
+from .serializers import KitchensSerializer, CategorySerializer, ReviewSerializer, AddressSerializer, CouponsSerializer, UserSerializer, OrderSerializer, MenuSerializer, SubItemsSerializer
 from django.contrib.gis.geos import Point
 from django.db.models import Avg, Q
 from datetime import datetime, timedelta
@@ -142,55 +142,33 @@ def getKitchen(request):
 @api_view(['POST'])
 def menu(request):
 	kitId = request.data['kitId']
-	categories = Categories.objects.filter(kit_id=kitId)
-	categoryjson = CategorySerializer(categories, many=True).data
 	menu = Menus.objects.filter(kit_id=kitId)
 
 	items = []
-	item = ''
 	for i in menu:
-		item = Items.objects.filter(id=i.item_id)
+		menuItemJson =  MenuSerializer(i).data
+		discRate = int(i.item.price) - int(int(i.offer)/100 * int(i.item.price))
+		menuItemJson.update({'discountrate': discRate})
 		subitems = SubItems.objects.filter(item_id=i.item_id)
-		for content in item:
-			menuitemid = str(content.id)
-			temp = {}
-			totalquant = 0
-			temp.update({'name': content.itemName})
-			temp.update({'category': content.category.category})
-			temp.update({'type': content.itemType})
-			temp.update({'price': content.price})
-			temp.update({'image': content.image.url})
-			temp.update({'desc': content.itemDesc})
-			temp.update({'offer': int(i.offer)})
-			temp.update({'id': content.id})
-			temp.update({'out_of_stock': i.out_of_stock})
-			temp.update({'minOrder': i.minOrder})
-
-			subtemp = []
-			for sub in subitems:
-				temp1 = {}
-				x = menuitemid + "-" + str(sub.id)
-				temp1.update({'id': sub.id})
-				temp1.update({'name': sub.name})
-				temp1.update({'price': sub.price})
-				discRateOfSubItem = int(sub.price) - (int(i.offer)/100 * int(sub.price))
-				temp1.update({'discountrate': discRateOfSubItem})
-				subtemp.append(temp1)
-			temp.update({'subitems': subtemp})
-
-			temp.update({'condition': content.condition})
-			discRate = int(content.price) - int(int(i.offer)/100 * int(content.price))
-			temp.update({'discountrate': discRate})
-			items.append(temp)
+		tempsubitems = []
+		for sub in subitems:
+			subItemJson = SubItemsSerializer(sub).data
+			discRateOfSubItem = int(sub.price) - (int(i.offer)/100 * int(sub.price))
+			subItemJson.update({'discountrate': discRateOfSubItem})
+			tempsubitems.append(subItemJson)
+		menuItemJson.update({'subitems': tempsubitems})
+		items.append(menuItemJson)
 
 	reviews = Reviews.objects.filter(kit_id=kitId)
 	reviewjson = ReviewSerializer(reviews, many=True).data
+
+	categories = Categories.objects.filter(kit_id=kitId)
+	categoryjson = CategorySerializer(categories, many=True).data
 
 	context = {
 		'categories': categoryjson,
 		'menuitems': items,
 		'reviews': reviewjson,
-		# 'favourite': favourite,
 	}
 	return Response(context)
 
@@ -588,7 +566,7 @@ def cancelOrder(request):
 			issue = message
 			comments = ""
 			subject = "Refund"
-			raise_refund_request(order[0].kitchen, order[0], order[0].customer, comments, issue, refundStatus, order[0].customer.phone, subject)
+			raise_complaint_refund(order[0].kitchen, order[0], order[0].customer, comments, issue, refundStatus, order[0].customer.phone, subject)
 		res = order.update(status=status, completed_at=currentDate, message=msg)
 
 	if res == 1:
@@ -598,10 +576,25 @@ def cancelOrder(request):
 	return Response(context)
 
 
+@api_view(['POST'])
+def orderHelp(request):
+	context = {}
+	orderid = request.data['orderid']
+	order = Order.objects.filter(id=orderid)
+	paytmNo = request.data['phone']
+	subject = request.data['subject']
+	issue = request.data['query']
+	status = "Under Process"
+	comments = ""
+	raise_complaint_refund(order[0].kitchen, order[0], order[0].customer, comments, issue, status, paytmNo, subject)
+	context['response'] = "Request registered Successfully"
+	return Response(context)
+
+
 def update_coupon(couponId, redeemed):
 	UserDiscountCoupons.objects.filter(id=couponId).update(redeemed=redeemed)
 
 
-def raise_refund_request(kitchen, order, cust, comments, issue, refundStatus, paytmNo, subject):
+def raise_complaint_refund(kitchen, order, cust, comments, issue, status, paytmNo, subject):
 	currentDate = getCurrentDate()
-	ComplaintsAndRefunds.objects.create(kit=kitchen, order=order, user=cust, comments=comments, issue=issue, status=refundStatus, paytmNo=paytmNo, request_date=currentDate, subject=subject)
+	ComplaintsAndRefunds.objects.create(kit=kitchen, order=order, user=cust, comments=comments, issue=issue, status=status, paytmNo=paytmNo, request_date=currentDate, subject=subject)

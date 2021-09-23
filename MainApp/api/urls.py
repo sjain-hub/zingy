@@ -21,4 +21,5 @@ urlpatterns = [
     path('appgetAndAddReviews', views.getAndAddReviews, name='appgetAndAddReviews'),
     path('appplaceOrder', views.placeOrder, name='appplaceOrder'),
     path('appcancelOrder', views.cancelOrder, name='appcancelOrder'),
+    path('apporderHelp', views.orderHelp, name='apporderHelp'),
 ]
